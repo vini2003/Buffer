@@ -1,3 +1,3 @@
-# Bee-in-a-Jar
+# Buffer
 
-A bee. A jar. A bee in a jar.
+`\dev\null` but not really, built to be compatible, inspired by networking hatred.
