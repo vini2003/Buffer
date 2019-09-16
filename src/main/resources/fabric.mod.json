@@ -1,30 +1,33 @@
 {
   "schemaVersion": 1,
-  "id": "beeinajar",
+  "id": "buffer",
   "version": "${version}",
 
-  "name": "Bee-in-a-Jar",
-  "description": "A bee. A jar. A bee in a jar.",
+  "name": "/void/null",
+  "description": "Buffers for your storage needs.",
   "authors": [
     "vini2003"
   ],
   "contact": {
-    "sources": "https://github.com/vini2003/bee-in-a-jar"
+    "sources": "https://github.com/vini2003/Buffer"
   },
 
   "license": "GPL v3.0",
-  "icon": "assets/beeinajar/icon.png",
+  "icon": "assets/buffer/icon.png",
 
   "environment": "*",
   "entrypoints": {
     "main": [
-      "beeinajar.BeeInAJarMod"
+      "buffer.BufferMod"
+    ],
+    "client": [
+      "buffer.BufferModClient"
     ]
   },
   "mixins": [
   ],
   "depends": {
-    "fabricloader": ">=0.4.0",
+    "fabricloader": ">=0.6.1",
     "fabric": "*"
   },
   "suggests": {

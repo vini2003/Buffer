@@ -1,0 +1,24 @@
+{
+    "multipart": [
+        {   "apply": { "model": "buffer:block/base" }},
+        {   "when": { "one": "true" },
+            "apply": { "model": "buffer:block/core_one" }
+        },
+        {   "when": { "two": "true" },
+            "apply": { "model": "buffer:block/core_two", "y": 90 }
+        },
+        {   "when": { "three": "true" },
+            "apply": { "model": "buffer:block/core_three", "y": 180 }
+        },
+        {   "when": { "four": "true" },
+            "apply": { "model": "buffer:block/core_four", "y": 270 }
+        },
+        {   "when": { "five": "true" },
+            "apply": { "model": "buffer:block/core_five", "y": 270 }
+        },
+        {   "when": { "six": "true" },
+            "apply": { "model": "buffer:block/core_six", "y": 270 }
+        }
+    ]
+}
+
