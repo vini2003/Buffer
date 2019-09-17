@@ -3,6 +3,10 @@ package buffer.screen;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import buffer.inventory.InventoryBuffer;
 import buffer.inventory.InventoryBuffer.VoidStack;
 import buffer.inventory.InventoryBuffer.WVoidSlot;
@@ -60,8 +64,8 @@ public class BufferController extends CottonCraftingController implements Tickab
             } else {
                 if (action == SlotActionType.QUICK_MOVE) {
                     if (!slot.getStack().isEmpty()) {
-                        ItemStack quickStack = bufferInventory.insertStack(slot.getStack().copy());
-                        this.setStackInSlot(slotNumber, quickStack.copy());
+                        ItemStack quickStack = bufferInventory.insertStack(slot.getStack().copy()); // this sets inv stack
+                    this.setStackInSlot(slotNumber, quickStack.copy());
                         this.sendContentUpdates();
                         return quickStack;
                     } else {
@@ -74,20 +78,16 @@ public class BufferController extends CottonCraftingController implements Tickab
                             player.inventory.getCursorStack().isEmpty() && !voidStack.getWrappedStack().isEmpty()) {
                                 voidStack.restockStack(this);
                                 final ItemStack wrappedStack = voidStack.getWrappedStack().copy();
-                                if (this.world.isClient) {
-                                    player.inventory.setCursorStack(wrappedStack.copy());
-                                    voidStack.setPreviousStack(wrappedStack.copy());
-                                    voidStack.setWrappedStack(ItemStack.EMPTY);
-                                } else {
-                                    player.inventory.setCursorStack(voidStack.getPreviousStack().copy());
-                                    voidStack.setWrappedStack(ItemStack.EMPTY);
-                                }
+                                player.inventory.setCursorStack(wrappedStack.copy());
+                                voidStack.setWrappedStack(ItemStack.EMPTY);
                         } else if (!player.inventory.getCursorStack().isEmpty() && !slot.hasStack()) {
                             bufferInventory.getSlot(slotNumber).setWrappedStack(player.inventory.getCursorStack().copy());
                             player.inventory.setCursorStack(ItemStack.EMPTY);
                         }
                         player.inventory.updateItems();
                         this.sendContentUpdates();
+                        slot.markDirty();
+                        player.inventory.markDirty();
                         return ItemStack.EMPTY;
                     } else {
                         return super.onSlotClick(slotNumber, button, action, player);
@@ -100,9 +100,15 @@ public class BufferController extends CottonCraftingController implements Tickab
 
     public void tick() {
         for (int slot : this.bufferInventory.getInvAvailableSlots(null)) {
-            Boolean shouldUpdate = this.bufferInventory.voidStacks.get(slot).restockStack(this);
+            VoidStack voidStack = this.bufferInventory.voidStacks.get(slot);
+            Boolean shouldUpdate = voidStack.restockStack(this);
             if (shouldUpdate) {
                 this.sendContentUpdates();
+            }
+            if (!this.world.isClient) {
+                //System.out.println("S: " + voidStack.getStored() + "; W: " + voidStack.getWrappedStack().getCount());
+            } else {
+                //System.out.println("C: " + voidStack.getStored() + "; W: " + voidStack.getWrappedStack().getCount());
             }
         }
 
