@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import buffer.inventory.InventoryBuffer;
+import buffer.inventory.InventoryBuffer.VoidStack;
 import buffer.inventory.InventoryBuffer.WVoidSlot;
 import buffer.utility.BufferType;
 import io.github.cottonmc.cotton.gui.CottonCraftingController;
@@ -11,6 +12,7 @@ import io.github.cottonmc.cotton.gui.widget.WItemSlot;
 import io.github.cottonmc.cotton.gui.widget.WLabel;
 import io.github.cottonmc.cotton.gui.widget.WPlainPanel;
 import net.minecraft.container.BlockContext;
+import net.minecraft.container.PlayerContainer;
 import net.minecraft.container.Slot;
 import net.minecraft.container.SlotActionType;
 import net.minecraft.entity.player.PlayerEntity;
@@ -57,20 +59,31 @@ public class BufferController extends CottonCraftingController implements Tickab
                 return ItemStack.EMPTY;
             } else {
                 if (action == SlotActionType.QUICK_MOVE) {
-                    ItemStack quickStack = bufferInventory.insertStack(slot.getStack().copy());
-                    this.setStackInSlot(slotNumber, ItemStack.EMPTY);
-                    this.sendContentUpdates();
-                    return quickStack;
+                    if (!slot.getStack().isEmpty()) {
+                        ItemStack quickStack = bufferInventory.insertStack(slot.getStack().copy());
+                        this.setStackInSlot(slotNumber, quickStack.copy());
+                        this.sendContentUpdates();
+                        return quickStack;
+                    } else {
+                        return ItemStack.EMPTY;
+                    }
                 } else if (action == SlotActionType.PICKUP) {
                     if (slot.inventory instanceof InventoryBuffer) {
-                        InventoryBuffer bufferInvTemporary = ((InventoryBuffer)slot.inventory);
-                        if (player.inventory.getCursorStack().isEmpty() && slot.hasStack()) {
-                            player.inventory.setCursorStack(bufferInvTemporary.getInvStack(slotNumber).copy());
-                            bufferInvTemporary.getSlot(slotNumber).setWrappedStack(ItemStack.EMPTY);
-                            //bufferInvTemporary.setInvStack(slotNumber, ItemStack.EMPTY);
+                        VoidStack voidStack = bufferInventory.getSlot(slotNumber);
+                        if (player.inventory.getCursorStack().isEmpty() && !voidStack.getPreviousStack().isEmpty() ||
+                            player.inventory.getCursorStack().isEmpty() && !voidStack.getWrappedStack().isEmpty()) {
+                                voidStack.restockStack(this);
+                                final ItemStack wrappedStack = voidStack.getWrappedStack().copy();
+                                if (this.world.isClient) {
+                                    player.inventory.setCursorStack(wrappedStack.copy());
+                                    voidStack.setPreviousStack(wrappedStack.copy());
+                                    voidStack.setWrappedStack(ItemStack.EMPTY);
+                                } else {
+                                    player.inventory.setCursorStack(voidStack.getPreviousStack().copy());
+                                    voidStack.setWrappedStack(ItemStack.EMPTY);
+                                }
                         } else if (!player.inventory.getCursorStack().isEmpty() && !slot.hasStack()) {
-                            bufferInvTemporary.getSlot(slotNumber).setWrappedStack(player.inventory.getCursorStack().copy());
-                            //bufferInvTemporary.setInvStack(slotNumber, player.inventory.getCursorStack().copy()); 
+                            bufferInventory.getSlot(slotNumber).setWrappedStack(player.inventory.getCursorStack().copy());
                             player.inventory.setCursorStack(ItemStack.EMPTY);
                         }
                         player.inventory.updateItems();
@@ -87,7 +100,10 @@ public class BufferController extends CottonCraftingController implements Tickab
 
     public void tick() {
         for (int slot : this.bufferInventory.getInvAvailableSlots(null)) {
-            Boolean bool = this.bufferInventory.voidStacks.get(slot).restockStack(this);
+            Boolean shouldUpdate = this.bufferInventory.voidStacks.get(slot).restockStack(this);
+            if (shouldUpdate) {
+                this.sendContentUpdates();
+            }
         }
 
         if (bufferInventory.getType() == BufferType.ONE) {

@@ -27,6 +27,9 @@ public class InventoryBuffer implements SidedInventory {
     public List<VoidStack> voidStacks = new ArrayList<>();
     protected List<InventoryListener> listeners;
 
+    public ItemStack itemStack = null;
+
+
     public class WVoidSlot extends WItemSlot {
         protected int slotIndex = 0;
         protected PlayerInventory playerInventory = null;
@@ -64,7 +67,7 @@ public class InventoryBuffer implements SidedInventory {
     }
 
     public class VoidStack {
-        int quantityStack = 0;
+        int stackQuantity = 0;
         int quantityMaximum = getInvMaxStackAmount();
 
         ItemStack wrapperStack = ItemStack.EMPTY;
@@ -78,11 +81,18 @@ public class InventoryBuffer implements SidedInventory {
 
         public void setWrappedStack(ItemStack stack) {
             this.wrapperStack = stack.copy();
-            this.previousStack = stack.copy();
         }
 
         public ItemStack getWrappedStack() {
             return this.wrapperStack.copy();
+        }
+
+        public void setPreviousStack(ItemStack stack) {
+            this.previousStack = stack.copy();
+        }
+
+        public ItemStack getPreviousStack() {
+            return this.previousStack;
         }
 
         public BufferResult canInsertStack(ItemStack stack) {
@@ -101,86 +111,76 @@ public class InventoryBuffer implements SidedInventory {
             }
         }
 
-        public ItemStack insertStack(ItemStack stackInsert) {
-            if (stackInsert.isEmpty()) {
-                return stackInsert;
+        public ItemStack insertStack(ItemStack insertStack) {
+            if (wrapperStack == ItemStack.EMPTY) {
+                wrapperStack = insertStack.copy();
+                return ItemStack.EMPTY;
+            } else  if (wrapperStack.getItem() != insertStack.getItem()) {
+                return ItemStack.EMPTY;
             }
-
-            this.quantityMaximum = bufferType.getStackSize();
 
             int wrapperQuantity = this.wrapperStack.getCount();
-            int insertQuantity = stackInsert.getCount();
+            int insertQuantity = insertStack.getCount();
 
-            // Added: Intercept click, update stock.
-            if (stackInsert.getItem() == wrapperStack.getItem()) {
-                if (wrapperQuantity == wrapperStack.getMaxCount()) {
-                    if (this.quantityStack + insertQuantity <= this.quantityMaximum) {
-                        this.quantityStack += insertQuantity;
-                        stackInsert.decrement(insertQuantity);
-                        if (stackInsert.getCount() == 0) {
-                            return ItemStack.EMPTY;
-                        }
-                    }
-                } else {
-                    int availableQuantity = wrapperStack.getMaxCount() - wrapperStack.getCount();
-                    if (insertQuantity <= availableQuantity) {
-                        this.wrapperStack.increment(insertQuantity);
-                    } else if (insertQuantity > availableQuantity) {
-                        int int_1 = Math.abs(availableQuantity - insertQuantity);
-                        this.wrapperStack.increment(availableQuantity);
-                        stackInsert.decrement(availableQuantity);
+            int insertMaximum = insertStack.getMaxCount();
 
-                        this.quantityStack += int_1;
-                        if (stackInsert.getCount() > 0) {
-                            return stackInsert;
-                        } else {
-                            return ItemStack.EMPTY;
-                        }
-                    }
-                }
-            } else if (wrapperStack.isEmpty()) {
-                this.wrapperStack = stackInsert.copy();
-                stackInsert = ItemStack.EMPTY;
+            int totalQuantity = stackQuantity + wrapperQuantity;
+            
+            this.quantityMaximum = getInvMaxStackAmount() + wrapperStack.getMaxCount();
+
+            if (totalQuantity + insertQuantity <= quantityMaximum) {
+                this.stackQuantity += insertQuantity;
+                insertStack.decrement(insertQuantity);
             }
-            return stackInsert;
+
+            else if (totalQuantity + insertQuantity > quantityMaximum) {
+                int differenceQuantity = (totalQuantity + insertQuantity) - quantityMaximum;
+                int offsetQuantity = insertMaximum - differenceQuantity;
+                this.stackQuantity += offsetQuantity;
+                insertStack.decrement(offsetQuantity);
+            }
+
+            if (insertStack.getCount() == 0) {
+                return ItemStack.EMPTY;
+            } else {
+                return insertStack;
+            }
         }
 
         public Boolean restockStack(BufferController controller) {
-            if (this.wrapperStack.getCount() >= 0 && this.quantityStack > 0) {
-                if (quantityStack - (wrapperStack.getMaxCount() - wrapperStack.getCount()) > 0) {
-                    quantityStack -= (wrapperStack.getMaxCount() - wrapperStack.getCount());
-                    this.setWrappedStack(new ItemStack(slotItem, this.wrapperStack.getCount() + (wrapperStack.getMaxCount() - wrapperStack.getCount())));
-                    controller.sendContentUpdates();
-                }
-                else {
-                    int difference = this.wrapperStack.getMaxCount() - Math.abs(this.quantityStack - wrapperStack.getMaxCount());
-                    wrapperStack.setCount(this.wrapperStack.getCount() + difference);
-                    this.quantityStack -= difference;
-                    this.setWrappedStack(new ItemStack(slotItem, this.wrapperStack.getCount() + difference));
-                    controller.sendContentUpdates();
-                }
-            }
-            if (this.wrapperStack.getCount() == 0 && this.quantityStack == 0) {
-                this.setWrappedStack(ItemStack.EMPTY);
-                this.slotItem = Items.AIR;
-                controller.sendContentUpdates();
+            int wrapperQuantity = this.wrapperStack.getCount();
+
+            Item wrapperItem;
+            
+            if (this.wrapperStack.getCount() == 0 && this.stackQuantity > 0 || this.wrapperStack.isEmpty() && this.stackQuantity > 0) {
+                this.wrapperStack.increment(1);
+                wrapperItem = this.previousStack.getItem();
+                this.wrapperStack.decrement(1);
             } else {
-                this.slotItem = this.wrapperStack.copy().getItem();
+                wrapperItem = this.wrapperStack.getItem();
             }
 
-            if (this.quantityStack == 0 && this.wrapperStack.getCount() == 0) {
-                this.setWrappedStack(ItemStack.EMPTY);
-                controller.sendContentUpdates();
+            if (wrapperQuantity >= 0 && stackQuantity > 0) {
+                int differenceQuantity = this.wrapperStack.getMaxCount() - wrapperQuantity;
+                if (this.stackQuantity >= differenceQuantity) {
+                    this.setWrappedStack(new ItemStack(wrapperItem, wrapperQuantity + differenceQuantity));
+                    this.stackQuantity -= differenceQuantity;
+                } else {
+                    this.setWrappedStack(new ItemStack(wrapperItem, wrapperQuantity + stackQuantity));
+                    this.stackQuantity -= stackQuantity;
+                }
+                return true;
+            } else if (stackQuantity == 0 && wrapperQuantity == 0) {
+                this.wrapperStack = ItemStack.EMPTY;
+                return false;
+            } else {
+                return false;
             }
-
-            this.previousStack = this.wrapperStack.copy();
-
-            return false;
         }
 
         public int getStored() {
-            if (this.quantityStack > 0) {
-                return this.quantityStack + this.wrapperStack.getCount();
+            if (this.stackQuantity > 0) {
+                return this.stackQuantity + this.wrapperStack.getCount();
             } else {
                 return this.wrapperStack.getCount();
             }
@@ -238,7 +238,6 @@ public class InventoryBuffer implements SidedInventory {
         return this.getInvMaxSlotAmount().length;
     }
 
-    // Gets slot stack.
     @Override
     public ItemStack getInvStack(int slot) {
         ItemStack returnStack = ItemStack.EMPTY;
@@ -250,7 +249,6 @@ public class InventoryBuffer implements SidedInventory {
         return returnStack;
     }
 
-    // Sets slot stack.
     @Override
     public void setInvStack(int slot, ItemStack stack) {
         if (this.voidStacks.get(slot) != null) {
@@ -279,7 +277,7 @@ public class InventoryBuffer implements SidedInventory {
             VoidStack bufferStack = this.voidStacks.get(slot);
             returnStack = bufferStack.getWrappedStack().copy();
             bufferStack.setWrappedStack(ItemStack.EMPTY);
-            bufferStack.quantityStack = 0;
+            bufferStack.stackQuantity = 0;
         }
         return returnStack;
     }

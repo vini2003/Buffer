@@ -35,10 +35,14 @@ public class BlockBuffer extends Block implements BlockEntityProvider {
 
     @Override
     public boolean activate(BlockState blockState, World world, BlockPos blockPos, PlayerEntity playerEntity, Hand hand, BlockHitResult blockHitResult) {
-        ContainerProviderRegistry.INSTANCE.openContainer(new Identifier("buffer", "buffer"), playerEntity, (buffer)->{
-            buffer.writeBlockPos(playerEntity.getBlockPos());
-        });
-        return true;
+        if (!world.isClient) {
+            ContainerProviderRegistry.INSTANCE.openContainer(new Identifier("buffer", "buffer"), playerEntity, (buffer)->{
+                buffer.writeBlockPos(playerEntity.getBlockPos());
+            });
+            return true;
+        } else {
+            return false;
+        }
     }
 
     @Override
