@@ -48,21 +48,25 @@ public class EntityBuffer extends BlockEntity implements Tickable, BufferProvide
 
     @Override
     public void tick() {
+        Integer tier = world.getBlockState(this.getPos()).get(BufferProvider.tier);
+        if (tier != null) {
+            this.bufferInventory.setType(BufferType.fromInt(tier));
+        }
         if (!isUpToDate) {
             BlockState blockState = this.world.getBlockState(this.getPos());
-            if (blockState.get(BufferProvider.two)) {
+            if (blockState.get(BufferProvider.tier) == 2) {
                 this.bufferInventory = new InventoryBuffer(BufferType.TWO);
             }
-            if (blockState.get(BufferProvider.three)) {
+            if (blockState.get(BufferProvider.tier) == 3) {
                 this.bufferInventory = new InventoryBuffer(BufferType.THREE);
             }
-            if (blockState.get(BufferProvider.four)) {
+            if (blockState.get(BufferProvider.tier) == 4) {
                 this.bufferInventory = new InventoryBuffer(BufferType.FOUR);
             }
-            if (blockState.get(BufferProvider.five)) {
+            if (blockState.get(BufferProvider.tier) == 5) {
                 this.bufferInventory = new InventoryBuffer(BufferType.FIVE);
             }
-            if (blockState.get(BufferProvider.six)) {
+            if (blockState.get(BufferProvider.tier) == 6) {
                 this.bufferInventory = new InventoryBuffer(BufferType.SIX);
             }
         }

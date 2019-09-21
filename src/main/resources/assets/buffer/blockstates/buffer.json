@@ -1,24 +1,11 @@
 {
-    "multipart": [
-        {   "apply": { "model": "buffer:block/base" }},
-        {   "when": { "one": "true" },
-            "apply": { "model": "buffer:block/core_one" }
-        },
-        {   "when": { "two": "true" },
-            "apply": { "model": "buffer:block/core_two", "y": 90 }
-        },
-        {   "when": { "three": "true" },
-            "apply": { "model": "buffer:block/core_three", "y": 180 }
-        },
-        {   "when": { "four": "true" },
-            "apply": { "model": "buffer:block/core_four", "y": 270 }
-        },
-        {   "when": { "five": "true" },
-            "apply": { "model": "buffer:block/core_five", "y": 270 }
-        },
-        {   "when": { "six": "true" },
-            "apply": { "model": "buffer:block/core_six", "y": 270 }
-        }
-    ]
+    "variants": {
+        "tier=1": { "model": "buffer:block/buffer_1" },
+        "tier=2": { "model": "buffer:block/buffer_2" },
+        "tier=3": { "model": "buffer:block/buffer_3" },
+        "tier=4": { "model": "buffer:block/buffer_4" },
+        "tier=5": { "model": "buffer:block/buffer_5" },
+        "tier=6": { "model": "buffer:block/buffer_6" }
+    }
 }
 

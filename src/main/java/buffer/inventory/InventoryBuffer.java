@@ -116,7 +116,7 @@ public class InventoryBuffer implements SidedInventory {
                 this.setWrappedStack(insertStack.copy());
                 return ItemStack.EMPTY;
             } else  if (wrapperStack.getItem() != insertStack.getItem()) {
-                return ItemStack.EMPTY;
+                return insertStack;
             }
 
             int wrapperQuantity = this.wrapperStack.getCount();
@@ -157,14 +157,6 @@ public class InventoryBuffer implements SidedInventory {
                 this.previousStack = wrapperStack.copy();
                 wrapperItem = wrapperStack.getItem();
             }
-            
-            //if (this.wrapperStack.getCount() == 0 && this.stackQuantity > 0 || this.wrapperStack.isEmpty() && this.stackQuantity > 0) {
-            //    this.wrapperStack.increment(1);
-            //    wrapperItem = this.wrapperStack.getItem();
-            //    this.wrapperStack.decrement(1);
-            //} else {
-            //    wrapperItem = this.wrapperStack.getItem();
-            //}
 
             if (wrapperQuantity >= 0 && stackQuantity > 0) {
                 int differenceQuantity = this.wrapperStack.getMaxCount() - wrapperQuantity;
@@ -208,11 +200,12 @@ public class InventoryBuffer implements SidedInventory {
     }
 
     public void setType(CompoundTag itemTag) {
-        try {
-            BufferType newBufferType = BufferType.fromString(itemTag.getString("type"));
-        } catch (NullPointerException exception) {
-            this.bufferType = BufferType.ONE;
+        if (itemTag == null || !itemTag.containsKey("tier")) {
+            itemTag = new CompoundTag();
+            itemTag.putInt("tier", 1);
         }
+        Integer tier = itemTag.getInt("tier");
+        this.bufferType = BufferType.fromInt(tier);
         for (int slot = 0; slot < this.getInvMaxSlotAmount().length- this.voidStacks.size(); ++slot) {
             this.voidStacks.add(new VoidStack());
         }

@@ -1,7 +1,5 @@
 package buffer.utility;
 
-import net.minecraft.state.property.BooleanProperty;
-
 public enum BufferType {
     ONE,
     TWO,
@@ -10,22 +8,41 @@ public enum BufferType {
     FIVE,
     SIX;
     
-    public BooleanProperty asProperty() {
+    public int asInt() {
         switch(this) {
             case ONE:
-                return BufferProvider.one;
+                return 1;
             case TWO:
-                return BufferProvider.two;
+                return 2;
             case THREE:
-                return BufferProvider.three;
+                return 3;
             case FOUR:
-                return BufferProvider.four;
+                return 4;
             case FIVE:
-                return BufferProvider.five;
+                return 5;
             case SIX:
-                return BufferProvider.six;
+                return 6;
             default:
-                return BufferProvider.one;
+                return 1;
+        }
+    }
+
+    public static BufferType fromInt(int type) {
+        switch(type) {
+            case 1:
+                return ONE;
+            case 2:
+                return TWO;
+            case 3:
+                return THREE;
+            case 4:
+                return FOUR;
+            case 5:
+                return FIVE;
+            case 6:
+                return SIX;
+            default:
+                return ONE;
         }
     }
 

@@ -7,11 +7,12 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import buffer.entity.EntityBuffer;
 import buffer.inventory.InventoryBuffer;
 import buffer.inventory.InventoryBuffer.VoidStack;
 import buffer.inventory.InventoryBuffer.WVoidSlot;
 import buffer.utility.BufferType;
-import io.github.cottonmc.cotton.gui.CottonCraftingController;
+import io.github.cottonmc.cotton.gui.CottonScreenController;
 import io.github.cottonmc.cotton.gui.widget.WItemSlot;
 import io.github.cottonmc.cotton.gui.widget.WLabel;
 import io.github.cottonmc.cotton.gui.widget.WPlainPanel;
@@ -27,7 +28,7 @@ import net.minecraft.recipe.RecipeType;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.Tickable;
 
-public class BufferController extends CottonCraftingController implements Tickable {
+public class BufferController extends CottonScreenController implements Tickable {
     private WPlainPanel rootPanel = null;
 
     private List<WItemSlot> slots = new ArrayList<>();
@@ -65,7 +66,7 @@ public class BufferController extends CottonCraftingController implements Tickab
                 if (action == SlotActionType.QUICK_MOVE) {
                     if (!slot.getStack().isEmpty()) {
                         ItemStack quickStack = bufferInventory.insertStack(slot.getStack().copy()); // this sets inv stack
-                    this.setStackInSlot(slotNumber, quickStack.copy());
+                        this.setStackInSlot(slotNumber, quickStack.copy());
                         this.sendContentUpdates();
                         return quickStack;
                     } else {
@@ -147,16 +148,32 @@ public class BufferController extends CottonCraftingController implements Tickab
         }
     }
 
+    public EntityBuffer getBlockEntity(BlockContext context) {
+        EntityBuffer lambdaBypass[] = { null };
+
+        context.run((world, blockPosition) -> {
+            EntityBuffer temporaryEntity = (EntityBuffer)world.getBlockEntity(blockPosition);
+            lambdaBypass[0] = temporaryEntity;
+        });
+
+        return lambdaBypass[0];
+    }
+
     public BufferController(int syncId, PlayerInventory playerInventory, BlockContext context) {
         super(RecipeType.CRAFTING, syncId, playerInventory, getBlockInventory(context), getBlockPropertyDelegate(context));
-        
+    
+
         this.playerInventory = playerInventory;
 
-        this.bufferInventory = new InventoryBuffer(playerInventory.getMainHandStack().getTag());
+        //this.bufferInventory = new InventoryBuffer(playerInventory.getMainHandStack().getTag());
 
         this.rootPanel = new WPlainPanel();
 
         setRootPanel(rootPanel);
+
+        EntityBuffer bufferEntity = this.getBlockEntity(context);
+
+        this.bufferInventory = bufferEntity.bufferInventory; //entity[0].bufferInventory;
 
         this.initInterface();
         this.postInterface();
