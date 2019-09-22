@@ -12,7 +12,7 @@ import buffer.inventory.InventoryBuffer;
 import buffer.inventory.InventoryBuffer.VoidStack;
 import buffer.inventory.InventoryBuffer.WVoidSlot;
 import buffer.utility.BufferType;
-import io.github.cottonmc.cotton.gui.CottonScreenController;
+import io.github.cottonmc.cotton.gui.CottonCraftingController;
 import io.github.cottonmc.cotton.gui.widget.WItemSlot;
 import io.github.cottonmc.cotton.gui.widget.WLabel;
 import io.github.cottonmc.cotton.gui.widget.WPlainPanel;
@@ -27,8 +27,9 @@ import net.minecraft.item.Items;
 import net.minecraft.recipe.RecipeType;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.Tickable;
+import net.minecraft.util.math.BlockPos;
 
-public class BufferController extends CottonScreenController implements Tickable {
+public class BufferController extends CottonCraftingController implements Tickable {
     private WPlainPanel rootPanel = null;
 
     private List<WItemSlot> slots = new ArrayList<>();

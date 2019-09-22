@@ -38,7 +38,7 @@ public class BlockBuffer extends Block implements BlockEntityProvider {
     public boolean activate(BlockState blockState, World world, BlockPos blockPos, PlayerEntity playerEntity, Hand hand, BlockHitResult blockHitResult) {
         if (!world.isClient) {
             ContainerProviderRegistry.INSTANCE.openContainer(new Identifier("buffer", "buffer"), playerEntity, (buffer)->{
-                buffer.writeBlockPos(playerEntity.getBlockPos());
+                buffer.writeBlockPos(blockPos);
             });
             return true;
         } else {

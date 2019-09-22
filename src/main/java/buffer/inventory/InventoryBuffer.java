@@ -10,6 +10,7 @@ import blue.endless.jankson.annotation.Nullable;
 import buffer.screen.BufferController;
 import buffer.utility.BufferResult;
 import buffer.utility.BufferType;
+import buffer.utility.Tuple;
 import io.github.cottonmc.cotton.gui.widget.WItemSlot;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -296,12 +297,41 @@ public class InventoryBuffer implements SidedInventory {
         return returnStack;
     }
 
-    public ItemStack insertStack(ItemStack insertionStack) {
+    public Tuple canInsert(ItemStack insertionStack) {
+        Tuple<Integer, Integer> insertionMode = new Tuple(-1, null);
+        // -1 = NO SLOT
+        //  0 = EMPTY SLOT
+        // +1 = MATCHING SLOT
         for (int slot : this.getInvAvailableSlots(null)) {
             VoidStack bufferStack = this.voidStacks.get(slot);
-            return bufferStack.insertStack(insertionStack);
+            if (insertionStack.getItem() == bufferStack.getWrappedStack().getItem()) {
+                insertionMode.setFirst(+1);
+                insertionMode.setSecond(slot);
+                break;
+            }
+            if (bufferStack.getWrappedStack().isEmpty()) {
+                insertionMode.setFirst(0);
+                insertionMode.setSecond(slot);
+            }
         }
-        return null;
+
+        return insertionMode;
+    }
+
+    public ItemStack insertStack(ItemStack insertionStack) {
+        Tuple<Integer, Integer> insertionData = this.canInsert(insertionStack);
+        if (insertionData.getFirst() == -1) {
+            return insertionStack;
+        }
+        if (insertionData.getFirst() == 0) {
+            VoidStack voidStack = this.getSlot(insertionData.getSecond());
+            return voidStack.insertStack(insertionStack);
+        }
+        if (insertionData.getFirst() == +1) {
+            VoidStack voidStack = this.getSlot(insertionData.getSecond());
+            return voidStack.insertStack(insertionStack);
+        }
+        return insertionStack;
     }
 
     @Override

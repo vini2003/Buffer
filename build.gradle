@@ -30,8 +30,8 @@ dependencies {
 	modCompile "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
 	// LibGUI
- 	modCompile "io.github.cottonmc:LibGui:1.3.2-beta.1"
-	include "io.github.cottonmc:LibGui:1.3.2-beta.1"
+ 	modCompile "io.github.cottonmc:LibGui:1.3.3-beta.3"
+	include "io.github.cottonmc:LibGui:1.3.3-beta.3"
 
 	// PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
 	// You may need to force-disable transitiveness on them.
