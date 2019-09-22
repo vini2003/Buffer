@@ -106,17 +106,17 @@ public enum BufferType {
     public int getStackSize() {
         switch(this) {
             case ONE:
-                return 64;
+                return 192;
             case TWO:
-                return 256;
+                return 448;
             case THREE:
-                return 1024;
+                return 960;
             case FOUR:
-                return 4096;
+                return 4032;
             case FIVE:
-                return 8192;
+                return 8128;
             case SIX:
-                return 16384;
+                return 16320;
             default:
                 return 1;
         }

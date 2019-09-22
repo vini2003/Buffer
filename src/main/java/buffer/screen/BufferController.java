@@ -65,14 +65,23 @@ public class BufferController extends CottonCraftingController implements Tickab
                 return ItemStack.EMPTY;
             } else {
                 if (action == SlotActionType.QUICK_MOVE) {
-                    if (!slot.getStack().isEmpty()) {
-                        ItemStack quickStack = bufferInventory.insertStack(slot.getStack().copy()); // this sets inv stack
-                        this.setStackInSlot(slotNumber, quickStack.copy());
-                        this.sendContentUpdates();
-                        return quickStack;
+                    ItemStack quickStack;
+                    VoidStack voidStack = bufferInventory.getSlot(slotNumber);
+                    if (slot.inventory instanceof InventoryBuffer) {
+                        voidStack.restockStack(this);
+                        final ItemStack wrappedStack = voidStack.getWrappedStack().copy();
+                        Boolean success = player.inventory.insertStack(wrappedStack.copy());
+                        if (success) {
+                            voidStack.setWrappedStack(ItemStack.EMPTY);
+                            return ItemStack.EMPTY;
+                        } else {
+                            return wrappedStack.copy();
+                        }
                     } else {
-                        return ItemStack.EMPTY;
+                        quickStack = bufferInventory.insertStack(slot.getStack().copy());
+                        this.setStackInSlot(slotNumber, quickStack.copy());
                     }
+                    return quickStack;
                 } else if (action == SlotActionType.PICKUP) {
                     if (slot.inventory instanceof InventoryBuffer) {
                         VoidStack voidStack = bufferInventory.getSlot(slotNumber);
@@ -106,11 +115,6 @@ public class BufferController extends CottonCraftingController implements Tickab
             Boolean shouldUpdate = voidStack.restockStack(this);
             if (shouldUpdate) {
                 this.sendContentUpdates();
-            }
-            if (!this.world.isClient) {
-                //System.out.println("S: " + voidStack.getStored() + "; W: " + voidStack.getWrappedStack().getCount());
-            } else {
-                //System.out.println("C: " + voidStack.getStored() + "; W: " + voidStack.getWrappedStack().getCount());
             }
         }
 
@@ -166,15 +170,13 @@ public class BufferController extends CottonCraftingController implements Tickab
 
         this.playerInventory = playerInventory;
 
-        //this.bufferInventory = new InventoryBuffer(playerInventory.getMainHandStack().getTag());
-
         this.rootPanel = new WPlainPanel();
 
         setRootPanel(rootPanel);
 
         EntityBuffer bufferEntity = this.getBlockEntity(context);
 
-        this.bufferInventory = bufferEntity.bufferInventory; //entity[0].bufferInventory;
+        this.bufferInventory = bufferEntity.bufferInventory;
 
         this.initInterface();
         this.postInterface();
@@ -215,11 +217,11 @@ public class BufferController extends CottonCraftingController implements Tickab
             labelOne.setText(new LiteralText(Integer.toString(this.bufferInventory.getStored(0))));
             labelTwo.setText(new LiteralText(Integer.toString(this.bufferInventory.getStored(1))));
             
-            this.rootPanel.add(slotOne, sectionX * 1 - 7, sectionY - 12);
-            this.rootPanel.add(slotTwo, sectionX * 2 + 1, sectionY - 12);
+            this.rootPanel.add(slotOne, sectionX * 2 + 1, sectionY - 12);
+            this.rootPanel.add(slotTwo, sectionX * 1 - 7, sectionY - 12);
 
-            this.rootPanel.add(labelOne, sectionX * 1 - 7, sectionY + 10);
-            this.rootPanel.add(labelTwo, sectionX * 2 + 1, sectionY + 10);
+            this.rootPanel.add(labelOne, sectionX * 2 + 1, sectionY + 10);
+            this.rootPanel.add(labelTwo, sectionX * 1 - 7, sectionY + 10);
         }
         if (bufferInventory.getType() == BufferType.THREE) {
             labelOne.setText(new LiteralText(Integer.toString(this.bufferInventory.getStored(0))));
