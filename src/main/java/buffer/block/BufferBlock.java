@@ -1,7 +1,7 @@
 package buffer.block;
 
-import buffer.entity.EntityBuffer;
-import buffer.inventory.InventoryBuffer;
+import buffer.entity.BufferEntity;
+import buffer.inventory.BufferInventory;
 import buffer.registry.BlockRegistry;
 import buffer.utility.BufferProvider;
 import buffer.utility.BufferType;
@@ -22,8 +22,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 
-public class BlockBuffer extends Block implements BlockEntityProvider {
-    public BlockBuffer(Block.Settings settings) {
+public class BufferBlock extends Block implements BlockEntityProvider {
+    public BufferBlock(Block.Settings settings) {
         super(settings);
         this.setDefaultState(this.stateFactory.getDefaultState()
             .with(BufferProvider.tier, 1));
@@ -31,7 +31,7 @@ public class BlockBuffer extends Block implements BlockEntityProvider {
 
     @Override
     public BlockEntity createBlockEntity(BlockView blockView) {
-        return new EntityBuffer();
+        return new BufferEntity();
     }
 
     @Override
@@ -49,8 +49,8 @@ public class BlockBuffer extends Block implements BlockEntityProvider {
     @Override
     public void onPlaced(World world, BlockPos blockPosition, BlockState blockState, LivingEntity livingEntity, ItemStack itemStack) {
         CompoundTag itemTag = itemStack.getTag();
-        EntityBuffer bufferEntity = (EntityBuffer)world.getBlockEntity(blockPosition);
-        InventoryBuffer inventoryMirror = bufferEntity.bufferInventory;
+        BufferEntity bufferEntity = (BufferEntity)world.getBlockEntity(blockPosition);
+        BufferInventory inventoryMirror = bufferEntity.bufferInventory;
         inventoryMirror.setType(itemTag);
         if (inventoryMirror.getType() == null) {
             if (itemTag == null || !itemTag.containsKey("tier")) {

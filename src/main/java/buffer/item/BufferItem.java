@@ -1,6 +1,6 @@
 package buffer.item;
 
-import buffer.inventory.InventoryBuffer;
+import buffer.inventory.BufferInventory;
 import buffer.registry.BlockRegistry;
 import buffer.utility.BufferProvider;
 import buffer.utility.BufferType;
@@ -26,10 +26,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 
-public class ItemBuffer extends BlockItem {
-    public InventoryBuffer bufferInventory = null;
+public class BufferItem extends BlockItem {
+    public BufferInventory bufferInventory = null;
 
-    public ItemBuffer(Block block, Item.Settings properties) {
+    public BufferItem(Block block, Item.Settings properties) {
         super(block, properties);
         this.addPropertyGetter(new Identifier("tier"), (itemStack_1, world_1, livingEntity_1) -> {
             CompoundTag itemTag = itemStack_1.getTag();

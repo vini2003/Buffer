@@ -7,11 +7,12 @@ import java.util.List;
 import com.google.common.collect.Lists;
 
 import blue.endless.jankson.annotation.Nullable;
-import buffer.screen.BufferController;
+import buffer.screen.BufferEntityController;
 import buffer.utility.BufferResult;
 import buffer.utility.BufferType;
 import buffer.utility.Tuple;
 import io.github.cottonmc.cotton.gui.widget.WItemSlot;
+import net.minecraft.block.entity.HopperBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
@@ -23,7 +24,7 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.math.Direction;
 
-public class InventoryBuffer implements SidedInventory {
+public class BufferInventory implements SidedInventory {
     protected BufferType bufferType = BufferType.ONE;
     public List<VoidStack> voidStacks = new ArrayList<>();
     protected List<InventoryListener> listeners;
@@ -83,11 +84,11 @@ public class InventoryBuffer implements SidedInventory {
         }
 
         public void setWrappedStack(ItemStack stack) {
-            this.wrapperStack = stack.copy();
+            this.wrapperStack = stack;
         }
 
         public ItemStack getWrappedStack() {
-            return this.wrapperStack.copy();
+            return this.wrapperStack;
         }
 
         public void setPreviousStack(ItemStack stack) {
@@ -172,6 +173,7 @@ public class InventoryBuffer implements SidedInventory {
             }
 
             if (wrapperQuantity >= 0 && stackQuantity > 0) {
+                wrapperQuantity = this.wrapperStack.getCount();
                 int differenceQuantity = this.wrapperStack.getMaxCount() - wrapperQuantity;
                 if (this.stackQuantity >= differenceQuantity) {
                     this.setWrappedStack(new ItemStack(wrapperItem, wrapperQuantity + differenceQuantity));
@@ -196,21 +198,21 @@ public class InventoryBuffer implements SidedInventory {
         }
     }
 
-    public void restockAll(BufferController controller) {
+    public void restockAll() {
         for (VoidStack voidStack : this.voidStacks) {
             voidStack.restockStack(false);
         }
     }
 
-    public InventoryBuffer(BufferType newBufferType) {
+    public BufferInventory(BufferType newBufferType) {
         this.setType(newBufferType);
     }
 
-    public InventoryBuffer(CompoundTag compoundTag) {
+    public BufferInventory(CompoundTag compoundTag) {
         this.setType(compoundTag);   
     }
 
-    public InventoryBuffer() {
+    public BufferInventory() {
         this.setType(BufferType.ONE);
     }
 
@@ -246,7 +248,7 @@ public class InventoryBuffer implements SidedInventory {
             return null;
         }
     }
-
+    
     public int getStored(int slot) {
         return this.voidStacks.get(slot).getStored();
     }
@@ -261,7 +263,7 @@ public class InventoryBuffer implements SidedInventory {
         ItemStack returnStack = ItemStack.EMPTY;
 
         if (this.voidStacks.get(slot) != null) {
-            returnStack = this.voidStacks.get(slot).getWrappedStack().copy();
+            returnStack = this.voidStacks.get(slot).getWrappedStack();
         }
 
         return returnStack;
@@ -306,7 +308,7 @@ public class InventoryBuffer implements SidedInventory {
         for (int slot : this.getInvAvailableSlots(null)) {
             VoidStack bufferStack = this.voidStacks.get(slot);
             if (bufferStack.getWrappedStack().getCount() >= itemQuantity) {
-                returnStack = bufferStack.wrapperStack.copy();
+                returnStack = new ItemStack(bufferStack.getWrappedStack().getItem(), itemQuantity);//bufferStack.wrapperStack.copy();
                 bufferStack.wrapperStack.decrement(itemQuantity);
             }
         }
