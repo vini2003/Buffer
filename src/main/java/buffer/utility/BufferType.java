@@ -8,7 +8,45 @@ public enum BufferType {
     FIVE,
     SIX;
     
-    public int asInt() {
+    public String toString() {
+        switch(this) {
+            case ONE:
+                return "one";
+            case TWO:
+                return "two";
+            case THREE:
+                return "three";
+            case FOUR:
+                return "four";
+            case FIVE:
+                return "five";
+            case SIX:
+                return "six";
+            default:
+                return "one";
+        }
+    }
+
+    public static BufferType fromString(String string) {
+        switch(string) {
+            case "one":
+                return ONE;
+            case "two":
+                return TWO;
+            case "three":
+                return THREE;
+            case "four":
+                return FOUR;
+            case "five":
+                return FIVE;
+            case "six":
+                return SIX;
+            default:
+                return ONE;
+        }
+    }
+    
+    public int toInt() {
         switch(this) {
             case ONE:
                 return 1;
@@ -40,44 +78,6 @@ public enum BufferType {
             case 5:
                 return FIVE;
             case 6:
-                return SIX;
-            default:
-                return ONE;
-        }
-    }
-
-    public String asString() {
-        switch(this) {
-            case ONE:
-                return "one";
-            case TWO:
-                return "two";
-            case THREE:
-                return "three";
-            case FOUR:
-                return "four";
-            case FIVE:
-                return "five";
-            case SIX:
-                return "six";
-            default:
-                return "one";
-        }
-    }
-
-    public static BufferType fromString(String type) {
-        switch(type) {
-            case "one":
-                return ONE;
-            case "two":
-                return TWO;
-            case "three":
-                return THREE;
-            case "four":
-                return FOUR;
-            case "five":
-                return FIVE;
-            case "six":
                 return SIX;
             default:
                 return ONE;

@@ -68,13 +68,15 @@ public class InventoryBuffer implements SidedInventory {
     }
 
     public class VoidStack {
-        int stackQuantity = 0;
+        public int stackQuantity = 0;
         int totalMaximum = getInvMaxStackAmount();
+
+        public CompoundTag wrapperTag = null;
 
         ItemStack wrapperStack = ItemStack.EMPTY;
         ItemStack previousStack = ItemStack.EMPTY;
 
-        Item slotItem;
+        public Item wrapperItem;
 
         public VoidStack() {
             // ...
@@ -115,6 +117,10 @@ public class InventoryBuffer implements SidedInventory {
         public ItemStack insertStack(ItemStack insertStack) {
             if (wrapperStack.getItem() == Items.AIR) {
                 this.setWrappedStack(insertStack.copy());
+                if (insertStack.hasTag()) {
+                    this.wrapperTag = insertStack.getTag();
+                    this.wrapperStack.setTag(wrapperTag);
+                }
                 return ItemStack.EMPTY;
             } else  if (wrapperStack.getItem() != insertStack.getItem()) {
                 return insertStack;
@@ -147,25 +153,33 @@ public class InventoryBuffer implements SidedInventory {
             }
         }
 
-        public Boolean restockStack(BufferController controller) {
+        public Boolean restockStack(Boolean isInitial) {
             int wrapperQuantity = this.wrapperStack.getCount();
 
-            Item wrapperItem = null;
-
             if (this.wrapperStack.getCount() == 0 && this.stackQuantity > 0) {
-                wrapperItem = previousStack.getItem();
+                if (!isInitial) {
+                    wrapperItem = previousStack.getItem();
+                }
             } else if (this.wrapperStack.getCount() > 0 && this.stackQuantity > 0) {    
-                this.previousStack = wrapperStack.copy();
-                wrapperItem = wrapperStack.getItem();
+                if (!isInitial) {
+                    this.previousStack = wrapperStack.copy();
+                    wrapperItem = wrapperStack.getItem();
+                    if (wrapperStack.hasTag()) {
+                        wrapperTag = wrapperStack.getTag();
+                    }
+
+                }
             }
 
             if (wrapperQuantity >= 0 && stackQuantity > 0) {
                 int differenceQuantity = this.wrapperStack.getMaxCount() - wrapperQuantity;
                 if (this.stackQuantity >= differenceQuantity) {
                     this.setWrappedStack(new ItemStack(wrapperItem, wrapperQuantity + differenceQuantity));
+                    this.wrapperStack.setTag(wrapperTag);
                     this.stackQuantity -= differenceQuantity;
                 } else {
                     this.setWrappedStack(new ItemStack(wrapperItem, wrapperQuantity + stackQuantity));
+                    this.wrapperStack.setTag(wrapperTag);
                     this.stackQuantity -= stackQuantity;
                 }
                 return true;
@@ -184,7 +198,7 @@ public class InventoryBuffer implements SidedInventory {
 
     public void restockAll(BufferController controller) {
         for (VoidStack voidStack : this.voidStacks) {
-            voidStack.restockStack(controller);
+            voidStack.restockStack(false);
         }
     }
 
@@ -214,8 +228,10 @@ public class InventoryBuffer implements SidedInventory {
 
     public void setType(BufferType newBufferType) {
         this.bufferType = newBufferType;
-        for (int slot = 0; slot < this.getInvMaxSlotAmount().length- this.voidStacks.size(); ++slot) {
-            this.voidStacks.add(new VoidStack());
+        for (int slot : this.getInvMaxSlotAmount()) {
+            if (voidStacks.size() - 1 < slot) {
+                this.voidStacks.add(new VoidStack());
+            }
         }
     }
 
@@ -305,9 +321,17 @@ public class InventoryBuffer implements SidedInventory {
         for (int slot : this.getInvAvailableSlots(null)) {
             VoidStack bufferStack = this.voidStacks.get(slot);
             if (insertionStack.getItem() == bufferStack.getWrappedStack().getItem()) {
-                insertionMode.setFirst(+1);
-                insertionMode.setSecond(slot);
-                break;
+                if (insertionStack.hasTag() && bufferStack.getWrappedStack().hasTag()
+                &&  insertionStack.getTag().equals(bufferStack.getWrappedStack().getTag())) {
+                    insertionMode.setFirst(+1);
+                    insertionMode.setSecond(slot);
+                    break;
+                }
+                if (!insertionStack.hasTag() && !bufferStack.getWrappedStack().hasTag()) {
+                    insertionMode.setFirst(+1);
+                    insertionMode.setSecond(slot);
+                    break;
+                }
             }
             if (bufferStack.getWrappedStack().isEmpty()) {
                 insertionMode.setFirst(0);

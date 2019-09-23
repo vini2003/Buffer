@@ -63,7 +63,7 @@ public class BlockBuffer extends Block implements BlockEntityProvider {
         Integer tier = itemTag.getInt("tier");
         inventoryMirror.setType(BufferType.fromInt(tier));
 
-        world.setBlockState(blockPosition, BlockRegistry.BLOCK_TESSERACT.getDefaultState().with(BufferProvider.tier, inventoryMirror.getType().asInt()));
+        world.setBlockState(blockPosition, BlockRegistry.BLOCK_TESSERACT.getDefaultState().with(BufferProvider.tier, inventoryMirror.getType().toInt()));
         super.onPlaced(world, blockPosition, blockState, livingEntity, itemStack);
     }
     
