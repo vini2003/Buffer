@@ -3,10 +3,10 @@ package buffer.screen;
 import java.util.ArrayList;
 import java.util.List;
 
-import buffer.entity.EntityBuffer;
-import buffer.inventory.InventoryBuffer;
-import buffer.inventory.InventoryBuffer.VoidStack;
-import buffer.inventory.InventoryBuffer.WVoidSlot;
+import buffer.entity.BufferEntity;
+import buffer.inventory.BufferInventory;
+import buffer.inventory.BufferInventory.VoidStack;
+import buffer.inventory.BufferInventory.WVoidSlot;
 import buffer.utility.BufferProvider;
 import buffer.utility.BufferType;
 import io.github.cottonmc.cotton.gui.CottonCraftingController;
@@ -47,7 +47,7 @@ public class BufferEntityController extends CottonCraftingController implements 
     private int sectionX = 48;
     private int sectionY = 20;
 
-    public EntityBuffer bufferEntity = null;
+    public BufferEntity bufferEntity = null;
 
     @Override
     public ItemStack onSlotClick(int slotNumber, int button, SlotActionType action, PlayerEntity player) {
@@ -63,7 +63,7 @@ public class BufferEntityController extends CottonCraftingController implements 
                 if (action == SlotActionType.QUICK_MOVE) {
                     ItemStack quickStack;
                     VoidStack voidStack = bufferEntity.bufferInventory.getSlot(slotNumber);
-                    if (slot.inventory instanceof InventoryBuffer) {
+                    if (slot.inventory instanceof BufferInventory) {
                         voidStack.restockStack(false);
                         final ItemStack wrappedStack = voidStack.getWrappedStack().copy();
                         Boolean success = player.inventory.insertStack(wrappedStack.copy());
@@ -79,7 +79,7 @@ public class BufferEntityController extends CottonCraftingController implements 
                     }
                     return quickStack;
                 } else if (action == SlotActionType.PICKUP) {
-                    if (slot.inventory instanceof InventoryBuffer) {
+                    if (slot.inventory instanceof BufferInventory) {
                         VoidStack voidStack = bufferEntity.bufferInventory.getSlot(slotNumber);
                         if (player.inventory.getCursorStack().isEmpty() && !voidStack.getPreviousStack().isEmpty() ||
                             player.inventory.getCursorStack().isEmpty() && !voidStack.getWrappedStack().isEmpty()) {
@@ -106,7 +106,7 @@ public class BufferEntityController extends CottonCraftingController implements 
     }
 
     public void tick() {
-        //this.bufferEntity.bufferInventory.restockAll();
+       // this.bufferEntity.bufferInventory.restockAll();
 
         for (int slot : this.bufferEntity.bufferInventory.getInvMaxSlotAmount()) {
             labels.get(slot).setText(new LiteralText(Integer.toString(this.bufferEntity.bufferInventory.getStored(slot))));
@@ -119,11 +119,11 @@ public class BufferEntityController extends CottonCraftingController implements 
         super.close(playerEntity);
     }
 
-    public EntityBuffer getBlockEntity(BlockContext context) {
-        EntityBuffer lambdaBypass[] = { null };
+    public BufferEntity getBlockEntity(BlockContext context) {
+        BufferEntity lambdaBypass[] = { null };
 
         context.run((world, blockPosition) -> {
-            EntityBuffer temporaryEntity = (EntityBuffer)world.getBlockEntity(blockPosition);
+            BufferEntity temporaryEntity = (BufferEntity)world.getBlockEntity(blockPosition);
             lambdaBypass[0] = temporaryEntity;
         });
 
@@ -134,7 +134,7 @@ public class BufferEntityController extends CottonCraftingController implements 
         super(RecipeType.CRAFTING, syncId, playerInventory, getBlockInventory(context), getBlockPropertyDelegate(context));
     
         this.playerInventory = playerInventory;
-        this.bufferEntity = (EntityBuffer)this.getBlockEntity(context);
+        this.bufferEntity = (BufferEntity)this.getBlockEntity(context);
         this.rootPanel = new WPlainPanel();
 
         this.setRootPanel(rootPanel);

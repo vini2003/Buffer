@@ -3,10 +3,10 @@ package buffer.screen;
 import java.util.ArrayList;
 import java.util.List;
 
-import buffer.entity.EntityBuffer;
-import buffer.inventory.InventoryBuffer;
-import buffer.inventory.InventoryBuffer.VoidStack;
-import buffer.inventory.InventoryBuffer.WVoidSlot;
+import buffer.inventory.BufferInventory;
+import buffer.inventory.BufferInventory.VoidStack;
+import buffer.inventory.BufferInventory.WVoidSlot;
+import buffer.item.BufferItem;
 import buffer.utility.BufferProvider;
 import buffer.utility.BufferType;
 import io.github.cottonmc.cotton.gui.CottonCraftingController;
@@ -47,7 +47,12 @@ public class BufferItemController extends CottonCraftingController implements Ti
     private int sectionX = 48;
     private int sectionY = 20;
 
-    public InventoryBuffer bufferInventory = new InventoryBuffer();
+    public BufferItem bufferItem = null;
+    public BufferInventory bufferInventory = null;
+
+    public PlayerInventory playerInventory = null;
+
+    public ItemStack serverStack = ItemStack.EMPTY;
 
     @Override
     public ItemStack onSlotClick(int slotNumber, int button, SlotActionType action, PlayerEntity player) {
@@ -62,8 +67,8 @@ public class BufferItemController extends CottonCraftingController implements Ti
             } else {
                 if (action == SlotActionType.QUICK_MOVE) {
                     ItemStack quickStack;
-                    VoidStack voidStack = bufferEntity.bufferInventory.getSlot(slotNumber);
-                    if (slot.inventory instanceof InventoryBuffer) {
+                    VoidStack voidStack = bufferInventory.getSlot(slotNumber);
+                    if (slot.inventory instanceof BufferInventory) {
                         voidStack.restockStack(false);
                         final ItemStack wrappedStack = voidStack.getWrappedStack().copy();
                         Boolean success = player.inventory.insertStack(wrappedStack.copy());
@@ -74,21 +79,28 @@ public class BufferItemController extends CottonCraftingController implements Ti
                             return wrappedStack.copy();
                         }
                     } else {
-                        quickStack = bufferEntity.bufferInventory.insertStack(slot.getStack().copy());
-                        this.setStackInSlot(slotNumber, quickStack.copy());
+                        if (player.world.isClient) {
+                            this.serverStack = slot.getStack().copy();
+                            quickStack = bufferInventory.insertStack(slot.getStack().copy());
+                            this.setStackInSlot(slotNumber, quickStack.copy());
+                        } else {
+                            quickStack = bufferInventory.insertStack(serverStack.copy());
+                            this.setStackInSlot(slotNumber, quickStack.copy());
+                            this.serverStack = ItemStack.EMPTY;
+                        }
+
                     }
                     return quickStack;
                 } else if (action == SlotActionType.PICKUP) {
-                    if (slot.inventory instanceof InventoryBuffer) {
-                        VoidStack voidStack = bufferEntity.bufferInventory.getSlot(slotNumber);
-                        if (player.inventory.getCursorStack().isEmpty() && !voidStack.getPreviousStack().isEmpty() ||
-                            player.inventory.getCursorStack().isEmpty() && !voidStack.getWrappedStack().isEmpty()) {
+                    if (slot.inventory instanceof BufferInventory) {
+                        VoidStack voidStack = bufferInventory.getSlot(slotNumber);
+                        if (player.inventory.getCursorStack().isEmpty() && !voidStack.getWrappedStack().isEmpty()) {
                                 voidStack.restockStack(false);
                                 final ItemStack wrappedStack = voidStack.getWrappedStack().copy();
                                 player.inventory.setCursorStack(wrappedStack.copy());
                                 voidStack.setWrappedStack(ItemStack.EMPTY);
                         } else if (!player.inventory.getCursorStack().isEmpty() && !slot.hasStack()) {
-                            bufferEntity.bufferInventory.getSlot(slotNumber).setWrappedStack(player.inventory.getCursorStack().copy());
+                            bufferInventory.getSlot(slotNumber).setWrappedStack(player.inventory.getCursorStack().copy());
                             player.inventory.setCursorStack(ItemStack.EMPTY);
                         }
                         player.inventory.updateItems();
@@ -106,35 +118,29 @@ public class BufferItemController extends CottonCraftingController implements Ti
     }
 
     public void tick() {
-        //this.bufferEntity.bufferInventory.restockAll();
-
-        for (int slot : this.bufferEntity.bufferInventory.getInvMaxSlotAmount()) {
-            labels.get(slot).setText(new LiteralText(Integer.toString(this.bufferEntity.bufferInventory.getStored(slot))));
+        bufferInventory.restockAll();
+        for (int slot : this.bufferInventory.getInvMaxSlotAmount()) {
+            labels.get(slot).setText(new LiteralText(Integer.toString(this.bufferInventory.getStored(slot))));
         }
     }
 
     @Override
     public void close(PlayerEntity playerEntity) {
-        bufferEntity.bufferInventory = this.bufferEntity.bufferInventory;
+        bufferItem.bufferInventory = this.bufferInventory;
         super.close(playerEntity);
     }
 
-    public EntityBuffer getBlockEntity(BlockContext context) {
-        EntityBuffer lambdaBypass[] = { null };
-
-        context.run((world, blockPosition) -> {
-            EntityBuffer temporaryEntity = (EntityBuffer)world.getBlockEntity(blockPosition);
-            lambdaBypass[0] = temporaryEntity;
-        });
-
-        return lambdaBypass[0];
+    public BufferItem getBufferItem() {
+        return (BufferItem)this.playerInventory.getMainHandStack().getItem();
     }
 
     public BufferItemController(int syncId, PlayerInventory playerInventory, BlockContext context) {
         super(RecipeType.CRAFTING, syncId, playerInventory, getBlockInventory(context), getBlockPropertyDelegate(context));
     
         this.playerInventory = playerInventory;
-        this.bufferEntity = (EntityBuffer)this.getBlockEntity(context);
+        this.bufferItem = this.getBufferItem();
+        this.bufferInventory = bufferItem.bufferInventory;
+        this.playerInventory = playerInventory;
         this.rootPanel = new WPlainPanel();
 
         this.setRootPanel(rootPanel);
@@ -146,12 +152,12 @@ public class BufferItemController extends CottonCraftingController implements Ti
     }
 
     public void initInterface() {
-        slotOne = bufferEntity.bufferInventory.new WVoidSlot(this.bufferEntity.bufferInventory, 0, 1, 1, playerInventory);
-        slotTwo = bufferEntity.bufferInventory.new WVoidSlot(this.bufferEntity.bufferInventory, 1, 1, 1, playerInventory);
-        slotThree = bufferEntity.bufferInventory.new WVoidSlot(this.bufferEntity.bufferInventory, 2, 1, 1, playerInventory);
-        slotFour = bufferEntity.bufferInventory.new WVoidSlot(this.bufferEntity.bufferInventory, 3, 1, 1, playerInventory);
-        slotFive = bufferEntity.bufferInventory.new WVoidSlot(this.bufferEntity.bufferInventory, 4, 1, 1, playerInventory);
-        slotSix = bufferEntity.bufferInventory.new WVoidSlot(this.bufferEntity.bufferInventory, 5, 1, 1, playerInventory);
+        slotOne = bufferInventory.new WVoidSlot(this.bufferInventory, 0, 1, 1, playerInventory);
+        slotTwo = bufferInventory.new WVoidSlot(this.bufferInventory, 1, 1, 1, playerInventory);
+        slotThree = bufferInventory.new WVoidSlot(this.bufferInventory, 2, 1, 1, playerInventory);
+        slotFour = bufferInventory.new WVoidSlot(this.bufferInventory, 3, 1, 1, playerInventory);
+        slotFive = bufferInventory.new WVoidSlot(this.bufferInventory, 4, 1, 1, playerInventory);
+        slotSix = bufferInventory.new WVoidSlot(this.bufferInventory, 5, 1, 1, playerInventory);
 
         labelOne = new WLabel("");
         labelTwo = new WLabel("");
@@ -174,16 +180,16 @@ public class BufferItemController extends CottonCraftingController implements Ti
         labels.add(labelFive);
         labels.add(labelSix);
 
-        if (bufferEntity.bufferInventory.getType() == BufferType.ONE) {
-            labelOne.setText(new LiteralText(Integer.toString(this.bufferEntity.bufferInventory.getStored(0))));
+        if (bufferInventory.getType() == BufferType.ONE) {
+            labelOne.setText(new LiteralText(Integer.toString(this.bufferInventory.getStored(0))));
 
             this.rootPanel.add(slotOne, sectionX * 2 - 27, sectionY - 12);
 
             this.rootPanel.add(labelOne, sectionX * 2 - 27, sectionY + 10);
         }
-        if (bufferEntity.bufferInventory.getType() == BufferType.TWO) {
-            labelOne.setText(new LiteralText(Integer.toString(this.bufferEntity.bufferInventory.getStored(0))));
-            labelTwo.setText(new LiteralText(Integer.toString(this.bufferEntity.bufferInventory.getStored(1))));
+        if (bufferInventory.getType() == BufferType.TWO) {
+            labelOne.setText(new LiteralText(Integer.toString(this.bufferInventory.getStored(0))));
+            labelTwo.setText(new LiteralText(Integer.toString(this.bufferInventory.getStored(1))));
             
             this.rootPanel.add(slotOne, sectionX * 2 + 1, sectionY - 12);
             this.rootPanel.add(slotTwo, sectionX * 1 - 7, sectionY - 12);
@@ -191,10 +197,10 @@ public class BufferItemController extends CottonCraftingController implements Ti
             this.rootPanel.add(labelOne, sectionX * 2 + 1, sectionY + 10);
             this.rootPanel.add(labelTwo, sectionX * 1 - 7, sectionY + 10);
         }
-        if (bufferEntity.bufferInventory.getType() == BufferType.THREE) {
-            labelOne.setText(new LiteralText(Integer.toString(this.bufferEntity.bufferInventory.getStored(0))));
-            labelTwo.setText(new LiteralText(Integer.toString(this.bufferEntity.bufferInventory.getStored(1))));
-            labelThree.setText(new LiteralText(Integer.toString(this.bufferEntity.bufferInventory.getStored(2))));
+        if (bufferInventory.getType() == BufferType.THREE) {
+            labelOne.setText(new LiteralText(Integer.toString(this.bufferInventory.getStored(0))));
+            labelTwo.setText(new LiteralText(Integer.toString(this.bufferInventory.getStored(1))));
+            labelThree.setText(new LiteralText(Integer.toString(this.bufferInventory.getStored(2))));
 
             this.rootPanel.add(slotOne, sectionX * 1 - 36, sectionY - 12);
             this.rootPanel.add(slotTwo, sectionX * 2 - 27, sectionY - 12);
@@ -204,11 +210,11 @@ public class BufferItemController extends CottonCraftingController implements Ti
             this.rootPanel.add(labelTwo, sectionX * 2 - 27, sectionY + 10);
             this.rootPanel.add(labelThree, sectionX * 3 - 18, sectionY + 10);
         }
-        if (bufferEntity.bufferInventory.getType() == BufferType.FOUR) {
-            labelOne.setText(new LiteralText(Integer.toString(this.bufferEntity.bufferInventory.getStored(0))));
-            labelTwo.setText(new LiteralText(Integer.toString(this.bufferEntity.bufferInventory.getStored(1))));
-            labelThree.setText(new LiteralText(Integer.toString(this.bufferEntity.bufferInventory.getStored(2))));
-            labelFour.setText(new LiteralText(Integer.toString(this.bufferEntity.bufferInventory.getStored(3))));
+        if (bufferInventory.getType() == BufferType.FOUR) {
+            labelOne.setText(new LiteralText(Integer.toString(this.bufferInventory.getStored(0))));
+            labelTwo.setText(new LiteralText(Integer.toString(this.bufferInventory.getStored(1))));
+            labelThree.setText(new LiteralText(Integer.toString(this.bufferInventory.getStored(2))));
+            labelFour.setText(new LiteralText(Integer.toString(this.bufferInventory.getStored(3))));
 
             this.rootPanel.add(slotOne, sectionX * 1 - 36, sectionY - 12);
             this.rootPanel.add(slotTwo, sectionX * 2 - 27, sectionY - 12);
@@ -220,12 +226,12 @@ public class BufferItemController extends CottonCraftingController implements Ti
             this.rootPanel.add(labelThree, sectionX * 3 - 18, sectionY + 10);
             this.rootPanel.add(labelFour, sectionX * 2 - 27, sectionY * 2 + 26);
         }
-        if (bufferEntity.bufferInventory.getType() == BufferType.FIVE) {
-            labelOne.setText(new LiteralText(Integer.toString(this.bufferEntity.bufferInventory.getStored(0))));
-            labelTwo.setText(new LiteralText(Integer.toString(this.bufferEntity.bufferInventory.getStored(1))));
-            labelThree.setText(new LiteralText(Integer.toString(this.bufferEntity.bufferInventory.getStored(2))));
-            labelFour.setText(new LiteralText(Integer.toString(this.bufferEntity.bufferInventory.getStored(3))));
-            labelFive.setText(new LiteralText(Integer.toString(this.bufferEntity.bufferInventory.getStored(4))));
+        if (bufferInventory.getType() == BufferType.FIVE) {
+            labelOne.setText(new LiteralText(Integer.toString(this.bufferInventory.getStored(0))));
+            labelTwo.setText(new LiteralText(Integer.toString(this.bufferInventory.getStored(1))));
+            labelThree.setText(new LiteralText(Integer.toString(this.bufferInventory.getStored(2))));
+            labelFour.setText(new LiteralText(Integer.toString(this.bufferInventory.getStored(3))));
+            labelFive.setText(new LiteralText(Integer.toString(this.bufferInventory.getStored(4))));
 
             this.rootPanel.add(slotOne, sectionX * 1 - 36, sectionY - 12);
             this.rootPanel.add(slotTwo, sectionX * 2 - 27, sectionY - 12);
@@ -239,13 +245,13 @@ public class BufferItemController extends CottonCraftingController implements Ti
             this.rootPanel.add(labelFour, sectionX * 1 - 7, sectionY * 2 + 26);
             this.rootPanel.add(labelFive, sectionX * 2 + 1, sectionY * 2 + 26);
         }
-        if (bufferEntity.bufferInventory.getType() == BufferType.SIX) {
-            labelOne.setText(new LiteralText(Integer.toString(this.bufferEntity.bufferInventory.getStored(0))));
-            labelTwo.setText(new LiteralText(Integer.toString(this.bufferEntity.bufferInventory.getStored(1))));
-            labelThree.setText(new LiteralText(Integer.toString(this.bufferEntity.bufferInventory.getStored(2))));
-            labelFour.setText(new LiteralText(Integer.toString(this.bufferEntity.bufferInventory.getStored(3))));
-            labelFive.setText(new LiteralText(Integer.toString(this.bufferEntity.bufferInventory.getStored(4))));
-            labelSix.setText(new LiteralText(Integer.toString(this.bufferEntity.bufferInventory.getStored(5))));
+        if (bufferInventory.getType() == BufferType.SIX) {
+            labelOne.setText(new LiteralText(Integer.toString(this.bufferInventory.getStored(0))));
+            labelTwo.setText(new LiteralText(Integer.toString(this.bufferInventory.getStored(1))));
+            labelThree.setText(new LiteralText(Integer.toString(this.bufferInventory.getStored(2))));
+            labelFour.setText(new LiteralText(Integer.toString(this.bufferInventory.getStored(3))));
+            labelFive.setText(new LiteralText(Integer.toString(this.bufferInventory.getStored(4))));
+            labelSix.setText(new LiteralText(Integer.toString(this.bufferInventory.getStored(5))));
 
             this.rootPanel.add(slotOne, sectionX * 1 - 36, sectionY - 12);
             this.rootPanel.add(slotTwo, sectionX * 2 - 27, sectionY - 12);

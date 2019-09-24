@@ -3,10 +3,10 @@ package buffer.screen;
 import io.github.cottonmc.cotton.gui.client.CottonInventoryScreen;
 import net.minecraft.entity.player.PlayerEntity;
 
-public class BufferEntityScreen extends CottonInventoryScreen<BufferController> {
-	BufferController controller;
+public class BufferEntityScreen extends CottonInventoryScreen<BufferEntityController> {
+	BufferEntityController controller;
 
-	public BufferEntityScreen(BufferController newController, PlayerEntity player) {
+	public BufferEntityScreen(BufferEntityController newController, PlayerEntity player) {
 		super(newController, player);
 		this.controller = newController;
 	}

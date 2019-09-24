@@ -1,7 +1,7 @@
 package buffer.utility;
 
-import buffer.inventory.InventoryBuffer;
-import buffer.inventory.InventoryBuffer.VoidStack;
+import buffer.inventory.BufferInventory;
+import buffer.inventory.BufferInventory.VoidStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Identifier;
@@ -9,7 +9,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 
 public class BufferHandler {
-    public static CompoundTag toTag(InventoryBuffer bufferInventory, CompoundTag bufferTag) {
+    public static CompoundTag toTag(BufferInventory bufferInventory, CompoundTag bufferTag) {
         BlockPos tagPosition = new BlockPos(bufferTag.getInt("x"), bufferTag.getInt("y"), bufferTag.getInt("z"));
         Identifier tagIdentifier = new Identifier(bufferTag.getString("id"));
         bufferTag.putString("type", bufferInventory.getType().toString());                                          // Type - ONE
@@ -26,8 +26,8 @@ public class BufferHandler {
         return bufferTag;
     }
 
-    public static InventoryBuffer fromTag(CompoundTag bufferTag) {
-        InventoryBuffer bufferInventory = new InventoryBuffer();
+    public static BufferInventory fromTag(CompoundTag bufferTag) {
+        BufferInventory bufferInventory = new BufferInventory();
         
         bufferInventory.setType(BufferType.fromString(bufferTag.getString("type")));
         

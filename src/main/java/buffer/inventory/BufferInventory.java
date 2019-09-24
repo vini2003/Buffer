@@ -7,12 +7,10 @@ import java.util.List;
 import com.google.common.collect.Lists;
 
 import blue.endless.jankson.annotation.Nullable;
-import buffer.screen.BufferEntityController;
 import buffer.utility.BufferResult;
 import buffer.utility.BufferType;
 import buffer.utility.Tuple;
 import io.github.cottonmc.cotton.gui.widget.WItemSlot;
-import net.minecraft.block.entity.HopperBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
@@ -44,44 +42,21 @@ public class BufferInventory implements SidedInventory {
 
         @Override
         public void onClick(int x, int y, int button) {
-            //if (!playerInventory.getCursorStack().isEmpty() && button == 0) {
-            //    VoidStack bufferStack = voidStacks.get(slotIndex);
-            //    ItemStack cursorStack = playerInventory.getCursorStack().copy();
-            //    if (bufferStack.getWrappedStack() == ItemStack.EMPTY) {
-            //        bufferStack.setWrappedStack(cursorStack.copy());
-            //        playerInventory.setCursorStack(ItemStack.EMPTY);
-            //        playerInventory.updateItems();
-            //    } else {
-            //        playerInventory.setCursorStack(bufferStack.insertStack(cursorStack.copy()));
-            //        playerInventory.updateItems();
-            //        //cursorStack = bufferStack.insertStack(cursorStack.copy());
-            //    }
-            //}
+            // TODO: Implement
             super.onClick(x, y, button);
         }
-
-        //@Override
-        //public void tick() {
-        //    for (VoidStack voidStack : voidStacks) {
-        //        voidStack.restockStack();
-        //    }
-        //}
     }
 
     public class VoidStack {
         public int stackQuantity = 0;
-        int totalMaximum = getInvMaxStackAmount();
+        public int totalMaximum = getInvMaxStackAmount();
 
         public CompoundTag wrapperTag = null;
 
-        ItemStack wrapperStack = ItemStack.EMPTY;
-        ItemStack previousStack = ItemStack.EMPTY;
+        public ItemStack wrapperStack = ItemStack.EMPTY;
+        public ItemStack previousStack = ItemStack.EMPTY;
 
         public Item wrapperItem;
-
-        public VoidStack() {
-            // ...
-        }
 
         public void setWrappedStack(ItemStack stack) {
             this.wrapperStack = stack;
