@@ -3,12 +3,12 @@ package buffer.inventory;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import com.google.common.collect.Lists;
 
 import blue.endless.jankson.annotation.Nullable;
-import buffer.utility.BufferResult;
-import buffer.utility.BufferType;
+import buffer.utility.BufferUtility;
 import buffer.utility.Tuple;
 import io.github.cottonmc.cotton.gui.widget.WItemSlot;
 import net.minecraft.entity.player.PlayerEntity;
@@ -20,10 +20,12 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.registry.Registry;
 
 public class BufferInventory implements SidedInventory {
-    protected BufferType bufferType = BufferType.ONE;
+    protected Integer bufferTier = 1;
     public List<VoidStack> voidStacks = new ArrayList<>();
     protected List<InventoryListener> listeners;
 
@@ -48,53 +50,56 @@ public class BufferInventory implements SidedInventory {
     }
 
     public class VoidStack {
-        public boolean shallInsert = true;
-
         public int stackQuantity = 0;
-        public int totalMaximum = getInvMaxStackAmount();
+        public int stackMaximum = getInvMaxStackAmount();
 
-        public CompoundTag wrapperTag = null;
+        private ItemStack wrapperStack = ItemStack.EMPTY;
+        private Item wrapperItem;
+        private CompoundTag wrapperTag = null;
 
-        public ItemStack wrapperStack = ItemStack.EMPTY;
-        public ItemStack previousStack = ItemStack.EMPTY;
+        private ItemStack initialStack = ItemStack.EMPTY;
 
-        public Item wrapperItem;
-
-        public void setWrappedStack(ItemStack stack) {
-            this.wrapperStack = stack;
+        public void setStack(ItemStack itemStack) {
+            this.wrapperStack = itemStack;
+            this.wrapperItem = itemStack.getItem();
+            this.wrapperTag = itemStack.getTag();
         }
 
-        public ItemStack getWrappedStack() {
+        public ItemStack getStack() {
             return this.wrapperStack;
         }
 
-        public void setPreviousStack(ItemStack stack) {
-            this.previousStack = stack.copy();
+        public Item getItem() {
+            return this.wrapperItem;
         }
 
-        public ItemStack getPreviousStack() {
-            return this.previousStack;
+        public CompoundTag getTag() {
+            return this.wrapperTag;
         }
 
-        public BufferResult canInsertStack(ItemStack stack) {
-            if (this.wrapperStack.getCount() + stack.getCount() < this.totalMaximum && this.wrapperStack.getItem() == stack.getItem()) {
-                return BufferResult.SUCCESS;
+        public boolean canInsert(ItemStack itemStack) {
+            if (wrapperStack.getCount() + itemStack.getCount() < stackMaximum 
+            &&  wrapperStack.getItem() == itemStack.getItem()
+            &&  wrapperStack.getTag() == itemStack.getTag()) {
+                return true;
             } else {
-                return BufferResult.FAIL;
+                return false;
             }
         }
 
-        public BufferResult canExtractStack(ItemStack stack) {
-            if (stack.getCount() <= this.wrapperStack.getCount() && this.wrapperStack.getItem() == stack.getItem()) {
-                return BufferResult.SUCCESS;
+        public boolean canExtract(ItemStack itemStack) {
+            if (itemStack.getCount() <= wrapperStack.getCount()
+            &&  wrapperStack.getItem() == itemStack.getItem()
+            &&  wrapperStack.getTag() == itemStack.getTag()) {
+                return true;
             } else {
-                return BufferResult.FAIL;
+                return false;
             }
         }
         
-        public ItemStack insertStack(ItemStack insertStack, Boolean isItem, Boolean isClient) {
+        public ItemStack insertStack(ItemStack insertStack) {
             if (wrapperStack.getItem() == Items.AIR) {
-                this.setWrappedStack(insertStack.copy());
+                this.setStack(insertStack.copy());
                 if (insertStack.hasTag()) {
                     this.wrapperTag = insertStack.getTag();
                     this.wrapperStack.setTag(wrapperTag);
@@ -110,15 +115,15 @@ public class BufferInventory implements SidedInventory {
 
             int insertMaximum = insertStack.getMaxCount();
 
-            this.totalMaximum = getInvMaxStackAmount() + wrapperStack.getMaxCount();
+            this.stackMaximum = getInvMaxStackAmount() + wrapperStack.getMaxCount();
 
-            if (totalQuantity + insertQuantity <= totalMaximum) {
+            if (totalQuantity + insertQuantity <= stackMaximum) {
                 this.stackQuantity += insertQuantity;
                 insertStack.decrement(insertQuantity);
             }
 
-            else if (totalQuantity + insertQuantity > totalMaximum) {
-                int differenceQuantity = (totalQuantity + insertQuantity) - totalMaximum;
+            else if (totalQuantity + insertQuantity > stackMaximum) {
+                int differenceQuantity = (totalQuantity + insertQuantity) - stackMaximum;
                 int offsetQuantity = insertMaximum - differenceQuantity;
                 this.stackQuantity += offsetQuantity;
                 insertStack.decrement(offsetQuantity);
@@ -136,11 +141,11 @@ public class BufferInventory implements SidedInventory {
 
             if (this.wrapperStack.getCount() == 0 && this.stackQuantity > 0) {
                 if (!isInitial) {
-                    wrapperItem = previousStack.getItem();
+                    wrapperItem = initialStack.getItem();
                 }
             } else if (this.wrapperStack.getCount() > 0 && this.stackQuantity > 0) {    
                 if (!isInitial) {
-                    this.previousStack = wrapperStack.copy();
+                    this.initialStack = wrapperStack.copy();
                     wrapperItem = wrapperStack.getItem();
                     if (wrapperStack.hasTag()) {
                         wrapperTag = wrapperStack.getTag();
@@ -153,11 +158,11 @@ public class BufferInventory implements SidedInventory {
                 wrapperQuantity = this.wrapperStack.getCount();
                 int differenceQuantity = this.wrapperStack.getMaxCount() - wrapperQuantity;
                 if (this.stackQuantity >= differenceQuantity) {
-                    this.setWrappedStack(new ItemStack(wrapperItem, wrapperQuantity + differenceQuantity));
+                    this.setStack(new ItemStack(wrapperItem, wrapperQuantity + differenceQuantity));
                     this.wrapperStack.setTag(wrapperTag);
                     this.stackQuantity -= differenceQuantity;
                 } else {
-                    this.setWrappedStack(new ItemStack(wrapperItem, wrapperQuantity + stackQuantity));
+                    this.setStack(new ItemStack(wrapperItem, wrapperQuantity + stackQuantity));
                     this.wrapperStack.setTag(wrapperTag);
                     this.stackQuantity -= stackQuantity;
                 }
@@ -173,6 +178,14 @@ public class BufferInventory implements SidedInventory {
         public int getStored() {
             return this.stackQuantity + this.wrapperStack.getCount();
         }
+
+        public void clear() {
+            this.stackQuantity = 0;
+            this.stackMaximum = 0;
+            this.wrapperItem = null;
+            this.wrapperStack = null;
+            this.wrapperTag = null;
+        }
     }
 
     public void restockAll() {
@@ -181,207 +194,177 @@ public class BufferInventory implements SidedInventory {
         }
     }
 
-    public BufferInventory(BufferType newBufferType) {
-        this.setType(newBufferType);
-    }
-
-    public BufferInventory(CompoundTag compoundTag) {
-        this.setType(compoundTag);   
-    }
-
-    public BufferInventory() {
-        this.setType(BufferType.ONE);
-    }
-
-    public void setType(CompoundTag itemTag) {
-        if (itemTag == null || !itemTag.containsKey("tier")) {
-            itemTag = new CompoundTag();
-            itemTag.putInt("tier", 1);
-        }
-        Integer tier = itemTag.getInt("tier");
-        this.bufferType = BufferType.fromInt(tier);
-        for (int slot = 0; slot < this.getInvMaxSlotAmount().length- this.voidStacks.size(); ++slot) {
-            this.voidStacks.add(new VoidStack());
+    @Nullable
+    public BufferInventory(Integer tier) {
+        if (tier == null) {
+            this.setTier(1);            
+        } else {
+            this.setTier(tier);
         }
     }
 
-    public void setType(BufferType newBufferType) {
-        this.bufferType = newBufferType;
-        for (int slot : this.getInvMaxSlotAmount()) {
-            if (voidStacks.size() - 1 < slot) {
-                this.voidStacks.add(new VoidStack());
+    public void setTier(Integer tier) {
+        this.bufferTier = tier;
+        for (int bufferSlot = 0; bufferSlot < getInvMaxSlotAmount(); ++bufferSlot) {
+            if (voidStacks.size() - 1 < bufferSlot) {
+                voidStacks.add(new VoidStack());
             }
         }
     }
 
-    public BufferType getType() {
-        return this.bufferType;
+    public Integer getTier() {
+        return this.bufferTier;
     }
 
-    public VoidStack getSlot(int slot) {
-        if (this.voidStacks.size() >= slot) {
-            return this.voidStacks.get(slot);
+    public VoidStack getSlot(int bufferSlot) {
+        if (voidStacks.size() - 1 >= bufferSlot) {
+            return voidStacks.get(bufferSlot);
         } else {
             return null;
         }
     }
     
-    public int getStored(int slot) {
-        return this.voidStacks.get(slot).getStored();
+    public Integer getStored(int bufferSlot) {
+        VoidStack bufferStack = getSlot(bufferSlot);
+        if (bufferStack != null) {
+            return bufferStack.getStored();
+        } else {
+            return null;
+        }
+
     }
 
     @Override
     public int getInvSize() {
-        return this.getInvMaxSlotAmount().length;
+        return getInvMaxSlotAmount() - 1;
     }
 
     @Override
-    public ItemStack getInvStack(int slot) {
-        ItemStack returnStack = ItemStack.EMPTY;
-
-        if (this.voidStacks.get(slot) != null) {
-            returnStack = this.voidStacks.get(slot).getWrappedStack();
+    public ItemStack getInvStack(int bufferSlot) {
+        VoidStack bufferStack = getSlot(bufferSlot);
+        if (bufferStack != null) {
+            return bufferStack.getStack();
+        } else {
+            return ItemStack.EMPTY;
         }
-
-        return returnStack;
     }
 
     @Override
-    public void setInvStack(int slot, ItemStack stack) {
-        if (this.voidStacks.get(slot) != null) {
-            VoidStack voidStack = this.voidStacks.get(slot);
-            voidStack.setWrappedStack(stack);
+    public void setInvStack(int bufferSlot, ItemStack itemStack) {
+        VoidStack bufferStack = getSlot(bufferSlot);
+        if (bufferStack != null) {
+            bufferStack.clear();
+            bufferStack.setStack(itemStack);
         }
     }
 
-    public int[] getInvMaxSlotAmount() {
-        return bufferType.getSlotAmount();
+    @Override
+    public ItemStack takeInvStack(int bufferSlot, int itemQuantity) {
+        VoidStack bufferStack = getSlot(bufferSlot);
+        if (bufferStack != null) { 
+            if (bufferStack.getStack().getCount() >= itemQuantity) {
+                ItemStack returnStack = new ItemStack(bufferStack.getStack().getItem(), itemQuantity);
+                bufferStack.wrapperStack.decrement(itemQuantity);
+                return returnStack;
+            } else {
+                return ItemStack.EMPTY;
+            }
+        } else {
+            return ItemStack.EMPTY;
+        }
+    }
+
+    @Override
+    public ItemStack removeInvStack(int bufferSlot) {
+        if (voidStacks.size() <= bufferSlot && bufferSlot >= 0) {
+            ItemStack returnStack = voidStacks.get(bufferSlot).getStack();
+            voidStacks.get(bufferSlot).setStack(ItemStack.EMPTY);
+            return returnStack;
+        } else {
+            return ItemStack.EMPTY;
+        }
+    }
+    
+
+    public int getInvMaxSlotAmount() {
+        return bufferTier;
     }
 
     public int getInvMaxStackAmount() {
-        return bufferType.getStackSize();
+        return BufferUtility.getStackSize(bufferTier);
     }
 
     @Override
     public int[] getInvAvailableSlots(Direction direction) {
-        return this.getInvMaxSlotAmount();
+        return IntStream.rangeClosed(0, bufferTier - 1).toArray();
     }   
 
-    @Override
-    public ItemStack removeInvStack(int var1) {
-        ItemStack returnStack = null;
+    // -1 = NO SLOT
+    //  0 = EMPTY SLOT
+    // +1 = MATCHING SLOT
+    public Tuple<Integer, Integer> tryInsert(ItemStack insertionStack) {
+        Tuple<Integer, Integer> insertionMode = new Tuple<Integer, Integer>(-1, null);
         for (int slot : this.getInvAvailableSlots(null)) {
             VoidStack bufferStack = this.voidStacks.get(slot);
-            returnStack = bufferStack.getWrappedStack().copy();
-            bufferStack.setWrappedStack(ItemStack.EMPTY);
-            bufferStack.stackQuantity = 0;
-        }
-        return returnStack;
-    }
-
-    @Override
-    public ItemStack takeInvStack(int slotIndex, int itemQuantity) {
-        ItemStack returnStack = null;
-        for (int slot : this.getInvAvailableSlots(null)) {
-            VoidStack bufferStack = this.voidStacks.get(slot);
-            if (bufferStack.getWrappedStack().getCount() >= itemQuantity) {
-                returnStack = new ItemStack(bufferStack.getWrappedStack().getItem(), itemQuantity);//bufferStack.wrapperStack.copy();
-                bufferStack.wrapperStack.decrement(itemQuantity);
-            }
-        }
-        return returnStack;
-    }
-
-    public Tuple canInsert(ItemStack insertionStack) {
-        Tuple<Integer, Integer> insertionMode = new Tuple(-1, null);
-        // -1 = NO SLOT
-        //  0 = EMPTY SLOT
-        // +1 = MATCHING SLOT
-        for (int slot : this.getInvAvailableSlots(null)) {
-            VoidStack bufferStack = this.voidStacks.get(slot);
-            if (insertionStack.getItem() == bufferStack.getWrappedStack().getItem()) {
-                if (insertionStack.hasTag() && bufferStack.getWrappedStack().hasTag()
-                &&  insertionStack.getTag().equals(bufferStack.getWrappedStack().getTag())) {
+            if (insertionStack.getItem() == bufferStack.getStack().getItem()) {
+                if (insertionStack.hasTag() && bufferStack.getStack().hasTag()
+                &&  insertionStack.getTag().equals(bufferStack.getStack().getTag())) {
                     insertionMode.setFirst(+1);
                     insertionMode.setSecond(slot);
                     break;
                 }
-                if (!insertionStack.hasTag() && !bufferStack.getWrappedStack().hasTag()) {
+                if (!insertionStack.hasTag() && !bufferStack.getStack().hasTag()) {
                     insertionMode.setFirst(+1);
                     insertionMode.setSecond(slot);
                     break;
                 }
             }
-            if (bufferStack.getWrappedStack().isEmpty()) {
+            if (bufferStack.getStack().isEmpty()) {
                 insertionMode.setFirst(0);
                 insertionMode.setSecond(slot);
             }
         }
-
         return insertionMode;
     }
 
-    public ItemStack insertStackEntity(ItemStack insertionStack, Boolean isItem, Boolean isClient) {
-        Tuple<Integer, Integer> insertionData = this.canInsert(insertionStack);
+    public ItemStack insertStack(ItemStack insertionStack) {
+        Tuple<Integer, Integer> insertionData = this.tryInsert(insertionStack);
         if (insertionData.getFirst() == -1) {
             return insertionStack;
         }
         if (insertionData.getFirst() == 0 || insertionData.getFirst() == +1) {
             VoidStack voidStack = this.getSlot(insertionData.getSecond());
-            return voidStack.insertStack(insertionStack, isItem, isClient);
+            return voidStack.insertStack(insertionStack);
         }
         return insertionStack;
     }
 
     @Override
-    public boolean canInsertInvStack(int slot, ItemStack stack, @Nullable Direction direction) {
-        VoidStack voidStack = voidStacks.get(slot);
-        
-        if (voidStack != null) {
-            BufferResult result = voidStack.canInsertStack(stack);
-            if (result == BufferResult.SUCCESS) {
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
+    public boolean canInsertInvStack(int bufferSlot, ItemStack itemStack, @Nullable Direction direction) {
+        VoidStack bufferStack = getSlot(bufferSlot);
+        return bufferStack.canInsert(itemStack);
     }
 
     @Override
-    public boolean canExtractInvStack(int slot, ItemStack stack, Direction direction) {
-        VoidStack voidStack = voidStacks.get(slot);
-        
-        if (voidStack != null) {
-            BufferResult result = voidStack.canExtractStack(stack);
-            if (result == BufferResult.SUCCESS) {
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
+    public boolean canExtractInvStack(int bufferSlot, ItemStack itemStack, Direction direction) {
+        VoidStack bufferStack = getSlot(bufferSlot);
+        return bufferStack.canInsert(itemStack);
     }
 
     @Override
     public boolean isInvEmpty() {
-        Boolean full = false;
-        for (int slot = 0; slot < this.getInvMaxSlotAmount().length; ++slot) {
-            if (this.voidStacks.get(slot) != null) {
-                VoidStack bufferStack = this.voidStacks.get(slot);
-                if (bufferStack.getWrappedStack() != ItemStack.EMPTY) {
-                    full = true;
-                }
-            } 
+        Boolean isEmpty = true;
+        for (VoidStack bufferStack : this.voidStacks) {
+            if (bufferStack.getStored() > 0) {
+                isEmpty = false;
+            }
         }
-        return full;
+        return isEmpty;
     }
 
     @Override
     public void clear() {
-        // ...
+        // TODO: Implement
     }
 
     @Override
@@ -393,13 +376,12 @@ public class BufferInventory implements SidedInventory {
         if (this.listeners == null) {
            this.listeners = Lists.newArrayList();
         }
-  
         this.listeners.add(iventoryListener);
      }
-  
-     public void removeListener(InventoryListener inventoryListener) {
-        this.listeners.remove(inventoryListener);
-     }
+
+    public void removeListener(InventoryListener inventoryListener) {
+       this.listeners.remove(inventoryListener);
+    }
 
     @Override
     public void markDirty() {
@@ -411,5 +393,38 @@ public class BufferInventory implements SidedInventory {
                 inventoryListener.onInvChange(this);
             }
         }
+    }
+
+    public static CompoundTag toTag(BufferInventory bufferInventory, CompoundTag bufferTag) {
+        bufferTag.putInt("tier", bufferInventory.getTier());
+        for (int bufferSlot : bufferInventory.getInvAvailableSlots(null)) {
+            VoidStack voidStack = bufferInventory.getSlot(bufferSlot);
+            bufferTag.putInt(Integer.toString(bufferSlot), voidStack.stackQuantity);
+            bufferTag.putInt(Integer.toString(bufferSlot) + "_size", voidStack.getStack().getCount());
+            if (voidStack.wrapperTag != null) {
+                bufferTag.put(Integer.toString(bufferSlot) + "_tag", voidStack.wrapperTag.copy());
+            }
+            bufferTag.putString(Integer.toString(bufferSlot) + "_item", voidStack.getStack().getItem().toString());
+        }
+        return bufferTag;
+    }
+
+    public static BufferInventory fromTag(CompoundTag bufferTag) {
+        BufferInventory bufferInventory = new BufferInventory(null);
+        bufferInventory.setTier(bufferTag.getInt("tier"));
+        for (int bufferSlot : bufferInventory.getInvAvailableSlots(null)) {
+            VoidStack voidStack = bufferInventory.getSlot(bufferSlot);
+            voidStack.stackQuantity = bufferTag.getInt(Integer.toString(bufferSlot));
+            Integer wrapperQuantity = bufferTag.getInt(Integer.toString(bufferSlot) + "_size");
+            voidStack.wrapperItem = Registry.ITEM.get(new Identifier(bufferTag.getString(Integer.toString(bufferSlot) + "_item")));
+            ItemStack itemStack = new ItemStack(voidStack.wrapperItem, wrapperQuantity);
+            if (bufferTag.containsKey(Integer.toString(bufferSlot) + "_slot")) {
+                voidStack.wrapperTag = (CompoundTag)bufferTag.getTag(Integer.toString(bufferSlot) + "_tag");
+                itemStack.setTag(voidStack.wrapperTag);
+            }
+            voidStack.setStack(itemStack.copy());
+            voidStack.restockStack(true);
+        }
+        return bufferInventory;
     }
 }

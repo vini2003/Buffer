@@ -1,6 +1,6 @@
 package buffer.utility;
 
-public enum BufferType {
+public enum BufferUtility {
     ONE,
     TWO,
     THREE,
@@ -27,7 +27,7 @@ public enum BufferType {
         }
     }
 
-    public static BufferType fromString(String string) {
+    public static BufferUtility fromString(String string) {
         switch(string) {
             case "one":
                 return ONE;
@@ -65,7 +65,7 @@ public enum BufferType {
         }
     }
 
-    public static BufferType fromInt(int type) {
+    public static BufferUtility fromInt(int type) {
         switch(type) {
             case 1:
                 return ONE;
@@ -84,38 +84,19 @@ public enum BufferType {
         }
     }
 
-    public int[] getSlotAmount() {
-        switch(this) {
-            case ONE:
-                return new int[] { 0 };
-            case TWO:
-                return new int[] { 0, 1 };
-            case THREE:
-                return new int[] { 0, 1, 2 };
-            case FOUR:
-                return new int[] { 0, 1, 2, 3 };
-            case FIVE:
-                return new int[] { 0, 1, 2, 3, 4 };
-            case SIX:
-                return new int[] { 0, 1, 2, 3, 4, 5 };
-            default:
-                return new int[] { 0 };
-        }
-    }
-
-    public int getStackSize() {
-        switch(this) {
-            case ONE:
+    public static Integer getStackSize(Integer tier) {
+        switch(tier) {
+            case 1:
                 return 192;
-            case TWO:
+            case 2:
                 return 448;
-            case THREE:
+            case 3:
                 return 960;
-            case FOUR:
+            case 4:
                 return 4032;
-            case FIVE:
+            case 5:
                 return 8128;
-            case SIX:
+            case 6:
                 return 16320;
             default:
                 return 1;

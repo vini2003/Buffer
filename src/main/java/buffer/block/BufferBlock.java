@@ -4,7 +4,6 @@ import buffer.entity.BufferEntity;
 import buffer.inventory.BufferInventory;
 import buffer.registry.BlockRegistry;
 import buffer.utility.BufferProvider;
-import buffer.utility.BufferType;
 import net.fabricmc.fabric.api.container.ContainerProviderRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEntityProvider;
@@ -51,19 +50,9 @@ public class BufferBlock extends Block implements BlockEntityProvider {
         CompoundTag itemTag = itemStack.getTag();
         BufferEntity bufferEntity = (BufferEntity)world.getBlockEntity(blockPosition);
         BufferInventory inventoryMirror = bufferEntity.bufferInventory;
-        inventoryMirror.setType(itemTag);
-        if (inventoryMirror.getType() == null) {
-            if (itemTag == null || !itemTag.containsKey("tier")) {
-                itemTag = new CompoundTag();
-                itemTag.putInt("tier", 1);
-                itemStack.setTag(itemTag);
-            }
-        }
-
         Integer tier = itemTag.getInt("tier");
-        inventoryMirror.setType(BufferType.fromInt(tier));
-
-        world.setBlockState(blockPosition, BlockRegistry.BLOCK_TESSERACT.getDefaultState().with(BufferProvider.tier, inventoryMirror.getType().toInt()));
+        inventoryMirror.setTier(tier);
+        world.setBlockState(blockPosition, BlockRegistry.BLOCK_TESSERACT.getDefaultState().with(BufferProvider.tier, inventoryMirror.getTier()));
         super.onPlaced(world, blockPosition, blockState, livingEntity, itemStack);
     }
     

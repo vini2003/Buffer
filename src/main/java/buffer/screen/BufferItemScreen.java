@@ -14,6 +14,6 @@ public class BufferItemScreen extends CottonInventoryScreen<BufferItemController
 	@Override
 	public void tick() {
 		super.tick();
-		controller.tick();
+		controller.screenTick();
 	}
 }
