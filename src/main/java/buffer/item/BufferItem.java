@@ -79,6 +79,6 @@ public class BufferItem extends BlockItem {
                 buffer.writeBlockPos(playerEntity.getBlockPos());
             });
         }
-        return super.use(world, playerEntity, hand);
+        return new TypedActionResult(ActionResult.PASS, playerEntity.getMainHandStack(), false);
     }
 }

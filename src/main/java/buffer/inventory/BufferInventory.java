@@ -26,7 +26,7 @@ import net.minecraft.util.registry.Registry;
 
 public class BufferInventory implements SidedInventory {
     protected Integer bufferTier = 1;
-    public List<VoidStack> voidStacks = new ArrayList<>();
+    public List<BufferStack> bufferStacks = new ArrayList<>();
     protected List<InventoryListener> listeners;
 
     public ItemStack itemStack = null;
@@ -49,7 +49,7 @@ public class BufferInventory implements SidedInventory {
         }
     }
 
-    public class VoidStack {
+    public class BufferStack {
         public int stackQuantity = 0;
         public int stackMaximum = getInvMaxStackAmount();
 
@@ -60,9 +60,7 @@ public class BufferInventory implements SidedInventory {
         private ItemStack initialStack = ItemStack.EMPTY;
 
         public void setStack(ItemStack itemStack) {
-            this.wrapperStack = itemStack;
-            this.wrapperItem = itemStack.getItem();
-            this.wrapperTag = itemStack.getTag();
+            this.wrapperStack = itemStack.copy();
         }
 
         public ItemStack getStack() {
@@ -189,8 +187,14 @@ public class BufferInventory implements SidedInventory {
     }
 
     public void restockAll() {
-        for (VoidStack voidStack : this.voidStacks) {
-            voidStack.restockStack(false);
+        for (BufferStack bufferStack : this.bufferStacks) {
+            bufferStack.restockStack(false);
+        }
+    }
+
+    public void restockInitial() {
+        for (BufferStack bufferStack : this.bufferStacks) {
+            bufferStack.restockStack(true);
         }
     }
 
@@ -206,8 +210,8 @@ public class BufferInventory implements SidedInventory {
     public void setTier(Integer tier) {
         this.bufferTier = tier;
         for (int bufferSlot = 0; bufferSlot < getInvMaxSlotAmount(); ++bufferSlot) {
-            if (voidStacks.size() - 1 < bufferSlot) {
-                voidStacks.add(new VoidStack());
+            if (bufferStacks.size() - 1 < bufferSlot) {
+                bufferStacks.add(new BufferStack());
             }
         }
     }
@@ -216,16 +220,16 @@ public class BufferInventory implements SidedInventory {
         return this.bufferTier;
     }
 
-    public VoidStack getSlot(int bufferSlot) {
-        if (voidStacks.size() - 1 >= bufferSlot) {
-            return voidStacks.get(bufferSlot);
+    public BufferStack getSlot(int bufferSlot) {
+        if (bufferStacks.size() - 1 >= bufferSlot) {
+            return bufferStacks.get(bufferSlot);
         } else {
             return null;
         }
     }
     
     public Integer getStored(int bufferSlot) {
-        VoidStack bufferStack = getSlot(bufferSlot);
+        BufferStack bufferStack = getSlot(bufferSlot);
         if (bufferStack != null) {
             return bufferStack.getStored();
         } else {
@@ -241,7 +245,7 @@ public class BufferInventory implements SidedInventory {
 
     @Override
     public ItemStack getInvStack(int bufferSlot) {
-        VoidStack bufferStack = getSlot(bufferSlot);
+        BufferStack bufferStack = getSlot(bufferSlot);
         if (bufferStack != null) {
             return bufferStack.getStack();
         } else {
@@ -251,7 +255,7 @@ public class BufferInventory implements SidedInventory {
 
     @Override
     public void setInvStack(int bufferSlot, ItemStack itemStack) {
-        VoidStack bufferStack = getSlot(bufferSlot);
+        BufferStack bufferStack = getSlot(bufferSlot);
         if (bufferStack != null) {
             bufferStack.clear();
             bufferStack.setStack(itemStack);
@@ -260,7 +264,7 @@ public class BufferInventory implements SidedInventory {
 
     @Override
     public ItemStack takeInvStack(int bufferSlot, int itemQuantity) {
-        VoidStack bufferStack = getSlot(bufferSlot);
+        BufferStack bufferStack = getSlot(bufferSlot);
         if (bufferStack != null) { 
             if (bufferStack.getStack().getCount() >= itemQuantity) {
                 ItemStack returnStack = new ItemStack(bufferStack.getStack().getItem(), itemQuantity);
@@ -276,9 +280,9 @@ public class BufferInventory implements SidedInventory {
 
     @Override
     public ItemStack removeInvStack(int bufferSlot) {
-        if (voidStacks.size() <= bufferSlot && bufferSlot >= 0) {
-            ItemStack returnStack = voidStacks.get(bufferSlot).getStack();
-            voidStacks.get(bufferSlot).setStack(ItemStack.EMPTY);
+        if (bufferStacks.size() <= bufferSlot && bufferSlot >= 0) {
+            ItemStack returnStack = bufferStacks.get(bufferSlot).getStack();
+            bufferStacks.get(bufferSlot).setStack(ItemStack.EMPTY);
             return returnStack;
         } else {
             return ItemStack.EMPTY;
@@ -305,7 +309,7 @@ public class BufferInventory implements SidedInventory {
     public Tuple<Integer, Integer> tryInsert(ItemStack insertionStack) {
         Tuple<Integer, Integer> insertionMode = new Tuple<Integer, Integer>(-1, null);
         for (int slot : this.getInvAvailableSlots(null)) {
-            VoidStack bufferStack = this.voidStacks.get(slot);
+            BufferStack bufferStack = this.bufferStacks.get(slot);
             if (insertionStack.getItem() == bufferStack.getStack().getItem()) {
                 if (insertionStack.hasTag() && bufferStack.getStack().hasTag()
                 &&  insertionStack.getTag().equals(bufferStack.getStack().getTag())) {
@@ -333,28 +337,28 @@ public class BufferInventory implements SidedInventory {
             return insertionStack;
         }
         if (insertionData.getFirst() == 0 || insertionData.getFirst() == +1) {
-            VoidStack voidStack = this.getSlot(insertionData.getSecond());
-            return voidStack.insertStack(insertionStack);
+            BufferStack bufferStack = this.getSlot(insertionData.getSecond());
+            return bufferStack.insertStack(insertionStack);
         }
         return insertionStack;
     }
 
     @Override
     public boolean canInsertInvStack(int bufferSlot, ItemStack itemStack, @Nullable Direction direction) {
-        VoidStack bufferStack = getSlot(bufferSlot);
+        BufferStack bufferStack = getSlot(bufferSlot);
         return bufferStack.canInsert(itemStack);
     }
 
     @Override
     public boolean canExtractInvStack(int bufferSlot, ItemStack itemStack, Direction direction) {
-        VoidStack bufferStack = getSlot(bufferSlot);
+        BufferStack bufferStack = getSlot(bufferSlot);
         return bufferStack.canInsert(itemStack);
     }
 
     @Override
     public boolean isInvEmpty() {
         Boolean isEmpty = true;
-        for (VoidStack bufferStack : this.voidStacks) {
+        for (BufferStack bufferStack : this.bufferStacks) {
             if (bufferStack.getStored() > 0) {
                 isEmpty = false;
             }
@@ -386,7 +390,7 @@ public class BufferInventory implements SidedInventory {
     @Override
     public void markDirty() {
         if (this.listeners != null) {
-            Iterator iterator = this.listeners.iterator();
+            Iterator<InventoryListener> iterator = this.listeners.iterator();
    
             while(iterator.hasNext()) {
                 InventoryListener inventoryListener = (InventoryListener)iterator.next();
@@ -398,13 +402,13 @@ public class BufferInventory implements SidedInventory {
     public static CompoundTag toTag(BufferInventory bufferInventory, CompoundTag bufferTag) {
         bufferTag.putInt("tier", bufferInventory.getTier());
         for (int bufferSlot : bufferInventory.getInvAvailableSlots(null)) {
-            VoidStack voidStack = bufferInventory.getSlot(bufferSlot);
-            bufferTag.putInt(Integer.toString(bufferSlot), voidStack.stackQuantity);
-            bufferTag.putInt(Integer.toString(bufferSlot) + "_size", voidStack.getStack().getCount());
-            if (voidStack.wrapperTag != null) {
-                bufferTag.put(Integer.toString(bufferSlot) + "_tag", voidStack.wrapperTag.copy());
+            BufferStack bufferStack = bufferInventory.getSlot(bufferSlot);
+            bufferTag.putInt(Integer.toString(bufferSlot), bufferStack.stackQuantity);
+            bufferTag.putInt(Integer.toString(bufferSlot) + "_size", bufferStack.getStack().getCount());
+            if (bufferStack.wrapperTag != null) {
+                bufferTag.put(Integer.toString(bufferSlot) + "_tag", bufferStack.wrapperTag.copy());
             }
-            bufferTag.putString(Integer.toString(bufferSlot) + "_item", voidStack.getStack().getItem().toString());
+            bufferTag.putString(Integer.toString(bufferSlot) + "_item", bufferStack.getStack().getItem().toString());
         }
         return bufferTag;
     }
@@ -413,17 +417,17 @@ public class BufferInventory implements SidedInventory {
         BufferInventory bufferInventory = new BufferInventory(null);
         bufferInventory.setTier(bufferTag.getInt("tier"));
         for (int bufferSlot : bufferInventory.getInvAvailableSlots(null)) {
-            VoidStack voidStack = bufferInventory.getSlot(bufferSlot);
-            voidStack.stackQuantity = bufferTag.getInt(Integer.toString(bufferSlot));
+            BufferStack bufferStack = bufferInventory.getSlot(bufferSlot);
+            bufferStack.stackQuantity = bufferTag.getInt(Integer.toString(bufferSlot));
             Integer wrapperQuantity = bufferTag.getInt(Integer.toString(bufferSlot) + "_size");
-            voidStack.wrapperItem = Registry.ITEM.get(new Identifier(bufferTag.getString(Integer.toString(bufferSlot) + "_item")));
-            ItemStack itemStack = new ItemStack(voidStack.wrapperItem, wrapperQuantity);
+            bufferStack.wrapperItem = Registry.ITEM.get(new Identifier(bufferTag.getString(Integer.toString(bufferSlot) + "_item")));
+            ItemStack itemStack = new ItemStack(bufferStack.wrapperItem, wrapperQuantity);
             if (bufferTag.containsKey(Integer.toString(bufferSlot) + "_slot")) {
-                voidStack.wrapperTag = (CompoundTag)bufferTag.getTag(Integer.toString(bufferSlot) + "_tag");
-                itemStack.setTag(voidStack.wrapperTag);
+                bufferStack.wrapperTag = (CompoundTag)bufferTag.getTag(Integer.toString(bufferSlot) + "_tag");
+                itemStack.setTag(bufferStack.wrapperTag);
             }
-            voidStack.setStack(itemStack.copy());
-            voidStack.restockStack(true);
+            bufferStack.setStack(itemStack.copy());
+            bufferStack.restockStack(true);
         }
         return bufferInventory;
     }
