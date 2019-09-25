@@ -74,7 +74,7 @@ public class BufferEntityController extends CottonCraftingController implements 
                             return wrappedStack.copy();
                         }
                     } else {
-                        quickStack = bufferEntity.bufferInventory.insertStack(slot.getStack().copy());
+                        quickStack = bufferEntity.bufferInventory.insertStackEntity(slot.getStack().copy(), false, false);
                         this.setStackInSlot(slotNumber, quickStack.copy());
                     }
                     return quickStack;

@@ -48,6 +48,8 @@ public class BufferInventory implements SidedInventory {
     }
 
     public class VoidStack {
+        public boolean shallInsert = true;
+
         public int stackQuantity = 0;
         public int totalMaximum = getInvMaxStackAmount();
 
@@ -89,8 +91,8 @@ public class BufferInventory implements SidedInventory {
                 return BufferResult.FAIL;
             }
         }
-
-        public ItemStack insertStack(ItemStack insertStack) {
+        
+        public ItemStack insertStack(ItemStack insertStack, Boolean isItem, Boolean isClient) {
             if (wrapperStack.getItem() == Items.AIR) {
                 this.setWrappedStack(insertStack.copy());
                 if (insertStack.hasTag()) {
@@ -319,18 +321,14 @@ public class BufferInventory implements SidedInventory {
         return insertionMode;
     }
 
-    public ItemStack insertStack(ItemStack insertionStack) {
+    public ItemStack insertStackEntity(ItemStack insertionStack, Boolean isItem, Boolean isClient) {
         Tuple<Integer, Integer> insertionData = this.canInsert(insertionStack);
         if (insertionData.getFirst() == -1) {
             return insertionStack;
         }
-        if (insertionData.getFirst() == 0) {
+        if (insertionData.getFirst() == 0 || insertionData.getFirst() == +1) {
             VoidStack voidStack = this.getSlot(insertionData.getSecond());
-            return voidStack.insertStack(insertionStack);
-        }
-        if (insertionData.getFirst() == +1) {
-            VoidStack voidStack = this.getSlot(insertionData.getSecond());
-            return voidStack.insertStack(insertionStack);
+            return voidStack.insertStack(insertionStack, isItem, isClient);
         }
         return insertionStack;
     }

@@ -96,6 +96,10 @@ public class BufferItem extends BlockItem {
         return super.use(world, playerEntity, hand);
     }
 
+    public <T> void print(T t) {
+        System.out.println(t);
+    }
+
     @Override
     public void inventoryTick(ItemStack itemStack, World world, Entity entity, int integer, boolean bool) {
         bufferInventory.restockAll();
