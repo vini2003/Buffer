@@ -3,7 +3,7 @@
   "id": "buffer",
   "version": "${version}",
 
-  "name": "/void/null",
+  "name": "Buffer",
   "description": "Buffers for your storage needs.",
   "authors": [
     "vini2003"

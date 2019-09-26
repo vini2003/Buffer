@@ -7,7 +7,7 @@ import java.util.List;
 import buffer.entity.BufferEntity;
 import buffer.inventory.BufferInventory;
 import buffer.inventory.BufferInventory.BufferStack;
-import buffer.inventory.BufferInventory.WVoidSlot;
+import buffer.inventory.BufferInventory.WBufferSlot;
 import buffer.registry.ItemRegistry;
 import buffer.utility.BufferPacket;
 import io.github.cottonmc.cotton.gui.CottonCraftingController;
@@ -114,12 +114,12 @@ public class BufferBaseController extends CottonCraftingController {
     }
 
     public void setWidgets() {
-        controllerSlots.set(0, bufferInventory.new WVoidSlot(this.bufferInventory, 0, 1, 1, playerInventory));
-        controllerSlots.set(1, bufferInventory.new WVoidSlot(this.bufferInventory, 1, 1, 1, playerInventory));
-        controllerSlots.set(2, bufferInventory.new WVoidSlot(this.bufferInventory, 2, 1, 1, playerInventory));
-        controllerSlots.set(3, bufferInventory.new WVoidSlot(this.bufferInventory, 3, 1, 1, playerInventory));
-        controllerSlots.set(4, bufferInventory.new WVoidSlot(this.bufferInventory, 4, 1, 1, playerInventory));
-        controllerSlots.set(5, bufferInventory.new WVoidSlot(this.bufferInventory, 5, 1, 1, playerInventory));
+        controllerSlots.set(0, bufferInventory.new WBufferSlot(this.bufferInventory, 0, 1, 1, playerInventory));
+        controllerSlots.set(1, bufferInventory.new WBufferSlot(this.bufferInventory, 1, 1, 1, playerInventory));
+        controllerSlots.set(2, bufferInventory.new WBufferSlot(this.bufferInventory, 2, 1, 1, playerInventory));
+        controllerSlots.set(3, bufferInventory.new WBufferSlot(this.bufferInventory, 3, 1, 1, playerInventory));
+        controllerSlots.set(4, bufferInventory.new WBufferSlot(this.bufferInventory, 4, 1, 1, playerInventory));
+        controllerSlots.set(5, bufferInventory.new WBufferSlot(this.bufferInventory, 5, 1, 1, playerInventory));
 
         for (Integer bufferSlot : bufferInventory.getInvAvailableSlots(null)) {
             controllerLabels.get(bufferSlot).setText(new LiteralText(Integer.toString(bufferInventory.getStored(bufferSlot))));    

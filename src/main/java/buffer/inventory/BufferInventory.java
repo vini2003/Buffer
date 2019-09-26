@@ -32,11 +32,11 @@ public class BufferInventory implements SidedInventory {
     public ItemStack itemStack = null;
 
 
-    public class WVoidSlot extends WItemSlot {
+    public class WBufferSlot extends WItemSlot {
         protected int slotIndex = 0;
         protected PlayerInventory playerInventory = null;
 
-        public WVoidSlot(Inventory inventory, int temporaryIndex, int slotsWide, int slotsHigh, PlayerInventory temporaryInventory) {
+        public WBufferSlot(Inventory inventory, int temporaryIndex, int slotsWide, int slotsHigh, PlayerInventory temporaryInventory) {
             super(inventory, temporaryIndex, slotsWide, slotsHigh, false, false);
             slotIndex = temporaryIndex;
             playerInventory = temporaryInventory;
