@@ -23,34 +23,30 @@ import net.minecraft.recipe.RecipeType;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
 
-public class BufferEntityController extends CottonCraftingController {
-    private WPlainPanel rootPanel = null;
+public class BufferBaseController extends CottonCraftingController {
+    protected BufferInventory bufferInventory = null;
+    
+    protected WPlainPanel rootPanel = null;
 
-    private List<WItemSlot> slots = new ArrayList<>();
+    protected List<WItemSlot> controllerSlots = new ArrayList<>();
+    protected List<WLabel> controllerLabels = new ArrayList<>();
 
-    private List<WLabel> labels = new ArrayList<>();
+    protected WVoidSlot slotOne = null;
+    protected WVoidSlot slotTwo = null;
+    protected WVoidSlot slotThree = null;
+    protected WVoidSlot slotFour = null;
+    protected WVoidSlot slotFive = null;
+    protected WVoidSlot slotSix = null;
 
-    private WVoidSlot slotOne = null;
-    private WVoidSlot slotTwo = null;
-    private WVoidSlot slotThree = null;
-    private WVoidSlot slotFour = null;
-    private WVoidSlot slotFive = null;
-    private WVoidSlot slotSix = null;
+    protected WLabel labelOne = null;
+    protected WLabel labelTwo = null;
+    protected WLabel labelThree = null;
+    protected WLabel labelFour = null;
+    protected WLabel labelFive = null;
+    protected WLabel labelSix = null;
 
-    private WLabel labelOne = null;
-    private WLabel labelTwo = null;
-    private WLabel labelThree = null;
-    private WLabel labelFour = null;
-    private WLabel labelFive = null;
-    private WLabel labelSix = null;
-
-    private int sectionX = 48;
-    private int sectionY = 20;
-
-    public BufferInventory bufferInventory = null;
-
-
-
+    protected static final int sectionX = 48;
+    protected static final int sectionY = 20;
 
     @Override
     public ItemStack onSlotClick(int slotNumber, int button, SlotActionType action, PlayerEntity playerEntity) {
@@ -113,28 +109,12 @@ public class BufferEntityController extends CottonCraftingController {
     public void screenTick() {
         bufferInventory.restockAll();
         for (Integer bufferSlot : this.bufferInventory.getInvAvailableSlots(null)) {
-            labels.get(bufferSlot).setText(new LiteralText(Integer.toString(this.bufferInventory.getStored(bufferSlot))));
+            controllerLabels.get(bufferSlot).setText(new LiteralText(Integer.toString(this.bufferInventory.getStored(bufferSlot))));
         }
     }
 
-    public BufferEntity getBlockEntity(BlockContext context) {
-        BufferEntity lambdaBypass[] = { null };
-
-        context.run((world, blockPosition) -> {
-            BufferEntity temporaryEntity = (BufferEntity)world.getBlockEntity(blockPosition);
-            lambdaBypass[0] = temporaryEntity;
-        });
-
-        return lambdaBypass[0];
-    }
-
-    public BufferEntityController(int syncId, PlayerInventory playerInventory, BlockContext context) {
+    public BufferBaseController(int syncId, PlayerInventory playerInventory, BlockContext context) {
         super(RecipeType.CRAFTING, syncId, playerInventory, getBlockInventory(context), getBlockPropertyDelegate(context));
-    
-        this.playerInventory = playerInventory;
-        this.bufferInventory = ((BufferEntity)this.getBlockEntity(context)).bufferInventory;
-        //this.bufferInventory = BufferInventory.fromTag(((BufferEntity)this.getBlockEntity(context)).getTag());
-        this.rootPanel = new WPlainPanel();
 
         this.setRootPanel(rootPanel);
 
@@ -159,19 +139,19 @@ public class BufferEntityController extends CottonCraftingController {
         labelFive = new WLabel("");
         labelSix = new WLabel("");
 
-        slots.add(slotOne);
-        slots.add(slotTwo);
-        slots.add(slotThree);
-        slots.add(slotFour);
-        slots.add(slotFive);
-        slots.add(slotSix);
+        controllerSlots.add(slotOne);
+        controllerSlots.add(slotTwo);
+        controllerSlots.add(slotThree);
+        controllerSlots.add(slotFour);
+        controllerSlots.add(slotFive);
+        controllerSlots.add(slotSix);
 
-        labels.add(labelOne);
-        labels.add(labelTwo);
-        labels.add(labelThree);
-        labels.add(labelFour);
-        labels.add(labelFive);
-        labels.add(labelSix);
+        controllerLabels.add(labelOne);
+        controllerLabels.add(labelTwo);
+        controllerLabels.add(labelThree);
+        controllerLabels.add(labelFour);
+        controllerLabels.add(labelFive);
+        controllerLabels.add(labelSix);
 
         if (bufferInventory.getTier() == 1) {
             labelOne.setText(new LiteralText(Integer.toString(this.bufferInventory.getStored(0))));

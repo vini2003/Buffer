@@ -5,7 +5,7 @@ import java.util.stream.IntStream;
 import buffer.entity.BufferEntity;
 import buffer.inventory.BufferInventory;
 import buffer.registry.BlockRegistry;
-import buffer.registry.NetworkRegistry;
+import buffer.utility.BufferPacket;
 import buffer.utility.BufferProvider;
 import net.fabricmc.fabric.api.container.ContainerProviderRegistry;
 import net.minecraft.block.Block;
@@ -32,9 +32,7 @@ public class BufferBlock extends Block implements BlockEntityProvider {
             .with(BufferProvider.tier, 1));
     }
 
-    public void sendPacket(ServerPlayerEntity playerEntity, Integer bufferSlot, Integer stackQuantity) {
-        playerEntity.networkHandler.sendPacket(NetworkRegistry.createStackUpdatePacket(bufferSlot, stackQuantity));
-    }
+
 
 
     @Override
@@ -50,7 +48,7 @@ public class BufferBlock extends Block implements BlockEntityProvider {
             });
             BufferEntity bufferEntity = ((BufferEntity)world.getBlockEntity(blockPos));
             for (Integer slotNumber : IntStream.rangeClosed(0, bufferEntity.bufferInventory.getTier() - 1).toArray()) {
-                this.sendPacket((ServerPlayerEntity)playerEntity, slotNumber, bufferEntity.bufferInventory.getStoredInternally(slotNumber));
+                BufferPacket.sendPacket((ServerPlayerEntity)playerEntity, slotNumber, bufferEntity.bufferInventory.getStoredInternally(slotNumber));
             }
             return true;
         } else {

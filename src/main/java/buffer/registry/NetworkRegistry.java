@@ -28,11 +28,15 @@ public class NetworkRegistry {
                     PlayerEntity playerEntity = packetContext.getPlayer();
                     if (playerEntity.container instanceof BufferItemController) {
                         BufferItemController bufferContainer = (BufferItemController)playerEntity.container;
-                        bufferContainer.bufferInventory.getSlot(bufferSlot).stackQuantity = packetStackQuantity;
+                        if (bufferContainer.bufferInventory != null) {
+                            bufferContainer.bufferInventory.getSlot(bufferSlot).stackQuantity = packetStackQuantity;
+                        }
                     }
                     if (playerEntity.container instanceof BufferEntityController) {
                         BufferEntityController bufferContainer = (BufferEntityController)playerEntity.container;
-                        bufferContainer.bufferInventory.getSlot(bufferSlot).stackQuantity = packetStackQuantity; 
+                        if (bufferContainer.bufferInventory != null) {
+                            bufferContainer.bufferInventory.getSlot(bufferSlot).stackQuantity = packetStackQuantity;
+                        }
                     }
                 });   
             }

@@ -266,7 +266,6 @@ public class BufferInventory implements SidedInventory {
     public void setInvStack(int bufferSlot, ItemStack itemStack) {
         BufferStack bufferStack = getSlot(bufferSlot);
         if (bufferStack != null) {
-            bufferStack.clear();
             bufferStack.setStack(itemStack);
         }
     }
