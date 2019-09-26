@@ -1,0 +1,31 @@
+{
+    "type": "crafting_shaped",
+    "pattern": [
+        "121",
+        "232",
+        "121"
+    ],
+    "key": {
+        "1": {
+            "item": "minecraft:redstone_block"
+        },
+        "2": {
+            "item": "minecraft:iron_bars"
+        },
+        "3": {
+            "item": "buffer:buffer",
+            "data": {
+                "require": {
+                    "tier": 1
+                }
+            }
+        }
+    },
+    "result": {
+        "item": "buffer:buffer",
+        "data": {
+            "tier": 2
+        },
+        "count": 1
+    }
+}

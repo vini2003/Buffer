@@ -33,18 +33,17 @@ public class BufferInventory implements SidedInventory {
 
 
     public class WBufferSlot extends WItemSlot {
-        protected int slotIndex = 0;
+        protected int bufferSlot = 0;
         protected PlayerInventory playerInventory = null;
 
         public WBufferSlot(Inventory inventory, int temporaryIndex, int slotsWide, int slotsHigh, PlayerInventory temporaryInventory) {
             super(inventory, temporaryIndex, slotsWide, slotsHigh, false, false);
-            slotIndex = temporaryIndex;
+            bufferSlot = temporaryIndex;
             playerInventory = temporaryInventory;
         }
 
         @Override
         public void onClick(int x, int y, int button) {
-            // TODO: Implement
             super.onClick(x, y, button);
         }
     }

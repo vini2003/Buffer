@@ -1,23 +1,26 @@
 {
     "type": "crafting_shaped",
     "pattern": [
-        "CIC",
-        "IEI",
-        "CIC"
+        "121",
+        "232",
+        "121"
     ],
     "key": {
-        "C": {
+        "1": {
             "item": "minecraft:coal_block"
         },
-        "I": {
+        "2": {
             "item": "minecraft:iron_bars"
         },
-        "E": {
-            "item": "minecraft:ender_pearl"
+        "3": {
+            "item": "buffer:buffer"
         }
     },
     "result": {
         "item": "buffer:buffer",
+        "data": {
+            "tier": 1
+        },
         "count": 1
     }
 }

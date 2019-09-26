@@ -10,7 +10,7 @@ import buffer.inventory.BufferInventory.BufferStack;
 import buffer.inventory.BufferInventory.WBufferSlot;
 import buffer.registry.ItemRegistry;
 import buffer.utility.BufferPacket;
-import io.github.cottonmc.cotton.gui.CottonCraftingController;
+import io.github.cottonmc.cotton.gui.CottonScreenController;
 import io.github.cottonmc.cotton.gui.widget.WItemSlot;
 import io.github.cottonmc.cotton.gui.widget.WLabel;
 import io.github.cottonmc.cotton.gui.widget.WPlainPanel;
@@ -24,7 +24,7 @@ import net.minecraft.recipe.RecipeType;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
 
-public class BufferBaseController extends CottonCraftingController {
+public class BufferBaseController extends CottonScreenController {
     public BufferInventory bufferInventory = new BufferInventory(null);
 
     protected WPlainPanel rootPanel = new WPlainPanel();
@@ -90,11 +90,14 @@ public class BufferBaseController extends CottonCraftingController {
                             final ItemStack wrappedStack = bufferStack.getStack().copy();
                             playerEntity.inventory.setCursorStack(wrappedStack.copy());
                             bufferStack.setStack(ItemStack.EMPTY);
-                            if (!world.isClient){BufferPacket.sendPacket((ServerPlayerEntity)playerEntity, slotNumber, bufferStack.getStored());}
+                            //if (!world.isClient){BufferPacket.sendPacket((ServerPlayerEntity)playerEntity, slotNumber, bufferStack.getStored());}
                     } else if (!playerEntity.inventory.getCursorStack().isEmpty() && !slot.hasStack()) {
                         bufferInventory.getSlot(slotNumber).setStack(playerEntity.inventory.getCursorStack().copy());
                         playerEntity.inventory.setCursorStack(ItemStack.EMPTY);
-                        if (!world.isClient){BufferPacket.sendPacket((ServerPlayerEntity)playerEntity, slotNumber, bufferStack.getStored());}
+                    } else if (!playerEntity.inventory.getCursorStack().isEmpty() && slot.hasStack()) {
+                        final ItemStack xavStack = playerEntity.inventory.getCursorStack();
+                        ItemStack newStack = bufferInventory.insertStack(xavStack.copy());
+                        playerEntity.inventory.setCursorStack(newStack);
                     }
                     return ItemStack.EMPTY;
                 } else {

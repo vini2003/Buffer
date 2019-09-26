@@ -21,7 +21,6 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.TypedActionResult;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class BufferItem extends BlockItem {
@@ -40,46 +39,6 @@ public class BufferItem extends BlockItem {
     }
 
     @Override
-    public ActionResult useOnBlock(ItemUsageContext itemUsageContext_1) {
-        World world = itemUsageContext_1.getWorld();
-        BlockPos blockPosition = itemUsageContext_1.getBlockPos();
-        BlockState stateHit = world.getBlockState(blockPosition);
-        Block blockHit = stateHit.getBlock();
-        PlayerEntity playerEntity = itemUsageContext_1.getPlayer();
-        ItemStack itemStack = itemUsageContext_1.getStack();
-        CompoundTag itemTag = itemStack.getTag();
-        Integer tier = itemTag.getInt("tier");
-
-        if (blockHit == Blocks.COAL_BLOCK && !playerEntity.isSneaking() && tier == 1) {
-            itemStack.getTag().putInt("tier", 2);
-            world.breakBlock(blockPosition, false);
-            return ActionResult.SUCCESS;
-        } 
-        if (blockHit == Blocks.IRON_BLOCK && !playerEntity.isSneaking() && tier == 2) {
-            itemStack.getTag().putInt("tier", 3);
-            world.breakBlock(blockPosition, false);
-            return ActionResult.SUCCESS;
-        }
-        if (blockHit == Blocks.GOLD_BLOCK && !playerEntity.isSneaking() && tier == 3) {
-            itemStack.getTag().putInt("tier", 4);
-            world.breakBlock(blockPosition, false);
-            return ActionResult.SUCCESS;
-        }
-        if (blockHit == Blocks.DIAMOND_BLOCK && !playerEntity.isSneaking() && tier == 4) {
-            itemStack.getTag().putInt("tier", 5);
-            world.breakBlock(blockPosition, false);
-            return ActionResult.SUCCESS;
-        }
-        if (blockHit == Blocks.EMERALD_BLOCK && !playerEntity.isSneaking() && tier == 5) {
-            itemStack.getTag().putInt("tier", 6);
-            world.breakBlock(blockPosition, false);
-            return ActionResult.SUCCESS;
-        }
-
-        return super.useOnBlock(itemUsageContext_1);
-    }
-
-    @Override
     public ActionResult place(ItemPlacementContext placementContext) {
         ActionResult placeResult = super.place(placementContext);
         if (placeResult == ActionResult.SUCCESS) {
@@ -90,9 +49,6 @@ public class BufferItem extends BlockItem {
             return ActionResult.FAIL;
         }
     }
-
-
-
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity playerEntity, Hand hand) {
@@ -105,6 +61,6 @@ public class BufferItem extends BlockItem {
                 BufferPacket.sendPacket((ServerPlayerEntity)playerEntity, slotNumber, itemTag.getInt(Integer.toString(slotNumber)));
             }
         }
-        return new TypedActionResult(ActionResult.PASS, playerEntity.getMainHandStack(), false);
+        return new TypedActionResult(ActionResult.SUCCESS, playerEntity.getMainHandStack());
     }
 }
