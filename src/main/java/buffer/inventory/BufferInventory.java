@@ -320,20 +320,16 @@ public class BufferInventory implements SidedInventory {
             BufferStack bufferStack = this.bufferStacks.get(slot);
             if (insertionStack.getItem() == bufferStack.getStack().getItem()) {
                 if (insertionStack.hasTag() && bufferStack.getStack().hasTag()
-                &&  insertionStack.getTag().equals(bufferStack.getStack().getTag())) {
-                    insertionMode.setFirst(+1);
-                    insertionMode.setSecond(slot);
-                    break;
-                }
-                if (!insertionStack.hasTag() && !bufferStack.getStack().hasTag()) {
-                    insertionMode.setFirst(+1);
-                    insertionMode.setSecond(slot);
+                &&  insertionStack.getTag().equals(bufferStack.getStack().getTag())
+                ||  !insertionStack.hasTag() && !bufferStack.getStack().hasTag()) {
+                    insertionMode.first = +1;
+                    insertionMode.second = slot;
                     break;
                 }
             }
             if (bufferStack.getStack().isEmpty()) {
-                insertionMode.setFirst(0);
-                insertionMode.setSecond(slot);
+                insertionMode.first = 0;
+                insertionMode.second = slot;
             }
         }
         return insertionMode;
@@ -341,11 +337,11 @@ public class BufferInventory implements SidedInventory {
 
     public ItemStack insertStack(ItemStack insertionStack) {
         Tuple<Integer, Integer> insertionData = this.tryInsert(insertionStack);
-        if (insertionData.getFirst() == -1) {
+        if (insertionData.first == -1) {
             return insertionStack;
         }
-        if (insertionData.getFirst() == 0 || insertionData.getFirst() == +1) {
-            BufferStack bufferStack = this.getSlot(insertionData.getSecond());
+        if (insertionData.first == 0 || insertionData.first == +1) {
+            BufferStack bufferStack = this.getSlot(insertionData.second);
             return bufferStack.insertStack(insertionStack);
         }
         return insertionStack;

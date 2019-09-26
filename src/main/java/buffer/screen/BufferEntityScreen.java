@@ -5,16 +5,16 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Tickable;
 
 public class BufferEntityScreen extends CottonInventoryScreen<BufferEntityController> implements Tickable {
-	BufferEntityController controller;
+	BufferEntityController bufferController;
 
 	public BufferEntityScreen(BufferEntityController newController, PlayerEntity player) {
 		super(newController, player);
-		this.controller = newController;
+		this.bufferController = newController;
 	}
 
 	@Override
 	public void tick() {
 		super.tick();
-		controller.screenTick();
+		bufferController.tick();
 	}
 }

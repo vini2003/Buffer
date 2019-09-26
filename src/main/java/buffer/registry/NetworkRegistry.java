@@ -27,15 +27,15 @@ public class NetworkRegistry {
                 packetContext.getTaskQueue().execute(() -> {
                     PlayerEntity playerEntity = packetContext.getPlayer();
                     if (playerEntity.container instanceof BufferItemController) {
-                        BufferItemController bufferContainer = (BufferItemController)playerEntity.container;
-                        if (bufferContainer.bufferInventory != null) {
-                            bufferContainer.bufferInventory.getSlot(bufferSlot).stackQuantity = packetStackQuantity;
+                        BufferItemController bufferController = (BufferItemController)playerEntity.container;
+                        if (bufferController.bufferInventory != null) {
+                            bufferController.bufferInventory.getSlot(bufferSlot).stackQuantity = packetStackQuantity;
                         }
                     }
                     if (playerEntity.container instanceof BufferEntityController) {
-                        BufferEntityController bufferContainer = (BufferEntityController)playerEntity.container;
-                        if (bufferContainer.bufferInventory != null) {
-                            bufferContainer.bufferInventory.getSlot(bufferSlot).stackQuantity = packetStackQuantity;
+                        BufferEntityController bufferController = (BufferEntityController)playerEntity.container;
+                        if (bufferController.bufferInventory != null) {
+                            bufferController.bufferInventory.getSlot(bufferSlot).stackQuantity = packetStackQuantity;
                         }
                     }
                 });   
