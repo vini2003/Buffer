@@ -2,8 +2,9 @@ package buffer.screen;
 
 import io.github.cottonmc.cotton.gui.client.CottonInventoryScreen;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.Tickable;
 
-public class BufferEntityScreen extends CottonInventoryScreen<BufferEntityController> {
+public class BufferEntityScreen extends CottonInventoryScreen<BufferEntityController> implements Tickable {
 	BufferEntityController controller;
 
 	public BufferEntityScreen(BufferEntityController newController, PlayerEntity player) {

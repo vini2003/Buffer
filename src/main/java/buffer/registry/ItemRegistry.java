@@ -7,9 +7,11 @@ import net.minecraft.util.registry.Registry;
 import buffer.item.BufferItem;
 
 public class ItemRegistry {
-    public static final Identifier ITEM_TESSERACT = new Identifier("buffer", "buffer");
+    public static final Identifier IDENTIFIER_BUFFER = new Identifier("buffer", "buffer");
+
+    public static BufferItem BUFFER_ITEM; 
 
     public static void registerItems() {
-        Registry.register(Registry.ITEM, ITEM_TESSERACT, new BufferItem(BlockRegistry.BLOCK_TESSERACT, new Item.Settings().group(ItemGroup.MISC)));
+        BUFFER_ITEM = Registry.register(Registry.ITEM, IDENTIFIER_BUFFER, new BufferItem(BlockRegistry.BLOCK_TESSERACT, new Item.Settings().group(ItemGroup.MISC)));
    }
 }

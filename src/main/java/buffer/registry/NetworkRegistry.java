@@ -1,5 +1,6 @@
 package buffer.registry;
 
+import buffer.screen.BufferEntityController;
 import buffer.screen.BufferItemController;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
@@ -28,6 +29,10 @@ public class NetworkRegistry {
                     if (playerEntity.container instanceof BufferItemController) {
                         BufferItemController bufferContainer = (BufferItemController)playerEntity.container;
                         bufferContainer.bufferInventory.getSlot(bufferSlot).stackQuantity = packetStackQuantity;
+                    }
+                    if (playerEntity.container instanceof BufferEntityController) {
+                        BufferEntityController bufferContainer = (BufferEntityController)playerEntity.container;
+                        bufferContainer.bufferInventory.getSlot(bufferSlot).stackQuantity = packetStackQuantity; 
                     }
                 });   
             }

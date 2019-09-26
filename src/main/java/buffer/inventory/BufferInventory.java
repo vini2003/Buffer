@@ -235,6 +235,15 @@ public class BufferInventory implements SidedInventory {
         } else {
             return null;
         }
+    }
+    
+    public Integer getStoredInternally(int bufferSlot) {
+        BufferStack bufferStack = getSlot(bufferSlot);
+        if (bufferStack != null) {
+            return bufferStack.stackQuantity;
+        } else {
+            return null;
+        }
 
     }
 

@@ -18,11 +18,14 @@ import net.minecraft.world.IWorld;
 
 public class BufferEntity extends BlockEntity implements Tickable, BufferProvider, BlockEntityClientSerializable, InventoryProvider, SidedInventory {
     public BufferInventory bufferInventory = new BufferInventory(null);
+
+    public CompoundTag bufferTag = new CompoundTag();
     
     protected Boolean isUpToDate = false;
 
     public BufferEntity() {
         super(EntityRegistry.ENTITY_TESSERACT);
+        this.bufferTag = bufferInventory.toTag(this.bufferInventory, this.bufferTag);
     }
 
     @Override
@@ -109,8 +112,13 @@ public class BufferEntity extends BlockEntity implements Tickable, BufferProvide
         super.fromTag(bufferTag);
     }
 
+    public CompoundTag getTag() {
+        return BufferInventory.toTag(this.bufferInventory, this.bufferTag);
+    }
+
     @Override
     public void tick() {
+        this.markDirty();
         //bufferInventory.restockAll();
     }
 }

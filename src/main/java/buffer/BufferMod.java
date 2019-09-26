@@ -4,6 +4,7 @@ import net.fabricmc.api.ModInitializer;
 import buffer.registry.BlockRegistry;
 import buffer.registry.EntityRegistry;
 import buffer.registry.ItemRegistry;
+import buffer.registry.NetworkRegistry;
 import buffer.registry.ScreenRegistryServer;
 
 public class BufferMod implements ModInitializer {
@@ -13,5 +14,6 @@ public class BufferMod implements ModInitializer {
 		ItemRegistry.registerItems();
 		EntityRegistry.registerBlocks();
 		ScreenRegistryServer.registerScreens();
+		NetworkRegistry.registerPackets();
 	}
 }

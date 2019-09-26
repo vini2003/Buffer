@@ -7,6 +7,7 @@ import buffer.entity.BufferEntity;
 import buffer.inventory.BufferInventory;
 import buffer.inventory.BufferInventory.BufferStack;
 import buffer.inventory.BufferInventory.WVoidSlot;
+import buffer.registry.ItemRegistry;
 import buffer.registry.NetworkRegistry;
 import io.github.cottonmc.cotton.gui.CottonCraftingController;
 import io.github.cottonmc.cotton.gui.widget.WItemSlot;
@@ -65,6 +66,9 @@ public class BufferItemController extends CottonCraftingController {
         if (slot == null || !slot.canTakeItems(playerEntity)) {
             return ItemStack.EMPTY;
         } else {
+            if (slot.getStack().getItem() == ItemRegistry.BUFFER_ITEM) {
+                return ItemStack.EMPTY;
+            }
             if (action == SlotActionType.QUICK_MOVE) {
                 ItemStack quickStack;
                 if (slot.inventory instanceof BufferInventory) {
@@ -81,18 +85,11 @@ public class BufferItemController extends CottonCraftingController {
                         return wrappedStack.copy();
                     }
                 } else {
-                    if (slot.getStack() == playerEntity.getMainHandStack()) {
-                        return ItemStack.EMPTY;
-                    } else {
-                        quickStack = bufferInventory.insertStack(slot.getStack().copy());
-                        this.setStackInSlot(slotNumber, quickStack.copy());
-                    }
+                    quickStack = bufferInventory.insertStack(slot.getStack().copy());
+                    this.setStackInSlot(slotNumber, quickStack.copy());
                 }
                 return quickStack;
             } else if (action == SlotActionType.PICKUP) {
-                if (slot.getStack() == playerEntity.getMainHandStack()) {
-                    return ItemStack.EMPTY;
-                }
                 if (slot.inventory instanceof BufferInventory) {
                     BufferStack bufferStack = bufferInventory.getSlot(slotNumber);
                     if (playerEntity.inventory.getCursorStack().isEmpty() && !bufferStack.getStack().isEmpty()) {
@@ -125,7 +122,7 @@ public class BufferItemController extends CottonCraftingController {
 
     public BufferItemController(int syncId, PlayerInventory playerInventory, BlockContext context) {
         super(RecipeType.CRAFTING, syncId, playerInventory, getBlockInventory(context), getBlockPropertyDelegate(context));
-    
+
         bufferInventory = BufferInventory.fromTag(playerInventory.getMainHandStack().getTag());
 
         rootPanel = new WPlainPanel();

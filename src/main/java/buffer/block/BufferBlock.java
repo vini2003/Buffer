@@ -1,8 +1,11 @@
 package buffer.block;
 
+import java.util.stream.IntStream;
+
 import buffer.entity.BufferEntity;
 import buffer.inventory.BufferInventory;
 import buffer.registry.BlockRegistry;
+import buffer.registry.NetworkRegistry;
 import buffer.utility.BufferProvider;
 import net.fabricmc.fabric.api.container.ContainerProviderRegistry;
 import net.minecraft.block.Block;
@@ -13,6 +16,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.state.StateFactory;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
@@ -28,6 +32,11 @@ public class BufferBlock extends Block implements BlockEntityProvider {
             .with(BufferProvider.tier, 1));
     }
 
+    public void sendPacket(ServerPlayerEntity playerEntity, Integer bufferSlot, Integer stackQuantity) {
+        playerEntity.networkHandler.sendPacket(NetworkRegistry.createStackUpdatePacket(bufferSlot, stackQuantity));
+    }
+
+
     @Override
     public BlockEntity createBlockEntity(BlockView blockView) {
         return new BufferEntity();
@@ -39,6 +48,10 @@ public class BufferBlock extends Block implements BlockEntityProvider {
             ContainerProviderRegistry.INSTANCE.openContainer(new Identifier("buffer", "buffer"), playerEntity, (buffer)->{
                 buffer.writeBlockPos(blockPos);
             });
+            BufferEntity bufferEntity = ((BufferEntity)world.getBlockEntity(blockPos));
+            for (Integer slotNumber : IntStream.rangeClosed(0, bufferEntity.bufferInventory.getTier() - 1).toArray()) {
+                this.sendPacket((ServerPlayerEntity)playerEntity, slotNumber, bufferEntity.bufferInventory.getStoredInternally(slotNumber));
+            }
             return true;
         } else {
             return false;
