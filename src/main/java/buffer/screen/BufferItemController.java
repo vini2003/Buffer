@@ -7,10 +7,12 @@ import buffer.entity.BufferEntity;
 import buffer.inventory.BufferInventory;
 import buffer.inventory.BufferInventory.BufferStack;
 import buffer.inventory.BufferInventory.WVoidSlot;
+import buffer.registry.NetworkRegistry;
 import io.github.cottonmc.cotton.gui.CottonCraftingController;
 import io.github.cottonmc.cotton.gui.widget.WItemSlot;
 import io.github.cottonmc.cotton.gui.widget.WLabel;
 import io.github.cottonmc.cotton.gui.widget.WPlainPanel;
+import net.minecraft.client.network.packet.CustomPayloadS2CPacket;
 import net.minecraft.container.BlockContext;
 import net.minecraft.container.Slot;
 import net.minecraft.container.SlotActionType;
@@ -18,6 +20,8 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.RecipeType;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
 
 public class BufferItemController extends CottonCraftingController {
@@ -46,16 +50,19 @@ public class BufferItemController extends CottonCraftingController {
 
     public BufferInventory bufferInventory = null;
 
+    public void sendPacket(ServerPlayerEntity playerEntity, Integer bufferSlot, Integer stackQuantity) {
+        playerEntity.networkHandler.sendPacket(NetworkRegistry.createStackUpdatePacket(bufferSlot, stackQuantity));
+    }
+
     @Override
-    public ItemStack onSlotClick(int slotNumber, int button, SlotActionType action, PlayerEntity player) {
-        bufferInventory.restockAll();
+    public ItemStack onSlotClick(int slotNumber, int button, SlotActionType action, PlayerEntity playerEntity) {
         Slot slot;
         if (slotNumber < 0 || slotNumber >= super.slotList.size()) {
             return ItemStack.EMPTY;
         } else {
             slot = super.slotList.get(slotNumber);
         }
-        if (slot == null || !slot.canTakeItems(player)) {
+        if (slot == null || !slot.canTakeItems(playerEntity)) {
             return ItemStack.EMPTY;
         } else {
             if (action == SlotActionType.QUICK_MOVE) {
@@ -64,15 +71,17 @@ public class BufferItemController extends CottonCraftingController {
                     BufferStack bufferStack = bufferInventory.getSlot(slotNumber);
                     bufferStack.restockStack(false);
                     final ItemStack wrappedStack = bufferStack.getStack().copy();
-                    Boolean success = player.inventory.insertStack(wrappedStack.copy());
+                    Boolean success = playerEntity.inventory.insertStack(wrappedStack.copy());
                     if (success) {
                         bufferStack.setStack(ItemStack.EMPTY);
+                        if (!world.isClient){this.sendPacket((ServerPlayerEntity)playerEntity, slotNumber, bufferStack.getStored());}
                         return ItemStack.EMPTY;
                     } else {
+                        if (!world.isClient){this.sendPacket((ServerPlayerEntity)playerEntity, slotNumber, bufferStack.getStored());}
                         return wrappedStack.copy();
                     }
                 } else {
-                    if (slot.getStack() == player.getMainHandStack()) {
+                    if (slot.getStack() == playerEntity.getMainHandStack()) {
                         return ItemStack.EMPTY;
                     } else {
                         quickStack = bufferInventory.insertStack(slot.getStack().copy());
@@ -81,26 +90,28 @@ public class BufferItemController extends CottonCraftingController {
                 }
                 return quickStack;
             } else if (action == SlotActionType.PICKUP) {
-                if (slot.getStack() == player.getMainHandStack()) {
+                if (slot.getStack() == playerEntity.getMainHandStack()) {
                     return ItemStack.EMPTY;
                 }
                 if (slot.inventory instanceof BufferInventory) {
                     BufferStack bufferStack = bufferInventory.getSlot(slotNumber);
-                    if (player.inventory.getCursorStack().isEmpty() && !bufferStack.getStack().isEmpty()) {
+                    if (playerEntity.inventory.getCursorStack().isEmpty() && !bufferStack.getStack().isEmpty()) {
                             bufferStack.restockStack(false);
                             final ItemStack wrappedStack = bufferStack.getStack().copy();
-                            player.inventory.setCursorStack(wrappedStack.copy());
+                            playerEntity.inventory.setCursorStack(wrappedStack.copy());
                             bufferStack.setStack(ItemStack.EMPTY);
-                    } else if (!player.inventory.getCursorStack().isEmpty() && !slot.hasStack()) {
-                        bufferInventory.getSlot(slotNumber).setStack(player.inventory.getCursorStack().copy());
-                        player.inventory.setCursorStack(ItemStack.EMPTY);
+                            if (!world.isClient){this.sendPacket((ServerPlayerEntity)playerEntity, slotNumber, bufferStack.getStored());}
+                    } else if (!playerEntity.inventory.getCursorStack().isEmpty() && !slot.hasStack()) {
+                        bufferInventory.getSlot(slotNumber).setStack(playerEntity.inventory.getCursorStack().copy());
+                        playerEntity.inventory.setCursorStack(ItemStack.EMPTY);
+                        if (!world.isClient){this.sendPacket((ServerPlayerEntity)playerEntity, slotNumber, bufferStack.getStored());}
                     }
                     return ItemStack.EMPTY;
                 } else {
-                    return super.onSlotClick(slotNumber, button, action, player);
+                    return super.onSlotClick(slotNumber, button, action, playerEntity);
                 }
             } else {
-                return super.onSlotClick(slotNumber, button, action, player);
+                return super.onSlotClick(slotNumber, button, action, playerEntity);
             }
         }
     }
@@ -116,7 +127,7 @@ public class BufferItemController extends CottonCraftingController {
         super(RecipeType.CRAFTING, syncId, playerInventory, getBlockInventory(context), getBlockPropertyDelegate(context));
     
         bufferInventory = BufferInventory.fromTag(playerInventory.getMainHandStack().getTag());
-        bufferInventory.restockInitial();
+
         rootPanel = new WPlainPanel();
 
         setRootPanel(rootPanel);

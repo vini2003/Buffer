@@ -111,6 +111,6 @@ public class BufferEntity extends BlockEntity implements Tickable, BufferProvide
 
     @Override
     public void tick() {
-        bufferInventory.restockAll();
+        //bufferInventory.restockAll();
     }
 }

@@ -1,5 +1,8 @@
 package buffer.item;
 
+import java.util.stream.IntStream;
+
+import buffer.registry.NetworkRegistry;
 import net.fabricmc.fabric.api.container.ContainerProviderRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -10,6 +13,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
@@ -72,12 +76,21 @@ public class BufferItem extends BlockItem {
         return super.useOnBlock(itemUsageContext_1);
     }
 
+    public void sendPacket(ServerPlayerEntity playerEntity, Integer bufferSlot, Integer stackQuantity) {
+        playerEntity.networkHandler.sendPacket(NetworkRegistry.createStackUpdatePacket(bufferSlot, stackQuantity));
+    }
+
+
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity playerEntity, Hand hand) {
         if (!world.isClient && playerEntity.isSneaking()) {
             ContainerProviderRegistry.INSTANCE.openContainer(new Identifier("buffer", "buffer_item"), playerEntity, (buffer)->{
                 buffer.writeBlockPos(playerEntity.getBlockPos());
             });
+            CompoundTag itemTag = playerEntity.getMainHandStack().getTag();
+            for (Integer slotNumber : IntStream.rangeClosed(0, itemTag.getInt("tier")).toArray()) {
+                this.sendPacket((ServerPlayerEntity)playerEntity, slotNumber, itemTag.getInt(Integer.toString(slotNumber)));
+            }
         }
         return new TypedActionResult(ActionResult.PASS, playerEntity.getMainHandStack(), false);
     }
