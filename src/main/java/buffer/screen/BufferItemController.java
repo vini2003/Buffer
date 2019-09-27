@@ -1,6 +1,8 @@
 package buffer.screen;
 
 import buffer.inventory.BufferInventory;
+import buffer.item.BufferItem;
+import buffer.utility.BufferProvider;
 import net.minecraft.container.BlockContext;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -19,6 +21,7 @@ public class BufferItemController extends BufferBaseController {
     public void close(PlayerEntity playerEntity) {
         ItemStack itemStack = playerEntity.getMainHandStack();
         itemStack.setTag(BufferInventory.toTag(bufferInventory, itemStack.getTag()));
+        BufferItem.stackToDraw = ItemStack.EMPTY;   
         super.close(playerEntity);
     }
 }

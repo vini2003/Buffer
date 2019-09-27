@@ -31,6 +31,7 @@ public class BufferInventory implements SidedInventory {
 
     public ItemStack itemStack = null;
 
+    public Integer selectedSlot = 0;
 
     public class WBufferSlot extends WItemSlot {
         protected int bufferSlot = 0;
@@ -182,6 +183,15 @@ public class BufferInventory implements SidedInventory {
             this.wrapperItem = null;
             this.wrapperStack = null;
             this.wrapperTag = null;
+        }
+    }
+
+    public void swapSlot() {
+        if (selectedSlot < this.getTier() - 1) {
+            ++selectedSlot;
+        }
+        else {
+            selectedSlot = -1;
         }
     }
 
@@ -404,6 +414,7 @@ public class BufferInventory implements SidedInventory {
 
     public static CompoundTag toTag(BufferInventory bufferInventory, CompoundTag bufferTag) {
         bufferTag.putInt("tier", bufferInventory.getTier());
+        bufferTag.putInt("selected_slot", bufferInventory.selectedSlot);
         for (int bufferSlot : bufferInventory.getInvAvailableSlots(null)) {
             BufferStack bufferStack = bufferInventory.getSlot(bufferSlot);
             bufferTag.putInt(Integer.toString(bufferSlot), bufferStack.stackQuantity);
@@ -419,6 +430,7 @@ public class BufferInventory implements SidedInventory {
     public static BufferInventory fromTag(CompoundTag bufferTag) {
         BufferInventory bufferInventory = new BufferInventory(null);
         bufferInventory.setTier(bufferTag.getInt("tier"));
+        bufferInventory.selectedSlot = bufferTag.getInt("selected_slot");
         for (int bufferSlot : bufferInventory.getInvAvailableSlots(null)) {
             BufferStack bufferStack = bufferInventory.getSlot(bufferSlot);
             bufferStack.stackQuantity = bufferTag.getInt(Integer.toString(bufferSlot));

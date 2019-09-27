@@ -25,6 +25,7 @@
     ]
   },
   "mixins": [
+    "buffer.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.6.1",

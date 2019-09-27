@@ -5,6 +5,7 @@ import java.util.stream.IntStream;
 import buffer.entity.BufferEntity;
 import buffer.inventory.BufferInventory;
 import buffer.registry.BlockRegistry;
+import buffer.registry.ItemRegistry;
 import buffer.utility.BufferPacket;
 import buffer.utility.BufferProvider;
 import net.fabricmc.fabric.api.container.ContainerProviderRegistry;
@@ -58,12 +59,14 @@ public class BufferBlock extends Block implements BlockEntityProvider {
 
     @Override
     public void onPlaced(World world, BlockPos blockPosition, BlockState blockState, LivingEntity livingEntity, ItemStack itemStack) {
-        CompoundTag itemTag = itemStack.getTag();
-        BufferEntity bufferEntity = (BufferEntity)world.getBlockEntity(blockPosition);
-        BufferInventory inventoryMirror = bufferEntity.bufferInventory;
-        Integer tier = itemTag.getInt("tier");
-        inventoryMirror.setTier(tier);
-        world.setBlockState(blockPosition, BlockRegistry.BLOCK_TESSERACT.getDefaultState().with(BufferProvider.tier, inventoryMirror.getTier()));
+        if (itemStack.getItem() == ItemRegistry.BUFFER_ITEM) {
+            CompoundTag itemTag = itemStack.getTag();
+            BufferEntity bufferEntity = (BufferEntity)world.getBlockEntity(blockPosition);
+            BufferInventory inventoryMirror = bufferEntity.bufferInventory;
+            Integer tier = itemTag.getInt("tier");
+            inventoryMirror.setTier(tier);
+            world.setBlockState(blockPosition, BlockRegistry.BLOCK_TESSERACT.getDefaultState().with(BufferProvider.tier, inventoryMirror.getTier()));
+        }
         super.onPlaced(world, blockPosition, blockState, livingEntity, itemStack);
     }
     
