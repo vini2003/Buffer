@@ -55,13 +55,7 @@ public class BufferItem extends BlockItem {
     @Override
     public ActionResult place(ItemPlacementContext placementContext) {
         if (placementContext.getStack().getItem() == ItemRegistry.BUFFER_ITEM) {
-            ActionResult placeResult;
-            if (placementContext.canPlace()) {
-                placeResult = ActionResult.SUCCESS;
-            } else {
-                placeResult = ActionResult.FAIL;
-            }
-            if (placeResult == ActionResult.SUCCESS) {
+            if (super.place(placementContext) == ActionResult.SUCCESS) {
                 BufferEntity bufferEntity = ((BufferEntity)placementContext.getWorld().getBlockEntity(placementContext.getBlockPos()));
                 bufferEntity.bufferInventory = BufferInventory.fromTag(placementContext.getStack().getTag());
                 return ActionResult.SUCCESS;
@@ -76,25 +70,21 @@ public class BufferItem extends BlockItem {
                 return ActionResult.FAIL;
             }
         }
-
     }
 
     @Override
     public ActionResult useOnBlock(ItemUsageContext itemContext) {
         if (itemContext.getPlayer().isSneaking()) {
             BufferInventory bufferInventory = BufferInventory.fromTag(itemContext.getPlayer().getMainHandStack().getTag());
-            ItemUsageContext bufferContext = new BufferUsageContext(itemContext.getWorld(), itemContext.getPlayer(), itemContext.getHand(), bufferInventory.getSlot(bufferInventory.selectedSlot).getStack(), new BlockHitResult(itemContext.getHitPos(), itemContext.getSide(), itemContext.getBlockPos(), true));
-            if (bufferContext.getStack().getItem() == ItemRegistry.BUFFER_ITEM) {
-                ActionResult result = super.useOnBlock(bufferContext);
-                if (result == ActionResult.SUCCESS) {
-                    bufferInventory.getSlot(bufferInventory.selectedSlot).getStack().decrement(1);
-                    itemContext.getPlayer().getMainHandStack().setTag(BufferInventory.toTag(bufferInventory, new CompoundTag()));
-                    return ActionResult.SUCCESS;
-                } else {
-                    return ActionResult.FAIL;
-                }
-                
+            if (bufferInventory.selectedSlot == -1) {
+                return super.useOnBlock(itemContext);
+                //if (result == ActionResult.SUCCESS) {
+                //    return ActionResult.SUCCESS;
+                //} else {
+                //    return ActionResult.FAIL;
+                //}
             } else {
+                ItemUsageContext bufferContext = new BufferUsageContext(itemContext.getWorld(), itemContext.getPlayer(), itemContext.getHand(), bufferInventory.getSlot(bufferInventory.selectedSlot).getStack(), new BlockHitResult(itemContext.getHitPos(), itemContext.getSide(), itemContext.getBlockPos(), true));
                 return bufferContext.getStack().getItem().useOnBlock(bufferContext);
             }
         } else {
