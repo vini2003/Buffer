@@ -3,7 +3,8 @@
     "package": "buffer.mixin",
     "compatibilityLevel": "JAVA_8",
     "client": [
-      "InGameHudMixin"
+      "InGameHudMixin",
+      "ItemEntityMixin"
     ],
     "injectors": {
       "defaultRequire": 1

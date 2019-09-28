@@ -24,6 +24,7 @@
     "result": {
         "item": "buffer:buffer",
         "data": {
+            "$": "$ i4",
             "tier": 5
         },
         "count": 1

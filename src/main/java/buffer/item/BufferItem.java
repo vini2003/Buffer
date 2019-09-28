@@ -1,43 +1,44 @@
 package buffer.item;
 
-import java.util.Iterator;
+import java.util.Random;
 import java.util.stream.IntStream;
-
-import com.mojang.realmsclient.gui.RealmsWorldSlotButton.Action;
 
 import buffer.entity.BufferEntity;
 import buffer.inventory.BufferInventory;
+import buffer.inventory.BufferInventory.BufferStack;
 import buffer.registry.ItemRegistry;
 import buffer.utility.BufferPacket;
 import buffer.utility.BufferUsageContext;
 import net.fabricmc.fabric.api.container.ContainerProviderRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
-import net.minecraft.item.BoneMealItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.state.StateFactory;
-import net.minecraft.state.property.Property;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 
 public class BufferItem extends BlockItem {
     public static ItemStack stackToDraw = ItemStack.EMPTY;
     public static Integer lockTick = 5;
-
+    @Override
+    public boolean canMine(BlockState blockState_1, World world_1, BlockPos blockPos_1, PlayerEntity playerEntity_1) {
+        // TODO Auto-generated method stub
+        return super.canMine(blockState_1, world_1, blockPos_1, playerEntity_1);
+    }
+    
     public BufferItem(Block block, Item.Settings properties) {
         super(block, properties);
         this.addPropertyGetter(new Identifier("tier"), (itemStack_1, world_1, livingEntity_1) -> {
@@ -78,14 +79,25 @@ public class BufferItem extends BlockItem {
             BufferInventory bufferInventory = BufferInventory.fromTag(itemContext.getPlayer().getMainHandStack().getTag());
             if (bufferInventory.selectedSlot == -1) {
                 return super.useOnBlock(itemContext);
-                //if (result == ActionResult.SUCCESS) {
-                //    return ActionResult.SUCCESS;
-                //} else {
-                //    return ActionResult.FAIL;
-                //}
             } else {
                 ItemUsageContext bufferContext = new BufferUsageContext(itemContext.getWorld(), itemContext.getPlayer(), itemContext.getHand(), bufferInventory.getSlot(bufferInventory.selectedSlot).getStack(), new BlockHitResult(itemContext.getHitPos(), itemContext.getSide(), itemContext.getBlockPos(), true));
-                return bufferContext.getStack().getItem().useOnBlock(bufferContext);
+                ActionResult useResult;
+                BufferStack bufferStack = bufferInventory.getSlot(bufferInventory.selectedSlot);
+                if (bufferContext.getStack().getItem().isDamageable() && bufferStack.getStored() == 1 && !itemContext.getWorld().isClient) {
+                    ItemStack newStack = bufferStack.getStack().copy();
+                    useResult = bufferContext.getStack().getItem().useOnBlock(bufferContext);
+                    if (useResult == ActionResult.SUCCESS) {
+                        newStack.damage(1, (Random)itemContext.getWorld().random, (ServerPlayerEntity)null);
+                        bufferStack.setStack(newStack);
+                        bufferStack.setTag(newStack.getTag());
+                    }
+                } else if (!bufferContext.getStack().getItem().isDamageable()) {
+                    useResult = bufferContext.getStack().getItem().useOnBlock(bufferContext);
+                } else {
+                    useResult = ActionResult.FAIL;
+                }
+                itemContext.getPlayer().getMainHandStack().setTag(BufferInventory.toTag(bufferInventory, new CompoundTag()));
+                return useResult;
             }
         } else {
             return ActionResult.FAIL;
@@ -98,10 +110,6 @@ public class BufferItem extends BlockItem {
             ContainerProviderRegistry.INSTANCE.openContainer(new Identifier("buffer", "buffer_item"), playerEntity, (buffer)->{
                 buffer.writeBlockPos(playerEntity.getBlockPos());
             });
-            CompoundTag itemTag = playerEntity.getMainHandStack().getTag();
-            for (Integer slotNumber : IntStream.rangeClosed(0, itemTag.getInt("tier") - 1).toArray()) {
-                BufferPacket.sendPacket((ServerPlayerEntity)playerEntity, slotNumber, itemTag.getInt(Integer.toString(slotNumber)));
-            }
         }
         return new TypedActionResult(ActionResult.SUCCESS, playerEntity.getMainHandStack());
     }

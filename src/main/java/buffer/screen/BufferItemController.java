@@ -7,6 +7,7 @@ import net.minecraft.container.BlockContext;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
 
 public class BufferItemController extends BufferBaseController {
     public BufferItemController(int syncId, PlayerInventory playerInventory, BlockContext context) {
@@ -20,7 +21,7 @@ public class BufferItemController extends BufferBaseController {
     @Override
     public void close(PlayerEntity playerEntity) {
         ItemStack itemStack = playerEntity.getMainHandStack();
-        itemStack.setTag(BufferInventory.toTag(bufferInventory, itemStack.getTag()));
+        itemStack.setTag(BufferInventory.toTag(bufferInventory, new CompoundTag()));
         BufferItem.stackToDraw = ItemStack.EMPTY;   
         super.close(playerEntity);
     }

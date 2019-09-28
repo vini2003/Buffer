@@ -26,7 +26,6 @@ public class NetworkRegistry {
     public static CustomPayloadC2SPacket createStackSwitchPacket() {
         PacketByteBuf buffer = new PacketByteBuf(Unpooled.buffer());
         buffer.writeBoolean(true);
-        System.out.println("Packet sent.");
         return new CustomPayloadC2SPacket(BUFFER_SWITCH_PACKET, buffer);
     }
 
@@ -54,7 +53,6 @@ public class NetworkRegistry {
         });
         ServerSidePacketRegistry.INSTANCE.register(BUFFER_SWITCH_PACKET, (packetContext, packetByteBuffer) -> {
             Boolean trySwitch = packetByteBuffer.readBoolean();
-            System.out.println("Packet received.");
             if (trySwitch != null) {
                 packetContext.getTaskQueue().execute(() -> {
                     PlayerEntity playerEntity = packetContext.getPlayer();

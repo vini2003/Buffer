@@ -61,6 +61,7 @@ public class BufferInventory implements SidedInventory {
 
         public void setStack(ItemStack itemStack) {
             this.wrapperStack = itemStack.copy();
+            this.wrapperTag = itemStack.getTag();
         }
 
         public ItemStack getStack() {
@@ -70,6 +71,12 @@ public class BufferInventory implements SidedInventory {
         public Item getItem() {
             return this.wrapperItem;
         }
+
+        public void setTag(CompoundTag itemTag) {
+            this.wrapperTag = itemTag;
+            this.wrapperStack.setTag(itemTag);
+        }
+
 
         public CompoundTag getTag() {
             return this.wrapperTag;
@@ -104,6 +111,8 @@ public class BufferInventory implements SidedInventory {
                 }
                 return ItemStack.EMPTY;
             } else  if (wrapperStack.getItem() != insertStack.getItem()) {
+                return insertStack;
+            } else if (wrapperStack.getTag() != insertStack.getTag()) {
                 return insertStack;
             }
 
@@ -349,9 +358,15 @@ public class BufferInventory implements SidedInventory {
         if (insertionData.first == -1) {
             return insertionStack;
         }
-        if (insertionData.first == 0 || insertionData.first == +1) {
+        if (insertionData.first == +1) {
             BufferStack bufferStack = this.getSlot(insertionData.second);
-            return bufferStack.insertStack(insertionStack);
+            insertionStack = bufferStack.insertStack(insertionStack);
+        }
+        if (insertionData.first == 0) {
+            BufferStack bufferStack = this.getSlot(insertionData.second);
+            bufferStack.insertStack(insertionStack);
+            bufferStack.restockStack(true);
+            insertionStack = ItemStack.EMPTY;
         }
         return insertionStack;
     }
@@ -429,21 +444,24 @@ public class BufferInventory implements SidedInventory {
 
     public static BufferInventory fromTag(CompoundTag bufferTag) {
         BufferInventory bufferInventory = new BufferInventory(null);
-        bufferInventory.setTier(bufferTag.getInt("tier"));
-        bufferInventory.selectedSlot = bufferTag.getInt("selected_slot");
-        for (int bufferSlot : bufferInventory.getInvAvailableSlots(null)) {
-            BufferStack bufferStack = bufferInventory.getSlot(bufferSlot);
-            bufferStack.stackQuantity = bufferTag.getInt(Integer.toString(bufferSlot));
-            Integer wrapperQuantity = bufferTag.getInt(Integer.toString(bufferSlot) + "_size");
-            bufferStack.wrapperItem = Registry.ITEM.get(new Identifier(bufferTag.getString(Integer.toString(bufferSlot) + "_item")));
-            ItemStack itemStack = new ItemStack(bufferStack.wrapperItem, wrapperQuantity);
-            if (bufferTag.containsKey(Integer.toString(bufferSlot) + "_slot")) {
-                bufferStack.wrapperTag = (CompoundTag)bufferTag.getTag(Integer.toString(bufferSlot) + "_tag");
-                itemStack.setTag(bufferStack.wrapperTag);
+        if (bufferTag != null) {
+            bufferInventory.setTier(bufferTag.getInt("tier"));
+            bufferInventory.selectedSlot = bufferTag.getInt("selected_slot");
+            for (int bufferSlot : bufferInventory.getInvAvailableSlots(null)) {
+                BufferStack bufferStack = bufferInventory.getSlot(bufferSlot);
+                bufferStack.stackQuantity = bufferTag.getInt(Integer.toString(bufferSlot));
+                Integer wrapperQuantity = bufferTag.getInt(Integer.toString(bufferSlot) + "_size");
+                bufferStack.wrapperItem = Registry.ITEM.get(new Identifier(bufferTag.getString(Integer.toString(bufferSlot) + "_item")));
+                ItemStack itemStack = new ItemStack(bufferStack.wrapperItem, wrapperQuantity);
+                if (bufferTag.containsKey(Integer.toString(bufferSlot) + "_tag")) {
+                    bufferStack.wrapperTag = (CompoundTag)bufferTag.getTag(Integer.toString(bufferSlot) + "_tag");
+                    itemStack.setTag(bufferStack.wrapperTag);
+                }
+                bufferStack.setStack(itemStack.copy());
+                bufferStack.restockStack(true);
             }
-            bufferStack.setStack(itemStack.copy());
-            bufferStack.restockStack(true);
         }
+
         return bufferInventory;
     }
 }

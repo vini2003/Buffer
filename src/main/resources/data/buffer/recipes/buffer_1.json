@@ -13,7 +13,7 @@
             "item": "minecraft:iron_bars"
         },
         "3": {
-            "item": "buffer:buffer"
+            "item": "minecraft:shulker_box"
         }
     },
     "result": {
