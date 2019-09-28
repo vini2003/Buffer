@@ -10,7 +10,7 @@ import buffer.screen.BufferItemScreen;
 
 public class ScreenRegistryClient {
     public static void registerScreens() {
-        ScreenProviderRegistry.INSTANCE.registerFactory(new Identifier("buffer", "buffer"), (syncId, identifier, player, buf) -> new BufferEntityScreen(new BufferEntityController(syncId, player.inventory, BlockContext.create(player.world, buf.readBlockPos())), player));
+        ScreenProviderRegistry.INSTANCE.registerFactory(new Identifier("buffer", "buffer_block"), (syncId, identifier, player, buf) -> new BufferEntityScreen(new BufferEntityController(syncId, player.inventory, BlockContext.create(player.world, buf.readBlockPos())), player));
         ScreenProviderRegistry.INSTANCE.registerFactory(new Identifier("buffer", "buffer_item"), (syncId, identifier, player, buf) -> new BufferItemScreen(new BufferItemController(syncId, player.inventory, BlockContext.create(player.world, buf.readBlockPos())), player));
     }
 }

@@ -37,7 +37,7 @@ public class ItemEntityMixin {
                 buffer = stack;
             }
         }
-        if (!itemEntity.world.isClient && buffer != ItemStack.EMPTY && !(playerEntity.container instanceof BufferItemController)) {
+        if (!itemEntity.world.isClient && buffer != ItemStack.EMPTY && !(playerEntity.container instanceof BufferItemController) && buffer.getTag().getBoolean("pickup") == true) {
             ItemStack itemStack = itemEntity.getStack();
             if (itemStack.getItem() != ItemRegistry.BUFFER_ITEM && pickupDelay == 0 && (owner == null || 6000 - age <= 200 || owner.equals(playerEntity.getUuid()))) {
                 BufferInventory bufferInventory = BufferInventory.fromTag(buffer.getTag());

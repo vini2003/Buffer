@@ -35,9 +35,6 @@ public class BufferBlock extends Block implements BlockEntityProvider {
             .with(BufferProvider.tier, 1));
     }
 
-
-
-
     @Override
     public BlockEntity createBlockEntity(BlockView blockView) {
         return new BufferEntity();
@@ -46,7 +43,7 @@ public class BufferBlock extends Block implements BlockEntityProvider {
     @Override
     public boolean activate(BlockState blockState, World world, BlockPos blockPos, PlayerEntity playerEntity, Hand hand, BlockHitResult blockHitResult) {
         if (!world.isClient) {
-            ContainerProviderRegistry.INSTANCE.openContainer(new Identifier("buffer", "buffer"), playerEntity, (buffer)->{
+            ContainerProviderRegistry.INSTANCE.openContainer(new Identifier("buffer", "buffer_block"), playerEntity, (buffer)->{
                 buffer.writeBlockPos(blockPos);
             });
             BufferEntity bufferEntity = ((BufferEntity)world.getBlockEntity(blockPos));

@@ -33,6 +33,10 @@ public class BufferInventory implements SidedInventory {
 
     public Integer selectedSlot = 0;
 
+    public Boolean isVoid = false;
+
+    public Boolean isPickup = false;
+
     public static String TIER_RETRIEVER() {
         return "tier";
     }
@@ -40,6 +44,15 @@ public class BufferInventory implements SidedInventory {
     public static String SELECTED_SLOT_RETRIEVER() {
         return "selected_slot";
     }
+
+    public static String VOID_RETRIEVER() {
+        return "void";
+    }
+
+    public static String PICKUP_RETRIEVER() {
+        return "pickup";
+    }
+
 
     public static String STACK_RETRIEVER(Integer integer) {
         return Integer.toString(integer);
@@ -159,7 +172,11 @@ public class BufferInventory implements SidedInventory {
                 int differenceQuantity = (totalQuantity + insertQuantity) - stackMaximum;
                 int offsetQuantity = insertMaximum - differenceQuantity;
                 this.stackQuantity += offsetQuantity;
-                insertStack.decrement(offsetQuantity);
+                if (isVoid) {
+                    insertStack = ItemStack.EMPTY;
+                } else {
+                    insertStack.decrement(offsetQuantity);
+                }
             }
 
             if (insertStack.getCount() == 0) {
@@ -219,6 +236,14 @@ public class BufferInventory implements SidedInventory {
             this.wrapperStack = null;
             this.wrapperTag = null;
         }
+    }
+
+    public void swapPickup() {
+        this.isPickup = !this.isPickup;
+    }
+
+    public void swapVoid() {
+        this.isVoid = !this.isVoid;
     }
 
     public void swapSlot() {
@@ -445,7 +470,6 @@ public class BufferInventory implements SidedInventory {
     public void markDirty() {
         if (this.listeners != null) {
             Iterator<InventoryListener> iterator = this.listeners.iterator();
-   
             while(iterator.hasNext()) {
                 InventoryListener inventoryListener = (InventoryListener)iterator.next();
                 inventoryListener.onInvChange(this);
@@ -457,6 +481,8 @@ public class BufferInventory implements SidedInventory {
         bufferInventory.restockAll();
         bufferTag.putInt(TIER_RETRIEVER(), bufferInventory.getTier());
         bufferTag.putInt(SELECTED_SLOT_RETRIEVER(), bufferInventory.selectedSlot);
+        bufferTag.putBoolean(PICKUP_RETRIEVER(), bufferInventory.isPickup);
+        bufferTag.putBoolean(VOID_RETRIEVER(), bufferInventory.isVoid);
         for (int bufferSlot : bufferInventory.getInvAvailableSlots(null)) {
             BufferStack bufferStack = bufferInventory.getSlot(bufferSlot);
             bufferTag.putInt(STACK_RETRIEVER(bufferSlot), bufferStack.stackQuantity);
@@ -473,6 +499,8 @@ public class BufferInventory implements SidedInventory {
         BufferInventory bufferInventory = new BufferInventory(null);
         if (bufferTag != null) {
             bufferInventory.setTier(bufferTag.getInt(TIER_RETRIEVER()));
+            bufferInventory.isPickup = bufferTag.getBoolean(PICKUP_RETRIEVER());
+            bufferInventory.isVoid = bufferTag.getBoolean(VOID_RETRIEVER());
             bufferInventory.selectedSlot = bufferTag.getInt(SELECTED_SLOT_RETRIEVER());
             for (int bufferSlot : bufferInventory.getInvAvailableSlots(null)) {
                 BufferStack bufferStack = bufferInventory.getSlot(bufferSlot);
@@ -488,7 +516,6 @@ public class BufferInventory implements SidedInventory {
                 bufferStack.restockStack(true);
             }
         }
-
         return bufferInventory;
     }
 }

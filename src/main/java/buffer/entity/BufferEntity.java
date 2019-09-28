@@ -25,7 +25,7 @@ public class BufferEntity extends BlockEntity implements Tickable, BufferProvide
 
     public BufferEntity() {
         super(EntityRegistry.ENTITY_TESSERACT);
-        this.bufferTag = bufferInventory.toTag(this.bufferInventory, this.bufferTag);
+        this.bufferTag = BufferInventory.toTag(this.bufferInventory, this.bufferTag);
     }
 
     @Override

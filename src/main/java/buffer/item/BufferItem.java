@@ -1,5 +1,6 @@
 package buffer.item;
 
+import java.util.List;
 import java.util.Random;
 
 import buffer.entity.BufferEntity;
@@ -10,6 +11,7 @@ import buffer.utility.BufferUsageContext;
 import net.fabricmc.fabric.api.container.ContainerProviderRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
@@ -19,6 +21,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
@@ -29,13 +32,12 @@ import net.minecraft.world.World;
 
 public class BufferItem extends BlockItem {
     public static ItemStack stackToDraw = ItemStack.EMPTY;
-    public static Integer lockTick = 5;
-    @Override
-    public boolean canMine(BlockState blockState_1, World world_1, BlockPos blockPos_1, PlayerEntity playerEntity_1) {
-        // TODO Auto-generated method stub
-        return super.canMine(blockState_1, world_1, blockPos_1, playerEntity_1);
-    }
-    
+    public static Integer amountToDraw = 0;
+
+    public static Integer slotTick = 5;
+    public static Integer voidTick = 5;
+    public static Integer pickupTick = 5;
+
     public BufferItem(Block block, Item.Settings properties) {
         super(block, properties);
         this.addPropertyGetter(new Identifier("tier"), (itemStack_1, world_1, livingEntity_1) -> {
@@ -128,6 +130,16 @@ public class BufferItem extends BlockItem {
     }
 
     @Override
+    public void appendTooltip(ItemStack itemStack, World world, List<Text> textList, TooltipContext tooltipContext) {
+        if (itemStack.getTag() != null) {
+            BufferTooltip.toList(itemStack.getTag()).forEach((text)-> {
+                textList.add(text);
+            });
+        }
+        super.appendTooltip(itemStack, world, textList, tooltipContext);
+    }
+
+    @Override
     public void inventoryTick(ItemStack itemStack, World world, Entity entity, int integer, boolean bool) {
         super.inventoryTick(itemStack, world, entity, integer, bool);
         if (entity instanceof PlayerEntity && world.isClient) {
@@ -136,11 +148,14 @@ public class BufferItem extends BlockItem {
                 BufferInventory bufferInventory = BufferInventory.fromTag(playerEntity.getMainHandStack().getTag());
                 if (bufferInventory.selectedSlot == -1) {
                     stackToDraw = playerEntity.getMainHandStack();
+                    amountToDraw = playerEntity.getMainHandStack().getCount();
                 } else {
                     stackToDraw = bufferInventory.getSlot(bufferInventory.selectedSlot).getStack().copy();
+                    amountToDraw = bufferInventory.getStored(bufferInventory.selectedSlot);
                 }
             } else {
                 stackToDraw = ItemStack.EMPTY;
+                amountToDraw = 0;
             }
         }
     }
