@@ -8,6 +8,7 @@ import buffer.inventory.BufferInventory;
 import buffer.inventory.BufferInventory.BufferStack;
 import buffer.registry.ItemRegistry;
 import buffer.utility.BufferPacket;
+import buffer.utility.BufferPlayerEntity;
 import buffer.utility.BufferUsageContext;
 import net.fabricmc.fabric.api.container.ContainerProviderRegistry;
 import net.minecraft.block.Block;
@@ -110,6 +111,18 @@ public class BufferItem extends BlockItem {
             ContainerProviderRegistry.INSTANCE.openContainer(new Identifier("buffer", "buffer_item"), playerEntity, (buffer)->{
                 buffer.writeBlockPos(playerEntity.getBlockPos());
             });
+        } else if (!playerEntity.isSneaking()) {
+            BufferInventory bufferInventory = BufferInventory.fromTag(playerEntity.getMainHandStack().getTag());
+            ItemStack bufferItemStack = playerEntity.getMainHandStack();
+            if (bufferInventory.selectedSlot != -1) {
+                BufferStack bufferStack = bufferInventory.getSlot(bufferInventory.selectedSlot); 
+                playerEntity.setStackInHand(hand, bufferStack.getStack());                
+                playerEntity.getMainHandStack().getItem().use(world, playerEntity, hand);
+                bufferStack.setStack(playerEntity.getMainHandStack());
+                bufferStack.getStack().decrement(1);
+                bufferItemStack.setTag(BufferInventory.toTag(bufferInventory, new CompoundTag()));
+                playerEntity.setStackInHand(hand, bufferItemStack);
+            }
         }
         return new TypedActionResult(ActionResult.SUCCESS, playerEntity.getMainHandStack());
     }
