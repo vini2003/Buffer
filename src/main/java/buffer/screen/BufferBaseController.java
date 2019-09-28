@@ -1,13 +1,10 @@
 package buffer.screen;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import buffer.entity.BufferEntity;
 import buffer.inventory.BufferInventory;
 import buffer.inventory.BufferInventory.BufferStack;
-import buffer.inventory.BufferInventory.WBufferSlot;
 import buffer.registry.ItemRegistry;
 import buffer.utility.BufferPacket;
 import io.github.cottonmc.cotton.gui.CottonScreenController;

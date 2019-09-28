@@ -16,9 +16,10 @@ public class KeybindRegistry {
     public static void registerKeybinds() {
         KeyBindingRegistry.INSTANCE.register(BUFFER_SWITCH);
         ClientTickCallback.EVENT.register(event -> {
-            if (BUFFER_SWITCH.isPressed() && BufferItem.lockTick >= 10) {
+            if (BUFFER_SWITCH.isPressed() && BufferItem.lockTick >= 5) {
+                BufferItem.lockTick = 0;
                 MinecraftClient.getInstance().getNetworkHandler().getConnection().send(NetworkRegistry.createStackSwitchPacket());
-            } else {
+            } else if (BUFFER_SWITCH.isPressed()) {
                 ++BufferItem.lockTick;
             }
         });

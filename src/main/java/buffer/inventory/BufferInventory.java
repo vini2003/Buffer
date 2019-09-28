@@ -33,6 +33,32 @@ public class BufferInventory implements SidedInventory {
 
     public Integer selectedSlot = 0;
 
+    public static String TIER_RETRIEVER() {
+        return "tier";
+    }
+
+    public static String SELECTED_SLOT_RETRIEVER() {
+        return "selected_slot";
+    }
+
+    public static String STACK_RETRIEVER(Integer integer) {
+        return Integer.toString(integer);
+    }
+
+    public static String SIZE_RETRIEVER(Integer integer) {
+        return Integer.toString(integer) + "_size";
+    }
+
+    public static String TAG_RETRIEVER(Integer integer) {
+        return Integer.toString(integer) + "_tag";
+    }
+
+    public static String ITEM_RETRIEVER(Integer integer) {
+        return Integer.toString(integer) + "_item";
+    }
+
+
+
     public class WBufferSlot extends WItemSlot {
         protected int bufferSlot = 0;
         protected PlayerInventory playerInventory = null;
@@ -428,16 +454,17 @@ public class BufferInventory implements SidedInventory {
     }
 
     public static CompoundTag toTag(BufferInventory bufferInventory, CompoundTag bufferTag) {
-        bufferTag.putInt("tier", bufferInventory.getTier());
-        bufferTag.putInt("selected_slot", bufferInventory.selectedSlot);
+        bufferInventory.restockAll();
+        bufferTag.putInt(TIER_RETRIEVER(), bufferInventory.getTier());
+        bufferTag.putInt(SELECTED_SLOT_RETRIEVER(), bufferInventory.selectedSlot);
         for (int bufferSlot : bufferInventory.getInvAvailableSlots(null)) {
             BufferStack bufferStack = bufferInventory.getSlot(bufferSlot);
-            bufferTag.putInt(Integer.toString(bufferSlot), bufferStack.stackQuantity);
-            bufferTag.putInt(Integer.toString(bufferSlot) + "_size", bufferStack.getStack().getCount());
-            if (bufferStack.wrapperTag != null) {
-                bufferTag.put(Integer.toString(bufferSlot) + "_tag", bufferStack.wrapperTag.copy());
+            bufferTag.putInt(STACK_RETRIEVER(bufferSlot), bufferStack.stackQuantity);
+            bufferTag.putInt(SIZE_RETRIEVER(bufferSlot), bufferStack.getStack().getCount());
+            bufferTag.putString(ITEM_RETRIEVER(bufferSlot), bufferStack.getStack().getItem().toString());
+            if (bufferStack.getStack().hasTag()) {
+                bufferTag.put(TAG_RETRIEVER(bufferSlot), bufferStack.wrapperTag.copy());
             }
-            bufferTag.putString(Integer.toString(bufferSlot) + "_item", bufferStack.getStack().getItem().toString());
         }
         return bufferTag;
     }
@@ -445,16 +472,16 @@ public class BufferInventory implements SidedInventory {
     public static BufferInventory fromTag(CompoundTag bufferTag) {
         BufferInventory bufferInventory = new BufferInventory(null);
         if (bufferTag != null) {
-            bufferInventory.setTier(bufferTag.getInt("tier"));
-            bufferInventory.selectedSlot = bufferTag.getInt("selected_slot");
+            bufferInventory.setTier(bufferTag.getInt(TIER_RETRIEVER()));
+            bufferInventory.selectedSlot = bufferTag.getInt(SELECTED_SLOT_RETRIEVER());
             for (int bufferSlot : bufferInventory.getInvAvailableSlots(null)) {
                 BufferStack bufferStack = bufferInventory.getSlot(bufferSlot);
-                bufferStack.stackQuantity = bufferTag.getInt(Integer.toString(bufferSlot));
-                Integer wrapperQuantity = bufferTag.getInt(Integer.toString(bufferSlot) + "_size");
-                bufferStack.wrapperItem = Registry.ITEM.get(new Identifier(bufferTag.getString(Integer.toString(bufferSlot) + "_item")));
+                bufferStack.stackQuantity = bufferTag.getInt(STACK_RETRIEVER(bufferSlot));
+                Integer wrapperQuantity = bufferTag.getInt(SIZE_RETRIEVER(bufferSlot));
+                bufferStack.wrapperItem = Registry.ITEM.get(new Identifier(bufferTag.getString(ITEM_RETRIEVER(bufferSlot))));
                 ItemStack itemStack = new ItemStack(bufferStack.wrapperItem, wrapperQuantity);
-                if (bufferTag.containsKey(Integer.toString(bufferSlot) + "_tag")) {
-                    bufferStack.wrapperTag = (CompoundTag)bufferTag.getTag(Integer.toString(bufferSlot) + "_tag");
+                if (bufferTag.containsKey(TAG_RETRIEVER(bufferSlot))) {
+                    bufferStack.wrapperTag = (CompoundTag)bufferTag.getTag(TAG_RETRIEVER(bufferSlot));
                     itemStack.setTag(bufferStack.wrapperTag);
                 }
                 bufferStack.setStack(itemStack.copy());

@@ -115,7 +115,7 @@ public class BufferEntity extends BlockEntity implements Tickable, BufferProvide
     public CompoundTag getTag() {
         return BufferInventory.toTag(this.bufferInventory, this.bufferTag);
     }
-
+    
     @Override
     public void tick() {
         this.markDirty();

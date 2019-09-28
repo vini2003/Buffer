@@ -10,6 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import buffer.inventory.BufferInventory;
 import buffer.registry.ItemRegistry;
+import buffer.screen.BufferItemController;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -36,9 +37,9 @@ public class ItemEntityMixin {
                 buffer = stack;
             }
         }
-        if (!itemEntity.world.isClient && buffer != ItemStack.EMPTY && playerEntity.container == null) {
+        if (!itemEntity.world.isClient && buffer != ItemStack.EMPTY && !(playerEntity.container instanceof BufferItemController)) {
             ItemStack itemStack = itemEntity.getStack();
-            if (pickupDelay == 0 && (owner == null || 6000 - age <= 200 || owner.equals(playerEntity.getUuid()))) {
+            if (itemStack.getItem() != ItemRegistry.BUFFER_ITEM && pickupDelay == 0 && (owner == null || 6000 - age <= 200 || owner.equals(playerEntity.getUuid()))) {
                 BufferInventory bufferInventory = BufferInventory.fromTag(buffer.getTag());
                 ItemStack tryInsertStack = bufferInventory.insertStack(itemStack);
                 itemEntity.setStack(tryInsertStack);

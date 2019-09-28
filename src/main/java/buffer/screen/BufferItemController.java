@@ -2,7 +2,6 @@ package buffer.screen;
 
 import buffer.inventory.BufferInventory;
 import buffer.item.BufferItem;
-import buffer.utility.BufferProvider;
 import net.minecraft.container.BlockContext;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;

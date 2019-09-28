@@ -1,19 +1,15 @@
 package buffer.item;
 
 import java.util.Random;
-import java.util.stream.IntStream;
 
 import buffer.entity.BufferEntity;
 import buffer.inventory.BufferInventory;
 import buffer.inventory.BufferInventory.BufferStack;
 import buffer.registry.ItemRegistry;
-import buffer.utility.BufferPacket;
-import buffer.utility.BufferPlayerEntity;
 import buffer.utility.BufferUsageContext;
 import net.fabricmc.fabric.api.container.ContainerProviderRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
@@ -115,16 +111,20 @@ public class BufferItem extends BlockItem {
             BufferInventory bufferInventory = BufferInventory.fromTag(playerEntity.getMainHandStack().getTag());
             ItemStack bufferItemStack = playerEntity.getMainHandStack();
             if (bufferInventory.selectedSlot != -1) {
-                BufferStack bufferStack = bufferInventory.getSlot(bufferInventory.selectedSlot); 
-                playerEntity.setStackInHand(hand, bufferStack.getStack());                
-                playerEntity.getMainHandStack().getItem().use(world, playerEntity, hand);
-                bufferStack.setStack(playerEntity.getMainHandStack());
-                bufferStack.getStack().decrement(1);
-                bufferItemStack.setTag(BufferInventory.toTag(bufferInventory, new CompoundTag()));
-                playerEntity.setStackInHand(hand, bufferItemStack);
+                BufferStack bufferStack = bufferInventory.getSlot(bufferInventory.selectedSlot);
+                if (bufferStack.getStack().isFood()) {
+                    return new TypedActionResult<ItemStack>(ActionResult.PASS, bufferItemStack);
+                } else {
+                    playerEntity.setStackInHand(hand, bufferStack.getStack());                
+                    playerEntity.getMainHandStack().getItem().use(world, playerEntity, hand);
+                    bufferStack.setStack(playerEntity.getMainHandStack());
+                    bufferStack.getStack().decrement(1);
+                    bufferItemStack.setTag(BufferInventory.toTag(bufferInventory, new CompoundTag()));
+                    playerEntity.setStackInHand(hand, bufferItemStack);
+                }
             }
         }
-        return new TypedActionResult(ActionResult.SUCCESS, playerEntity.getMainHandStack());
+        return new TypedActionResult<ItemStack>(ActionResult.PASS, playerEntity.getMainHandStack());
     }
 
     @Override
