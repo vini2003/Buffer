@@ -478,13 +478,13 @@ public class BufferInventory implements SidedInventory {
     }
 
     public static CompoundTag toTag(BufferInventory bufferInventory, CompoundTag bufferTag) {
-        bufferInventory.restockAll();
         bufferTag.putInt(TIER_RETRIEVER(), bufferInventory.getTier());
         bufferTag.putInt(SELECTED_SLOT_RETRIEVER(), bufferInventory.selectedSlot);
         bufferTag.putBoolean(PICKUP_RETRIEVER(), bufferInventory.isPickup);
         bufferTag.putBoolean(VOID_RETRIEVER(), bufferInventory.isVoid);
         for (int bufferSlot : bufferInventory.getInvAvailableSlots(null)) {
             BufferStack bufferStack = bufferInventory.getSlot(bufferSlot);
+            bufferStack.restockStack(false);
             bufferTag.putInt(STACK_RETRIEVER(bufferSlot), bufferStack.stackQuantity);
             bufferTag.putInt(SIZE_RETRIEVER(bufferSlot), bufferStack.getStack().getCount());
             bufferTag.putString(ITEM_RETRIEVER(bufferSlot), bufferStack.getStack().getItem().toString());

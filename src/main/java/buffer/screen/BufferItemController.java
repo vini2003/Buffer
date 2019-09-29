@@ -15,7 +15,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Identifier;
 
 public class BufferItemController extends BufferBaseController {
-    protected final static Identifier baseImage  = new Identifier("buffer:textures/gui/toggle_base.png");
     protected final static Identifier offImage = new Identifier("buffer:textures/gui/toggle_off.png");
 	protected final static Identifier onImage  = new Identifier("buffer:textures/gui/toggle_on.png");
 

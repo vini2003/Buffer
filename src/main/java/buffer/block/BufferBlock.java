@@ -7,6 +7,7 @@ import buffer.entity.BufferEntity;
 import buffer.inventory.BufferInventory;
 import buffer.registry.BlockRegistry;
 import buffer.registry.ItemRegistry;
+import buffer.registry.ScreenRegistryServer;
 import buffer.utility.BufferPacket;
 import buffer.utility.BufferProvider;
 import net.fabricmc.fabric.api.container.ContainerProviderRegistry;
@@ -43,7 +44,7 @@ public class BufferBlock extends Block implements BlockEntityProvider {
     @Override
     public boolean activate(BlockState blockState, World world, BlockPos blockPos, PlayerEntity playerEntity, Hand hand, BlockHitResult blockHitResult) {
         if (!world.isClient) {
-            ContainerProviderRegistry.INSTANCE.openContainer(new Identifier("buffer", "buffer_block"), playerEntity, (buffer)->{
+            ContainerProviderRegistry.INSTANCE.openContainer(ScreenRegistryServer.BUFFER_BLOCK_CONTAINER, playerEntity, (buffer)->{
                 buffer.writeBlockPos(blockPos);
             });
             BufferEntity bufferEntity = ((BufferEntity)world.getBlockEntity(blockPos));
