@@ -16,11 +16,11 @@ import net.minecraft.item.ItemStack;
 
 @Mixin(InGameHud.class)
 public class InGameHudMixin {
-    ItemRenderer itemRenderer = MinecraftClient.getInstance().getItemRenderer();
-    TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
+    private ItemRenderer itemRenderer = MinecraftClient.getInstance().getItemRenderer();
+    private TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
 
     @Inject(method = "render(F)V", at = @At("RETURN"))
-    protected void render(float c, CallbackInfo info) {
+    private void render(float c, CallbackInfo info) {
         if (MinecraftClient.getInstance().player.getMainHandStack().getItem() != ItemRegistry.BUFFER_ITEM) {
             BufferItem.amountToDraw = 0;
             BufferItem.stackToDraw = ItemStack.EMPTY;

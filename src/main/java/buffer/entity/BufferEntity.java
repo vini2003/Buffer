@@ -21,7 +21,7 @@ public class BufferEntity extends BlockEntity implements Tickable, BufferProvide
 
     public CompoundTag bufferTag = new CompoundTag();
     
-    protected Boolean isUpToDate = false;
+    protected boolean isUpToDate = false;
 
     public BufferEntity() {
         super(EntityRegistry.ENTITY_BUFFER);

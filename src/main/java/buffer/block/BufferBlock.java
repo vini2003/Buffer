@@ -43,9 +43,7 @@ public class BufferBlock extends Block implements BlockEntityProvider {
     @Override
     public boolean activate(BlockState blockState, World world, BlockPos blockPos, PlayerEntity playerEntity, Hand hand, BlockHitResult blockHitResult) {
         if (!world.isClient) {
-            ContainerProviderRegistry.INSTANCE.openContainer(new Identifier("buffer", "buffer_block"), playerEntity, (buffer)->{
-                buffer.writeBlockPos(blockPos);
-            });
+            ContainerProviderRegistry.INSTANCE.openContainer(new Identifier("buffer", "buffer_block"), playerEntity, (buffer)-> buffer.writeBlockPos(blockPos));
             BufferEntity bufferEntity = ((BufferEntity)world.getBlockEntity(blockPos));
             for (Integer slotNumber : IntStream.rangeClosed(0, bufferEntity.bufferInventory.getTier() - 1).toArray()) {
                 BufferPacket.sendPacket((ServerPlayerEntity)playerEntity, slotNumber, bufferEntity.bufferInventory.getStoredInternally(slotNumber));

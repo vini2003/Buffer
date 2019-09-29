@@ -8,8 +8,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IWorld;
 
 public interface BufferProvider extends InventoryProvider {
-    public IntProperty tier = IntProperty.of("tier", 1, 6);
+    IntProperty tier = IntProperty.of("tier", 1, 6);
 
     @Override
-    public SidedInventory getInventory(BlockState state, IWorld world, BlockPos pos);
+    SidedInventory getInventory(BlockState state, IWorld world, BlockPos pos);
 }

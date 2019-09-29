@@ -1,7 +1,6 @@
 package buffer.item;
 
 import java.util.List;
-import java.util.Random;
 
 import buffer.entity.BufferEntity;
 import buffer.inventory.BufferInventory;
@@ -19,7 +18,6 @@ import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
@@ -46,8 +44,7 @@ public class BufferItem extends BlockItem {
                 itemTag.putInt("tier", 1);
                 itemStack_1.setTag(itemTag);
             }
-            int tier = itemTag.getInt("tier");
-            return tier;
+            return itemTag.getInt("tier");
         });
     }
 
@@ -108,16 +105,14 @@ public class BufferItem extends BlockItem {
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity playerEntity, Hand hand) {
         if (!world.isClient && playerEntity.isSneaking()) {
-            ContainerProviderRegistry.INSTANCE.openContainer(new Identifier("buffer", "buffer_item"), playerEntity, (buffer)->{
-                buffer.writeBlockPos(playerEntity.getBlockPos());
-            });
+            ContainerProviderRegistry.INSTANCE.openContainer(new Identifier("buffer", "buffer_item"), playerEntity, (buffer)-> buffer.writeBlockPos(playerEntity.getBlockPos()));
         } else if (!playerEntity.isSneaking()) {
             BufferInventory bufferInventory = BufferInventory.fromTag(playerEntity.getMainHandStack().getTag());
             ItemStack bufferItemStack = playerEntity.getMainHandStack();
             if (bufferInventory.selectedSlot != -1) {
                 BufferStack bufferStack = bufferInventory.getSlot(bufferInventory.selectedSlot);
                 if (bufferStack.getStack().isFood()) {
-                    return new TypedActionResult<ItemStack>(ActionResult.PASS, bufferItemStack);
+                    return new TypedActionResult<>(ActionResult.PASS, bufferItemStack);
                 } else {
                     playerEntity.setStackInHand(hand, bufferStack.getStack());                
                     playerEntity.getMainHandStack().getItem().use(world, playerEntity, hand);
@@ -128,7 +123,7 @@ public class BufferItem extends BlockItem {
                 }
             }
         }
-        return new TypedActionResult<ItemStack>(ActionResult.PASS, playerEntity.getMainHandStack());
+        return new TypedActionResult<>(ActionResult.PASS, playerEntity.getMainHandStack());
     }
 
     @Override

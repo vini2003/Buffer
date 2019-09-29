@@ -64,16 +64,14 @@ public class NetworkRegistry {
                 });   
             }
         });
-        ServerSidePacketRegistry.INSTANCE.register(BUFFER_SWITCH_PACKET, (packetContext, packetByteBuffer) -> {
-            packetContext.getTaskQueue().execute(() -> {
-                PlayerEntity playerEntity = packetContext.getPlayer();
-                if (playerEntity.inventory.getMainHandStack().getItem() == ItemRegistry.BUFFER_ITEM) {
-                    BufferInventory bufferInventory = BufferInventory.fromTag(playerEntity.inventory.getMainHandStack().getTag());
-                    bufferInventory.swapSlot();
-                    playerEntity.getMainHandStack().setTag(BufferInventory.toTag(bufferInventory, playerEntity.inventory.getMainHandStack().getTag()));
-                }
-            });   
-        });
+        ServerSidePacketRegistry.INSTANCE.register(BUFFER_SWITCH_PACKET, (packetContext, packetByteBuffer) -> packetContext.getTaskQueue().execute(() -> {
+            PlayerEntity playerEntity = packetContext.getPlayer();
+            if (playerEntity.inventory.getMainHandStack().getItem() == ItemRegistry.BUFFER_ITEM) {
+                BufferInventory bufferInventory = BufferInventory.fromTag(playerEntity.inventory.getMainHandStack().getTag());
+                bufferInventory.swapSlot();
+                playerEntity.getMainHandStack().setTag(BufferInventory.toTag(bufferInventory, playerEntity.inventory.getMainHandStack().getTag()));
+            }
+        }));
 
         ServerSidePacketRegistry.INSTANCE.register(BUFFER_PICKUP_PACKET, (packetContext, packetByteBuffer) -> {
             boolean something = packetByteBuffer.readBoolean();
