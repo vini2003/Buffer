@@ -12,18 +12,11 @@ import net.minecraft.block.Block;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemUsageContext;
+import net.minecraft.item.*;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.*;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.world.World;
 
@@ -161,5 +154,22 @@ public class BufferItem extends BlockItem {
                 amountToDraw = 0;
             }
         }
+    }
+
+    @Override
+    public void appendStacks(ItemGroup group, DefaultedList<ItemStack> items) {
+        if(isIn(group)) {
+            for(int i = 1; i <= 6; i++) {
+                items.add(getTier(i));
+            }
+        }
+    }
+
+    private ItemStack getTier(int tier) {
+        ItemStack stack = new ItemStack(this);
+        CompoundTag tag = new CompoundTag();
+        tag.putInt("tier", tier);
+        stack.setTag(tag);
+        return stack;
     }
 }
