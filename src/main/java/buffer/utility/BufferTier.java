@@ -71,7 +71,7 @@ public enum BufferTier {
                 return 16320;
             case 1:
             default:
-                return 1;
+                return 192;
         }
     }
 }
