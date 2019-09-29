@@ -24,7 +24,7 @@ public class BufferEntity extends BlockEntity implements Tickable, BufferProvide
     protected Boolean isUpToDate = false;
 
     public BufferEntity() {
-        super(EntityRegistry.ENTITY_TESSERACT);
+        super(EntityRegistry.ENTITY_BUFFER);
         this.bufferTag = BufferInventory.toTag(this.bufferInventory, this.bufferTag);
     }
 

@@ -10,7 +10,6 @@ import buffer.registry.ItemRegistry;
 import buffer.utility.BufferUsageContext;
 import net.fabricmc.fabric.api.container.ContainerProviderRegistry;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -27,7 +26,6 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class BufferItem extends BlockItem {
@@ -82,6 +80,9 @@ public class BufferItem extends BlockItem {
                 ItemUsageContext bufferContext = new BufferUsageContext(itemContext.getWorld(), itemContext.getPlayer(), itemContext.getHand(), bufferInventory.getSlot(bufferInventory.selectedSlot).getStack(), new BlockHitResult(itemContext.getHitPos(), itemContext.getSide(), itemContext.getBlockPos(), true));
                 ActionResult useResult;
                 BufferStack bufferStack = bufferInventory.getSlot(bufferInventory.selectedSlot);
+                if (bufferStack.getItem() == ItemRegistry.BUFFER_ITEM) {
+                    return ActionResult.FAIL;
+                }
                 if (bufferContext.getStack().getItem().isDamageable() && bufferStack.getStored() == 1 && !itemContext.getWorld().isClient) {
                     ItemStack newStack = bufferStack.getStack().copy();
                     useResult = bufferContext.getStack().getItem().useOnBlock(bufferContext);

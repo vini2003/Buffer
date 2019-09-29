@@ -20,7 +20,7 @@ public class BufferEntityController extends BufferBaseController {
         super(syncId, playerInventory, context);
         super.playerInventory = playerInventory;
         super.bufferInventory = ((BufferEntity)getBufferEntity(context)).bufferInventory;
-        super.setWidgets();
+        super.setBaseWidgets();
         super.rootPanel.validate(this);
     }
 }

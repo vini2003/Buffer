@@ -8,7 +8,6 @@ import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
 import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
 import net.minecraft.client.network.packet.CustomPayloadS2CPacket;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.packet.CustomPayloadC2SPacket;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.PacketByteBuf;
@@ -31,13 +30,15 @@ public class NetworkRegistry {
         return new CustomPayloadC2SPacket(BUFFER_SWITCH_PACKET, buffer);
     }
 
-    public static CustomPayloadC2SPacket createBufferPickupPacket() {
+    public static CustomPayloadC2SPacket createBufferPickupPacket(boolean isPickup) {
         PacketByteBuf buffer = new PacketByteBuf(Unpooled.buffer());
+        buffer.writeBoolean(isPickup);
         return new CustomPayloadC2SPacket(BUFFER_PICKUP_PACKET, buffer);
     }
 
-    public static CustomPayloadC2SPacket createBufferVoidPacket() {
+    public static CustomPayloadC2SPacket createBufferVoidPacket(boolean isVoid) {
         PacketByteBuf buffer = new PacketByteBuf(Unpooled.buffer());
+        buffer.writeBoolean(isVoid);
         return new CustomPayloadC2SPacket(BUFFER_VOID_PACKET, buffer);
     }
 
@@ -79,18 +80,19 @@ public class NetworkRegistry {
                 PlayerEntity playerEntity = packetContext.getPlayer();
                 if (playerEntity.inventory.getMainHandStack().getItem() == ItemRegistry.BUFFER_ITEM) {
                     BufferInventory bufferInventory = BufferInventory.fromTag(playerEntity.inventory.getMainHandStack().getTag());
-                    bufferInventory.swapPickup();
+                    bufferInventory.isPickup = packetByteBuffer.readBoolean();
                     playerEntity.getMainHandStack().setTag(BufferInventory.toTag(bufferInventory, playerEntity.inventory.getMainHandStack().getTag()));
                 }
             });   
         });
 
         ServerSidePacketRegistry.INSTANCE.register(BUFFER_VOID_PACKET, (packetContext, packetByteBuffer) -> {
+            boolean something = packetByteBuffer.readBoolean();
             packetContext.getTaskQueue().execute(() -> {
                 PlayerEntity playerEntity = packetContext.getPlayer();
                 if (playerEntity.inventory.getMainHandStack().getItem() == ItemRegistry.BUFFER_ITEM) {
                     BufferInventory bufferInventory = BufferInventory.fromTag(playerEntity.inventory.getMainHandStack().getTag());
-                    bufferInventory.swapVoid();
+                    bufferInventory.isVoid = something;
                     playerEntity.getMainHandStack().setTag(BufferInventory.toTag(bufferInventory, playerEntity.inventory.getMainHandStack().getTag()));
                 }
             });   

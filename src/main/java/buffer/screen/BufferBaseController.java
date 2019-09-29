@@ -112,7 +112,7 @@ public class BufferBaseController extends CottonScreenController {
         }
     }
 
-    public void setWidgets() {
+    public void setBaseWidgets() {
         controllerSlots.set(0, bufferInventory.new WBufferSlot(this.bufferInventory, 0, 1, 1, playerInventory));
         controllerSlots.set(1, bufferInventory.new WBufferSlot(this.bufferInventory, 1, 1, 1, playerInventory));
         controllerSlots.set(2, bufferInventory.new WBufferSlot(this.bufferInventory, 2, 1, 1, playerInventory));
@@ -128,6 +128,7 @@ public class BufferBaseController extends CottonScreenController {
             case 1:
                 rootPanel.add(controllerSlots.get(0), sectionX * 2 - 27, sectionY - 12);
                 rootPanel.add(controllerLabels.get(0), sectionX * 2 - 27, sectionY + 10);
+                this.rootPanel.add(this.createPlayerInventoryPanel(), 0, sectionY * 4);
                 break;
             case 2:
                 rootPanel.add(controllerSlots.get(0), sectionX * 2 + 1, sectionY - 12);
@@ -180,8 +181,6 @@ public class BufferBaseController extends CottonScreenController {
                 rootPanel.add(controllerLabels.get(5), sectionX * 3 - 18, sectionY * 2 + 26);  
                 break;  
         }
-
-        this.rootPanel.add(this.createPlayerInventoryPanel(), 0, sectionY * 4);
     }
     
     @Override   

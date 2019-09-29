@@ -64,7 +64,7 @@ public class BufferBlock extends Block implements BlockEntityProvider {
             BufferInventory inventoryMirror = bufferEntity.bufferInventory;
             Integer tier = itemTag.getInt(BufferInventory.TIER_RETRIEVER());
             inventoryMirror.setTier(tier);
-            world.setBlockState(blockPosition, BlockRegistry.BLOCK_TESSERACT.getDefaultState().with(BufferProvider.tier, inventoryMirror.getTier()));
+            world.setBlockState(blockPosition, BlockRegistry.BLOCK_BUFFER.getDefaultState().with(BufferProvider.tier, inventoryMirror.getTier()));
         }
         super.onPlaced(world, blockPosition, blockState, livingEntity, itemStack);
     }

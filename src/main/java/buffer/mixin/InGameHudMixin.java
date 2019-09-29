@@ -6,6 +6,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import buffer.item.BufferItem;
+import buffer.registry.ItemRegistry;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.hud.InGameHud;
@@ -20,7 +21,11 @@ public class InGameHudMixin {
 
     @Inject(method = "render(F)V", at = @At("RETURN"))
     protected void render(float c, CallbackInfo info) {
-        if (BufferItem.stackToDraw != ItemStack.EMPTY) {
+        if (MinecraftClient.getInstance().player.getMainHandStack().getItem() != ItemRegistry.BUFFER_ITEM) {
+            BufferItem.amountToDraw = 0;
+            BufferItem.stackToDraw = ItemStack.EMPTY;
+        }
+        if (BufferItem.stackToDraw != ItemStack.EMPTY && BufferItem.amountToDraw > 0) {
             GuiLighting.enableForItems();
             itemRenderer.renderGuiItem(BufferItem.stackToDraw, 16, MinecraftClient.getInstance().window.getScaledHeight() - 32);
             GuiLighting.disable();
