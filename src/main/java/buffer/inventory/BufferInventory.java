@@ -40,7 +40,7 @@ public class BufferInventory implements SidedInventory {
     public static final String TIER_RETRIEVER = "tier";
     public static final String SELECTED_SLOT_RETRIEVER = "selected_slot";
     public static final String VOID_RETRIEVER = "void";
-    public static String PICKUP_RETRIEVER = "pickup";
+    public static final String PICKUP_RETRIEVER = "pickup";
 
     public static String STACK_RETRIEVER(Integer integer) {
         return Integer.toString(integer);
