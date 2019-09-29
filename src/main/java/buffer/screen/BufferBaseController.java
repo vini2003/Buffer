@@ -22,7 +22,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
 
 public class BufferBaseController extends CottonScreenController {
-    public BufferInventory bufferInventory = new BufferInventory(null);
+    public BufferInventory bufferInventory = new BufferInventory(1);
 
     protected WPlainPanel rootPanel = new WPlainPanel();
 
@@ -107,7 +107,7 @@ public class BufferBaseController extends CottonScreenController {
 
     public void tick() {
         bufferInventory.restockAll();
-        for (Integer bufferSlot : this.bufferInventory.getInvAvailableSlots(null)) {
+        for (int bufferSlot : this.bufferInventory.getInvAvailableSlots(null)) {
             controllerLabels.get(bufferSlot).setText(new LiteralText(Integer.toString(this.bufferInventory.getStored(bufferSlot))));
         }
     }
@@ -120,7 +120,7 @@ public class BufferBaseController extends CottonScreenController {
         controllerSlots.set(4, new BufferInventory.WBufferSlot(this.bufferInventory, 4, 1, 1, playerInventory));
         controllerSlots.set(5, new BufferInventory.WBufferSlot(this.bufferInventory, 5, 1, 1, playerInventory));
 
-        for (Integer bufferSlot : bufferInventory.getInvAvailableSlots(null)) {
+        for (int bufferSlot : bufferInventory.getInvAvailableSlots(null)) {
             controllerLabels.get(bufferSlot).setText(new LiteralText(Integer.toString(bufferInventory.getStored(bufferSlot))));    
         }
 
@@ -128,7 +128,6 @@ public class BufferBaseController extends CottonScreenController {
             case 1:
                 rootPanel.add(controllerSlots.get(0), sectionX * 2 - 27, sectionY - 12);
                 rootPanel.add(controllerLabels.get(0), sectionX * 2 - 27, sectionY + 10);
-                this.rootPanel.add(this.createPlayerInventoryPanel(), 0, sectionY * 4);
                 break;
             case 2:
                 rootPanel.add(controllerSlots.get(0), sectionX * 2 + 1, sectionY - 12);

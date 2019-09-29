@@ -7,8 +7,9 @@ import buffer.entity.BufferEntity;
 import buffer.inventory.BufferInventory;
 import buffer.registry.BlockRegistry;
 import buffer.registry.ItemRegistry;
+import buffer.registry.ScreenRegistryServer;
 import buffer.utility.BufferPacket;
-import buffer.utility.BufferProvider;
+import buffer.utility.BufferTier;
 import net.fabricmc.fabric.api.container.ContainerProviderRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEntityProvider;
@@ -32,7 +33,7 @@ public class BufferBlock extends Block implements BlockEntityProvider {
     public BufferBlock(Block.Settings settings) {
         super(settings);
         this.setDefaultState(this.stateFactory.getDefaultState()
-            .with(BufferProvider.tier, 1));
+            .with(BufferTier.bufferTier, 1));
     }
 
     @Override
@@ -43,9 +44,9 @@ public class BufferBlock extends Block implements BlockEntityProvider {
     @Override
     public boolean activate(BlockState blockState, World world, BlockPos blockPos, PlayerEntity playerEntity, Hand hand, BlockHitResult blockHitResult) {
         if (!world.isClient) {
-            ContainerProviderRegistry.INSTANCE.openContainer(new Identifier("buffer", "buffer_block"), playerEntity, (buffer)-> buffer.writeBlockPos(blockPos));
+            ContainerProviderRegistry.INSTANCE.openContainer(ScreenRegistryServer.BUFFER_BLOCK_CONTAINER, playerEntity, (buffer)-> buffer.writeBlockPos(blockPos));
             BufferEntity bufferEntity = ((BufferEntity)world.getBlockEntity(blockPos));
-            for (Integer slotNumber : IntStream.rangeClosed(0, bufferEntity.bufferInventory.getTier() - 1).toArray()) {
+            for (int slotNumber : IntStream.rangeClosed(0, bufferEntity.bufferInventory.getTier() - 1).toArray()) {
                 BufferPacket.sendPacket((ServerPlayerEntity)playerEntity, slotNumber, bufferEntity.bufferInventory.getStoredInternally(slotNumber));
             }
             return true;
@@ -60,9 +61,9 @@ public class BufferBlock extends Block implements BlockEntityProvider {
             CompoundTag itemTag = itemStack.getTag();
             BufferEntity bufferEntity = (BufferEntity)world.getBlockEntity(blockPosition);
             BufferInventory inventoryMirror = bufferEntity.bufferInventory;
-            Integer tier = itemTag.getInt(BufferInventory.TIER_RETRIEVER);
+            int tier = itemTag.getInt(BufferInventory.TIER_RETRIEVER);
             inventoryMirror.setTier(tier);
-            world.setBlockState(blockPosition, BlockRegistry.BLOCK_BUFFER.getDefaultState().with(BufferProvider.tier, inventoryMirror.getTier()));
+            world.setBlockState(blockPosition, BlockRegistry.BLOCK_BUFFER.getDefaultState().with(BufferTier.bufferTier, inventoryMirror.getTier()));
         }
         super.onPlaced(world, blockPosition, blockState, livingEntity, itemStack);
     }
@@ -79,7 +80,7 @@ public class BufferBlock extends Block implements BlockEntityProvider {
     @Override
     protected void appendProperties(StateFactory.Builder<Block, BlockState> builder) {
         super.appendProperties(builder);
-        builder.add(BufferProvider.tier);
+        builder.add(BufferTier.bufferTier);
     }
 
 }

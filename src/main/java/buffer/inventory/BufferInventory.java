@@ -25,36 +25,33 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.registry.Registry;
 
 public class BufferInventory implements SidedInventory {
-    protected Integer bufferTier = 1;
-    public List<BufferStack> bufferStacks = new ArrayList<>();
+    protected List<BufferStack> bufferStacks = new ArrayList<>();
     protected List<InventoryListener> listeners;
+    protected int bufferTier = 1;
 
-    public ItemStack itemStack = null;
-
-    public Integer selectedSlot = 0;
+    public int selectedSlot = 0;
 
     public boolean isVoid = false;
-
     public boolean isPickup = false;
 
     public static final String TIER_RETRIEVER = "tier";
     public static final String SELECTED_SLOT_RETRIEVER = "selected_slot";
     public static final String VOID_RETRIEVER = "void";
-    public static String PICKUP_RETRIEVER = "pickup";
+    public static final String PICKUP_RETRIEVER = "pickup";
 
-    public static String STACK_RETRIEVER(Integer integer) {
+    public static String STACK_RETRIEVER(int integer) {
         return Integer.toString(integer);
     }
 
-    public static String SIZE_RETRIEVER(Integer integer) {
+    public static String SIZE_RETRIEVER(int integer) {
         return integer + "_size";
     }
 
-    public static String TAG_RETRIEVER(Integer integer) {
+    public static String TAG_RETRIEVER(int integer) {
         return integer + "_tag";
     }
 
-    public static String ITEM_RETRIEVER(Integer integer) {
+    public static String ITEM_RETRIEVER(int integer) {
         return integer + "_item";
     }
 
@@ -246,15 +243,11 @@ public class BufferInventory implements SidedInventory {
     }
 
     @Nullable
-    public BufferInventory(Integer tier) {
-        if (tier == null) {
-            this.setTier(1);            
-        } else {
-            this.setTier(tier);
-        }
+    public BufferInventory(int tier) {
+        this.setTier(tier);
     }
 
-    public void setTier(Integer tier) {
+    public void setTier(int tier) {
         this.bufferTier = tier;
         for (int bufferSlot = 0; bufferSlot < getInvMaxSlotAmount(); ++bufferSlot) {
             if (bufferStacks.size() - 1 < bufferSlot) {
@@ -263,7 +256,7 @@ public class BufferInventory implements SidedInventory {
         }
     }
 
-    public Integer getTier() {
+    public int getTier() {
         return this.bufferTier;
     }
 
@@ -275,21 +268,21 @@ public class BufferInventory implements SidedInventory {
         }
     }
     
-    public Integer getStored(int bufferSlot) {
+    public int getStored(int bufferSlot) {
         BufferStack bufferStack = getSlot(bufferSlot);
         if (bufferStack != null) {
             return bufferStack.getStored();
         } else {
-            return null;
+            return 0;
         }
     }
     
-    public Integer getStoredInternally(int bufferSlot) {
+    public int getStoredInternally(int bufferSlot) {
         BufferStack bufferStack = getSlot(bufferSlot);
         if (bufferStack != null) {
             return bufferStack.stackQuantity;
         } else {
-            return null;
+            return 0;
         }
 
     }
@@ -461,6 +454,7 @@ public class BufferInventory implements SidedInventory {
         bufferTag.putBoolean(VOID_RETRIEVER, bufferInventory.isVoid);
         for (int bufferSlot : bufferInventory.getInvAvailableSlots(null)) {
             BufferStack bufferStack = bufferInventory.getSlot(bufferSlot);
+            bufferStack.restockStack(false);
             bufferTag.putInt(STACK_RETRIEVER(bufferSlot), bufferStack.stackQuantity);
             bufferTag.putInt(SIZE_RETRIEVER(bufferSlot), bufferStack.getStack().getCount());
             bufferTag.putString(ITEM_RETRIEVER(bufferSlot), bufferStack.getStack().getItem().toString());
@@ -472,7 +466,7 @@ public class BufferInventory implements SidedInventory {
     }
 
     public static BufferInventory fromTag(CompoundTag bufferTag) {
-        BufferInventory bufferInventory = new BufferInventory(null);
+        BufferInventory bufferInventory = new BufferInventory(1);
         if (bufferTag != null) {
             bufferInventory.setTier(bufferTag.getInt(TIER_RETRIEVER));
             bufferInventory.isPickup = bufferTag.getBoolean(PICKUP_RETRIEVER);

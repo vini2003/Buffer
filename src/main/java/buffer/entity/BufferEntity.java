@@ -2,7 +2,6 @@ package buffer.entity;
 
 import buffer.inventory.BufferInventory;
 import buffer.registry.EntityRegistry;
-import buffer.utility.BufferProvider;
 import net.fabricmc.fabric.api.block.entity.BlockEntityClientSerializable;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.InventoryProvider;
@@ -16,8 +15,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.IWorld;
 
-public class BufferEntity extends BlockEntity implements Tickable, BufferProvider, BlockEntityClientSerializable, InventoryProvider, SidedInventory {
-    public BufferInventory bufferInventory = new BufferInventory(null);
+public class BufferEntity extends BlockEntity implements Tickable, BlockEntityClientSerializable, InventoryProvider, SidedInventory {
+    public BufferInventory bufferInventory = new BufferInventory(1);
 
     public CompoundTag bufferTag = new CompoundTag();
     

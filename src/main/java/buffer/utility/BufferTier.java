@@ -1,7 +1,9 @@
 package buffer.utility;
 
-public enum BufferTier {
+import buffer.inventory.BufferInventory;
+import net.minecraft.state.property.IntProperty;
 
+public enum BufferTier {
     ONE,
     TWO,
     THREE,
@@ -9,6 +11,8 @@ public enum BufferTier {
     FIVE,
     SIX;
     
+    public static IntProperty bufferTier = IntProperty.of(BufferInventory.TIER_RETRIEVER, 1, 6);
+
     public String toString() {
         return super.toString().toLowerCase();
     }
@@ -53,10 +57,8 @@ public enum BufferTier {
         }
     }
 
-    public static Integer getStackSize(Integer tier) {
+    public static int getStackSize(int tier) {
         switch(tier) {
-            case 1:
-                return 192;
             case 2:
                 return 448;
             case 3:
@@ -67,6 +69,7 @@ public enum BufferTier {
                 return 8128;
             case 6:
                 return 16320;
+            case 1:
             default:
                 return 1;
         }
