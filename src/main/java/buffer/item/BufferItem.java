@@ -16,13 +16,16 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.DefaultedList;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.TypedActionResult;
@@ -31,23 +34,22 @@ import net.minecraft.world.World;
 
 public class BufferItem extends Item {
     public static ItemStack stackToDraw = ItemStack.EMPTY;
-    public static Integer amountToDraw = 0;
+    public static int amountToDraw = 0;
 
-    public static Integer slotTick = 5;
-    public static Integer voidTick = 5;
-    public static Integer pickupTick = 5;
+    public static int slotTick = 5;
+    public static int voidTick = 5;
+    public static int pickupTick = 5;
 
     public BufferItem(Block block, Item.Settings properties) {
         super(properties);
-        this.addPropertyGetter(new Identifier("tier"), (itemStack_1, world_1, livingEntity_1) -> {
+        this.addPropertyGetter(new Identifier(BufferInventory.TIER_RETRIEVER), (itemStack_1, world_1, livingEntity_1) -> {
             CompoundTag itemTag = itemStack_1.getTag();
-            if (itemTag == null || !itemTag.containsKey("tier")) {
+            if (itemTag == null || !itemTag.containsKey(BufferInventory.TIER_RETRIEVER)) {
                 itemTag = new CompoundTag();
-                itemTag.putInt("tier", 1);
+                itemTag.putInt(BufferInventory.TIER_RETRIEVER, 1);
                 itemStack_1.setTag(itemTag);
             }
-            Integer tier = itemTag.getInt("tier");
-            return tier;
+            return itemTag.getInt(BufferInventory.TIER_RETRIEVER);
         });
     }
 
@@ -123,15 +125,13 @@ public class BufferItem extends Item {
     public TypedActionResult<ItemStack> use(World world, PlayerEntity playerEntity, Hand hand) {
         BufferInventory bufferInventory = BufferInventory.fromTag(playerEntity.getMainHandStack().getTag());
         if (!world.isClient && bufferInventory.selectedSlot == -1 && !playerEntity.isSneaking()) {
-            ContainerProviderRegistry.INSTANCE.openContainer(ScreenRegistryServer.BUFFER_ITEM_CONTAINER, playerEntity, (buffer)->{
-                buffer.writeBlockPos(playerEntity.getBlockPos());
-            });
+            ContainerProviderRegistry.INSTANCE.openContainer(ScreenRegistryServer.BUFFER_ITEM_CONTAINER, playerEntity, (buffer)-> buffer.writeBlockPos(playerEntity.getBlockPos()));
         } else {
             ItemStack bufferItemStack = playerEntity.getMainHandStack();
             if (bufferInventory.selectedSlot != -1) {
                 BufferStack bufferStack = bufferInventory.getSlot(bufferInventory.selectedSlot);
                 if (bufferStack.getStack().isFood()) {
-                    return new TypedActionResult<ItemStack>(ActionResult.PASS, bufferItemStack);
+                    return new TypedActionResult<>(ActionResult.PASS, bufferItemStack);
                 } else {
                     playerEntity.setStackInHand(hand, bufferStack.getStack());                
                     TypedActionResult<ItemStack> usageResult = playerEntity.getMainHandStack().getItem().use(world, playerEntity, hand);
@@ -146,19 +146,26 @@ public class BufferItem extends Item {
                     }
                     playerEntity.setStackInHand(hand, bufferItemStack);
                 }
+            } else {
+               
             }
         }
-        return new TypedActionResult<ItemStack>(ActionResult.PASS, playerEntity.getMainHandStack());
+        return new TypedActionResult<>(ActionResult.PASS, playerEntity.getMainHandStack());
     }
 
     @Override
-    public void appendTooltip(ItemStack itemStack, World world, List<Text> textList, TooltipContext tooltipContext) {
+    public void appendTooltip(ItemStack itemStack, World world, List<Text> text, TooltipContext tooltipContext) {
         if (itemStack.getTag() != null) {
-            BufferTooltip.toList(itemStack.getTag()).forEach((text)-> {
-                textList.add(text);
-            });
+            CompoundTag tag = itemStack.getTag();
+
+            if(tag.containsKey(BufferInventory.TIER_RETRIEVER)) {
+                text.add(new TranslatableText("buffer.tooltip.tier", Integer.toString(tag.getInt(BufferInventory.TIER_RETRIEVER))));
+            }
+
+            text.add(new TranslatableText("buffer.tooltip.pickup." + tag.getBoolean(BufferInventory.PICKUP_RETRIEVER)));
+            text.add(new TranslatableText("buffer.tooltip.void." + tag.getBoolean(BufferInventory.VOID_RETRIEVER)));
         }
-        super.appendTooltip(itemStack, world, textList, tooltipContext);
+        super.appendTooltip(itemStack, world, text, tooltipContext);
     }
 
     @Override
@@ -180,5 +187,22 @@ public class BufferItem extends Item {
                 amountToDraw = 0;
             }
         }
+    }
+
+    @Override
+    public void appendStacks(ItemGroup group, DefaultedList<ItemStack> items) {
+        if(isIn(group)) {
+            for(int i = 1; i <= 6; i++) {
+                items.add(getTier(i));
+            }
+        }
+    }
+
+    private ItemStack getTier(int tier) {
+        ItemStack stack = new ItemStack(this);
+        CompoundTag tag = new CompoundTag();
+        tag.putInt(BufferInventory.TIER_RETRIEVER, tier);
+        stack.setTag(tag);
+        return stack;
     }
 }

@@ -22,7 +22,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
 
 public class BufferBaseController extends CottonScreenController {
-    public BufferInventory bufferInventory = new BufferInventory(null);
+    public BufferInventory bufferInventory = new BufferInventory(1);
 
     protected WPlainPanel rootPanel = new WPlainPanel();
 
@@ -65,7 +65,7 @@ public class BufferBaseController extends CottonScreenController {
                     BufferStack bufferStack = bufferInventory.getSlot(slotNumber);
                     bufferStack.restockStack(false);
                     final ItemStack wrappedStack = bufferStack.getStack().copy();
-                    Boolean success = playerEntity.inventory.insertStack(wrappedStack.copy());
+                    boolean success = playerEntity.inventory.insertStack(wrappedStack.copy());
                     if (success) {
                         bufferStack.setStack(ItemStack.EMPTY);
                         if (!world.isClient){BufferPacket.sendPacket((ServerPlayerEntity)playerEntity, slotNumber, bufferStack.getStored());}
@@ -107,20 +107,20 @@ public class BufferBaseController extends CottonScreenController {
 
     public void tick() {
         bufferInventory.restockAll();
-        for (Integer bufferSlot : this.bufferInventory.getInvAvailableSlots(null)) {
+        for (int bufferSlot : this.bufferInventory.getInvAvailableSlots(null)) {
             controllerLabels.get(bufferSlot).setText(new LiteralText(Integer.toString(this.bufferInventory.getStored(bufferSlot))));
         }
     }
 
     public void setBaseWidgets() {
-        controllerSlots.set(0, bufferInventory.new WBufferSlot(this.bufferInventory, 0, 1, 1, playerInventory));
-        controllerSlots.set(1, bufferInventory.new WBufferSlot(this.bufferInventory, 1, 1, 1, playerInventory));
-        controllerSlots.set(2, bufferInventory.new WBufferSlot(this.bufferInventory, 2, 1, 1, playerInventory));
-        controllerSlots.set(3, bufferInventory.new WBufferSlot(this.bufferInventory, 3, 1, 1, playerInventory));
-        controllerSlots.set(4, bufferInventory.new WBufferSlot(this.bufferInventory, 4, 1, 1, playerInventory));
-        controllerSlots.set(5, bufferInventory.new WBufferSlot(this.bufferInventory, 5, 1, 1, playerInventory));
+        controllerSlots.set(0, new BufferInventory.WBufferSlot(this.bufferInventory, 0, 1, 1, playerInventory));
+        controllerSlots.set(1, new BufferInventory.WBufferSlot(this.bufferInventory, 1, 1, 1, playerInventory));
+        controllerSlots.set(2, new BufferInventory.WBufferSlot(this.bufferInventory, 2, 1, 1, playerInventory));
+        controllerSlots.set(3, new BufferInventory.WBufferSlot(this.bufferInventory, 3, 1, 1, playerInventory));
+        controllerSlots.set(4, new BufferInventory.WBufferSlot(this.bufferInventory, 4, 1, 1, playerInventory));
+        controllerSlots.set(5, new BufferInventory.WBufferSlot(this.bufferInventory, 5, 1, 1, playerInventory));
 
-        for (Integer bufferSlot : bufferInventory.getInvAvailableSlots(null)) {
+        for (int bufferSlot : bufferInventory.getInvAvailableSlots(null)) {
             controllerLabels.get(bufferSlot).setText(new LiteralText(Integer.toString(bufferInventory.getStored(bufferSlot))));    
         }
 
@@ -128,7 +128,6 @@ public class BufferBaseController extends CottonScreenController {
             case 1:
                 rootPanel.add(controllerSlots.get(0), sectionX * 2 - 27, sectionY - 12);
                 rootPanel.add(controllerLabels.get(0), sectionX * 2 - 27, sectionY + 10);
-                this.rootPanel.add(this.createPlayerInventoryPanel(), 0, sectionY * 4);
                 break;
             case 2:
                 rootPanel.add(controllerSlots.get(0), sectionX * 2 + 1, sectionY - 12);

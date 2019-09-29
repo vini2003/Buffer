@@ -8,7 +8,7 @@ import java.util.stream.IntStream;
 import com.google.common.collect.Lists;
 
 import blue.endless.jankson.annotation.Nullable;
-import buffer.utility.BufferUtility;
+import buffer.utility.BufferTier;
 import buffer.utility.Tuple;
 import io.github.cottonmc.cotton.gui.widget.WItemSlot;
 import net.minecraft.entity.player.PlayerEntity;
@@ -25,56 +25,39 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.registry.Registry;
 
 public class BufferInventory implements SidedInventory {
-    protected Integer bufferTier = 1;
-    public List<BufferStack> bufferStacks = new ArrayList<>();
+    protected List<BufferStack> bufferStacks = new ArrayList<>();
     protected List<InventoryListener> listeners;
+    protected int bufferTier = 1;
 
-    public ItemStack itemStack = null;
+    public int selectedSlot = 0;
 
-    public Integer selectedSlot = 0;
+    public boolean isVoid = false;
+    public boolean isPickup = false;
 
-    public Boolean isVoid = false;
+    public static final String TIER_RETRIEVER = "tier";
+    public static final String SELECTED_SLOT_RETRIEVER = "selected_slot";
+    public static final String VOID_RETRIEVER = "void";
+    public static final String PICKUP_RETRIEVER = "pickup";
 
-    public Boolean isPickup = false;
-
-    public static String TIER_RETRIEVER() {
-        return "tier";
-    }
-
-    public static String SELECTED_SLOT_RETRIEVER() {
-        return "selected_slot";
-    }
-
-    public static String VOID_RETRIEVER() {
-        return "void";
-    }
-
-    public static String PICKUP_RETRIEVER() {
-        return "pickup";
-    }
-
-
-    public static String STACK_RETRIEVER(Integer integer) {
+    public static String STACK_RETRIEVER(int integer) {
         return Integer.toString(integer);
     }
 
-    public static String SIZE_RETRIEVER(Integer integer) {
-        return Integer.toString(integer) + "_size";
+    public static String SIZE_RETRIEVER(int integer) {
+        return integer + "_size";
     }
 
-    public static String TAG_RETRIEVER(Integer integer) {
-        return Integer.toString(integer) + "_tag";
+    public static String TAG_RETRIEVER(int integer) {
+        return integer + "_tag";
     }
 
-    public static String ITEM_RETRIEVER(Integer integer) {
-        return Integer.toString(integer) + "_item";
+    public static String ITEM_RETRIEVER(int integer) {
+        return integer + "_item";
     }
 
-
-
-    public class WBufferSlot extends WItemSlot {
-        protected int bufferSlot = 0;
-        protected PlayerInventory playerInventory = null;
+    public static class WBufferSlot extends WItemSlot {
+        protected int bufferSlot;
+        protected PlayerInventory playerInventory;
 
         public WBufferSlot(Inventory inventory, int temporaryIndex, int slotsWide, int slotsHigh, PlayerInventory temporaryInventory) {
             super(inventory, temporaryIndex, slotsWide, slotsHigh, false, false);
@@ -122,23 +105,15 @@ public class BufferInventory implements SidedInventory {
         }
 
         public boolean canInsert(ItemStack itemStack) {
-            if (wrapperStack.getCount() + itemStack.getCount() < stackMaximum 
-            &&  wrapperStack.getItem() == itemStack.getItem()
-            &&  wrapperStack.getTag() == itemStack.getTag()) {
-                return true;
-            } else {
-                return false;
-            }
+            return wrapperStack.getCount() + itemStack.getCount() < stackMaximum
+                    && wrapperStack.getItem() == itemStack.getItem()
+                    && wrapperStack.getTag() == itemStack.getTag();
         }
 
         public boolean canExtract(ItemStack itemStack) {
-            if (itemStack.getCount() <= wrapperStack.getCount()
-            &&  wrapperStack.getItem() == itemStack.getItem()
-            &&  wrapperStack.getTag() == itemStack.getTag()) {
-                return true;
-            } else {
-                return false;
-            }
+            return itemStack.getCount() <= wrapperStack.getCount()
+                    && wrapperStack.getItem() == itemStack.getItem()
+                    && wrapperStack.getTag() == itemStack.getTag();
         }
         
         public ItemStack insertStack(ItemStack insertStack) {
@@ -186,7 +161,7 @@ public class BufferInventory implements SidedInventory {
             }
         }
 
-        public Boolean restockStack(Boolean isInitial) {
+        public boolean restockStack(Boolean isInitial) {
             int wrapperQuantity = this.wrapperStack.getCount();
 
             if (this.wrapperStack.getCount() == 0 && this.stackQuantity > 0) {
@@ -268,15 +243,11 @@ public class BufferInventory implements SidedInventory {
     }
 
     @Nullable
-    public BufferInventory(Integer tier) {
-        if (tier == null) {
-            this.setTier(1);            
-        } else {
-            this.setTier(tier);
-        }
+    public BufferInventory(int tier) {
+        this.setTier(tier);
     }
 
-    public void setTier(Integer tier) {
+    public void setTier(int tier) {
         this.bufferTier = tier;
         for (int bufferSlot = 0; bufferSlot < getInvMaxSlotAmount(); ++bufferSlot) {
             if (bufferStacks.size() - 1 < bufferSlot) {
@@ -285,7 +256,7 @@ public class BufferInventory implements SidedInventory {
         }
     }
 
-    public Integer getTier() {
+    public int getTier() {
         return this.bufferTier;
     }
 
@@ -297,21 +268,21 @@ public class BufferInventory implements SidedInventory {
         }
     }
     
-    public Integer getStored(int bufferSlot) {
+    public int getStored(int bufferSlot) {
         BufferStack bufferStack = getSlot(bufferSlot);
         if (bufferStack != null) {
             return bufferStack.getStored();
         } else {
-            return null;
+            return 0;
         }
     }
     
-    public Integer getStoredInternally(int bufferSlot) {
+    public int getStoredInternally(int bufferSlot) {
         BufferStack bufferStack = getSlot(bufferSlot);
         if (bufferStack != null) {
             return bufferStack.stackQuantity;
         } else {
-            return null;
+            return 0;
         }
 
     }
@@ -372,7 +343,7 @@ public class BufferInventory implements SidedInventory {
     }
 
     public int getInvMaxStackAmount() {
-        return BufferUtility.getStackSize(bufferTier);
+        return BufferTier.getStackSize(bufferTier);
     }
 
     @Override
@@ -384,7 +355,7 @@ public class BufferInventory implements SidedInventory {
     //  0 = EMPTY SLOT
     // +1 = MATCHING SLOT
     public Tuple<Integer, Integer> tryInsert(ItemStack insertionStack) {
-        Tuple<Integer, Integer> insertionMode = new Tuple<Integer, Integer>(-1, null);
+        Tuple<Integer, Integer> insertionMode = new Tuple<>(-1, null);
         for (int slot : this.getInvAvailableSlots(null)) {
             BufferStack bufferStack = this.bufferStacks.get(slot);
             if (insertionStack.getItem() == bufferStack.getStack().getItem()) {
@@ -436,7 +407,7 @@ public class BufferInventory implements SidedInventory {
 
     @Override
     public boolean isInvEmpty() {
-        Boolean isEmpty = true;
+        boolean isEmpty = true;
         for (BufferStack bufferStack : this.bufferStacks) {
             if (bufferStack.getStored() > 0) {
                 isEmpty = false;
@@ -455,11 +426,11 @@ public class BufferInventory implements SidedInventory {
         return true;
     }
 
-    public void addListener(InventoryListener iventoryListener) {
+    public void addListener(InventoryListener inventoryListener) {
         if (this.listeners == null) {
            this.listeners = Lists.newArrayList();
         }
-        this.listeners.add(iventoryListener);
+        this.listeners.add(inventoryListener);
      }
 
     public void removeListener(InventoryListener inventoryListener) {
@@ -469,19 +440,18 @@ public class BufferInventory implements SidedInventory {
     @Override
     public void markDirty() {
         if (this.listeners != null) {
-            Iterator<InventoryListener> iterator = this.listeners.iterator();
-            while(iterator.hasNext()) {
-                InventoryListener inventoryListener = (InventoryListener)iterator.next();
+            for (InventoryListener inventoryListener : this.listeners) {
                 inventoryListener.onInvChange(this);
             }
         }
     }
 
     public static CompoundTag toTag(BufferInventory bufferInventory, CompoundTag bufferTag) {
-        bufferTag.putInt(TIER_RETRIEVER(), bufferInventory.getTier());
-        bufferTag.putInt(SELECTED_SLOT_RETRIEVER(), bufferInventory.selectedSlot);
-        bufferTag.putBoolean(PICKUP_RETRIEVER(), bufferInventory.isPickup);
-        bufferTag.putBoolean(VOID_RETRIEVER(), bufferInventory.isVoid);
+        bufferInventory.restockAll();
+        bufferTag.putInt(TIER_RETRIEVER, bufferInventory.getTier());
+        bufferTag.putInt(SELECTED_SLOT_RETRIEVER, bufferInventory.selectedSlot);
+        bufferTag.putBoolean(PICKUP_RETRIEVER, bufferInventory.isPickup);
+        bufferTag.putBoolean(VOID_RETRIEVER, bufferInventory.isVoid);
         for (int bufferSlot : bufferInventory.getInvAvailableSlots(null)) {
             BufferStack bufferStack = bufferInventory.getSlot(bufferSlot);
             bufferStack.restockStack(false);
@@ -496,16 +466,16 @@ public class BufferInventory implements SidedInventory {
     }
 
     public static BufferInventory fromTag(CompoundTag bufferTag) {
-        BufferInventory bufferInventory = new BufferInventory(null);
+        BufferInventory bufferInventory = new BufferInventory(1);
         if (bufferTag != null) {
-            bufferInventory.setTier(bufferTag.getInt(TIER_RETRIEVER()));
-            bufferInventory.isPickup = bufferTag.getBoolean(PICKUP_RETRIEVER());
-            bufferInventory.isVoid = bufferTag.getBoolean(VOID_RETRIEVER());
-            bufferInventory.selectedSlot = bufferTag.getInt(SELECTED_SLOT_RETRIEVER());
+            bufferInventory.setTier(bufferTag.getInt(TIER_RETRIEVER));
+            bufferInventory.isPickup = bufferTag.getBoolean(PICKUP_RETRIEVER);
+            bufferInventory.isVoid = bufferTag.getBoolean(VOID_RETRIEVER);
+            bufferInventory.selectedSlot = bufferTag.getInt(SELECTED_SLOT_RETRIEVER);
             for (int bufferSlot : bufferInventory.getInvAvailableSlots(null)) {
                 BufferStack bufferStack = bufferInventory.getSlot(bufferSlot);
                 bufferStack.stackQuantity = bufferTag.getInt(STACK_RETRIEVER(bufferSlot));
-                Integer wrapperQuantity = bufferTag.getInt(SIZE_RETRIEVER(bufferSlot));
+                int wrapperQuantity = bufferTag.getInt(SIZE_RETRIEVER(bufferSlot));
                 bufferStack.wrapperItem = Registry.ITEM.get(new Identifier(bufferTag.getString(ITEM_RETRIEVER(bufferSlot))));
                 ItemStack itemStack = new ItemStack(bufferStack.wrapperItem, wrapperQuantity);
                 if (bufferTag.containsKey(TAG_RETRIEVER(bufferSlot))) {

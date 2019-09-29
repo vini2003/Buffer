@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "package": "buffer.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "ItemEntityMixin"
+  ],
+  "client": [
+    "InGameHudMixin",
+    "WToggleButtonMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

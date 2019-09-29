@@ -12,6 +12,8 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 
 public class BufferItemController extends BufferBaseController {
@@ -28,43 +30,43 @@ public class BufferItemController extends BufferBaseController {
     }
 
     public void setItemWidgets() {
+        Text voidText;
+
         WToggleButton togglePickup = new WToggleButton(onImage, offImage);
         WToggleButton toggleVoid = new WToggleButton(onImage, offImage);
-        WLabel pickupLabel = new WLabel("Collect");
-        WLabel voidLabel = new WLabel("Void");
 
-        rootPanel.add(controllerLabels.get(4), sectionX * 2 - 27, sectionY * 2 + 26);        
-        rootPanel.add(controllerLabels.get(5), sectionX * 3 - 18, sectionY * 2 + 26);  
+        WLabel pickupLabel = new WLabel(new TranslatableText("buffer.gui.pickup"), WLabel.DEFAULT_TEXT_COLOR);
+        WLabel voidLabel = new WLabel(voidText = new TranslatableText("buffer.gui.void"), WLabel.DEFAULT_TEXT_COLOR);
 
         togglePickup.setToggle(super.bufferInventory.isPickup);
         toggleVoid.setToggle(super.bufferInventory.isVoid);
 
         togglePickup.setOnToggle(() -> {
-            MinecraftClient.getInstance().getNetworkHandler().sendPacket(NetworkRegistry.createBufferVoidPacket(togglePickup.getToggle()));
+            MinecraftClient.getInstance().getNetworkHandler().sendPacket(NetworkRegistry.createBufferPickupPacket(togglePickup.getToggle()));
             bufferInventory.isPickup = togglePickup.getToggle();
-            super.playerInventory.getMainHandStack().getTag().putBoolean(BufferInventory.PICKUP_RETRIEVER(), togglePickup.getToggle());
+            super.playerInventory.getMainHandStack().getTag().putBoolean(BufferInventory.PICKUP_RETRIEVER, togglePickup.getToggle());
         });
         toggleVoid.setOnToggle(() -> {
             MinecraftClient.getInstance().getNetworkHandler().sendPacket(NetworkRegistry.createBufferVoidPacket(toggleVoid.getToggle()));
             bufferInventory.isVoid = toggleVoid.getToggle();
-            super.playerInventory.getMainHandStack().getTag().putBoolean(BufferInventory.VOID_RETRIEVER(), toggleVoid.getToggle());
+            super.playerInventory.getMainHandStack().getTag().putBoolean(BufferInventory.VOID_RETRIEVER, toggleVoid.getToggle());
         });
         
         TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
 
         if (super.bufferInventory.getTier() <= 3) {
-            super.rootPanel.add(togglePickup, 5, sectionY * 2 + 18);
-            super.rootPanel.add(toggleVoid, 139, sectionY * 2 + 18);
-            super.rootPanel.add(pickupLabel, 27, sectionY * 2 + 24);
-            super.rootPanel.add(voidLabel, 135 - (textRenderer.getStringWidth("Void")), sectionY * 2 + 24);
+            this.rootPanel.add(this.createPlayerInventoryPanel(), 0, sectionY * 4);
+            super.rootPanel.add(togglePickup, 5, sectionY * 2 + 9);
+            super.rootPanel.add(toggleVoid, 139, sectionY * 2 + 9);
+            super.rootPanel.add(pickupLabel, 27, sectionY * 2 + 15);
+            super.rootPanel.add(voidLabel, 135 - (textRenderer.getStringWidth(voidText.asString())), sectionY * 2 + 15);
         } else {
-            super.rootPanel.add(togglePickup, 5, sectionY * 2 + 18);
-            super.rootPanel.add(toggleVoid, 139, sectionY * 2 + 18);
-            super.rootPanel.add(pickupLabel, 27, sectionY * 2 + 24);
-            super.rootPanel.add(voidLabel, 135 - (textRenderer.getStringWidth("Void")), sectionY * 2 + 24);
+            this.rootPanel.add(this.createPlayerInventoryPanel(), 0, sectionY * 5 + 18);
+            super.rootPanel.add(togglePickup, 5, sectionY * 3 + 8 + 18);
+            super.rootPanel.add(toggleVoid, 139, sectionY * 3 + 8 + 18);
+            super.rootPanel.add(pickupLabel, 27, sectionY * 3 + 8 + 18 + 6);
+            super.rootPanel.add(voidLabel, 135 - (textRenderer.getStringWidth(voidText.asString())), sectionY * 3 + 8 + 18 + 6);       
         }
-
-
     }
 
     @Override
