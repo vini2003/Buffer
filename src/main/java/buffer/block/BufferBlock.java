@@ -60,7 +60,7 @@ public class BufferBlock extends Block implements BlockEntityProvider {
             CompoundTag itemTag = itemStack.getTag();
             BufferEntity bufferEntity = (BufferEntity)world.getBlockEntity(blockPosition);
             BufferInventory inventoryMirror = bufferEntity.bufferInventory;
-            Integer tier = itemTag.getInt(BufferInventory.TIER_RETRIEVER());
+            Integer tier = itemTag.getInt(BufferInventory.TIER_RETRIEVER);
             inventoryMirror.setTier(tier);
             world.setBlockState(blockPosition, BlockRegistry.BLOCK_BUFFER.getDefaultState().with(BufferProvider.tier, inventoryMirror.getTier()));
         }

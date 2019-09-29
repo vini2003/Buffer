@@ -37,22 +37,10 @@ public class BufferInventory implements SidedInventory {
 
     public boolean isPickup = false;
 
-    public static String TIER_RETRIEVER() {
-        return "tier";
-    }
-
-    public static String SELECTED_SLOT_RETRIEVER() {
-        return "selected_slot";
-    }
-
-    public static String VOID_RETRIEVER() {
-        return "void";
-    }
-
-    public static String PICKUP_RETRIEVER() {
-        return "pickup";
-    }
-
+    public static final String TIER_RETRIEVER = "tier";
+    public static final String SELECTED_SLOT_RETRIEVER = "selected_slot";
+    public static final String VOID_RETRIEVER = "void";
+    public static String PICKUP_RETRIEVER = "pickup";
 
     public static String STACK_RETRIEVER(Integer integer) {
         return Integer.toString(integer);
@@ -69,8 +57,6 @@ public class BufferInventory implements SidedInventory {
     public static String ITEM_RETRIEVER(Integer integer) {
         return integer + "_item";
     }
-
-
 
     public static class WBufferSlot extends WItemSlot {
         protected int bufferSlot;
@@ -469,10 +455,10 @@ public class BufferInventory implements SidedInventory {
 
     public static CompoundTag toTag(BufferInventory bufferInventory, CompoundTag bufferTag) {
         bufferInventory.restockAll();
-        bufferTag.putInt(TIER_RETRIEVER(), bufferInventory.getTier());
-        bufferTag.putInt(SELECTED_SLOT_RETRIEVER(), bufferInventory.selectedSlot);
-        bufferTag.putBoolean(PICKUP_RETRIEVER(), bufferInventory.isPickup);
-        bufferTag.putBoolean(VOID_RETRIEVER(), bufferInventory.isVoid);
+        bufferTag.putInt(TIER_RETRIEVER, bufferInventory.getTier());
+        bufferTag.putInt(SELECTED_SLOT_RETRIEVER, bufferInventory.selectedSlot);
+        bufferTag.putBoolean(PICKUP_RETRIEVER, bufferInventory.isPickup);
+        bufferTag.putBoolean(VOID_RETRIEVER, bufferInventory.isVoid);
         for (int bufferSlot : bufferInventory.getInvAvailableSlots(null)) {
             BufferStack bufferStack = bufferInventory.getSlot(bufferSlot);
             bufferTag.putInt(STACK_RETRIEVER(bufferSlot), bufferStack.stackQuantity);
@@ -488,10 +474,10 @@ public class BufferInventory implements SidedInventory {
     public static BufferInventory fromTag(CompoundTag bufferTag) {
         BufferInventory bufferInventory = new BufferInventory(null);
         if (bufferTag != null) {
-            bufferInventory.setTier(bufferTag.getInt(TIER_RETRIEVER()));
-            bufferInventory.isPickup = bufferTag.getBoolean(PICKUP_RETRIEVER());
-            bufferInventory.isVoid = bufferTag.getBoolean(VOID_RETRIEVER());
-            bufferInventory.selectedSlot = bufferTag.getInt(SELECTED_SLOT_RETRIEVER());
+            bufferInventory.setTier(bufferTag.getInt(TIER_RETRIEVER));
+            bufferInventory.isPickup = bufferTag.getBoolean(PICKUP_RETRIEVER);
+            bufferInventory.isVoid = bufferTag.getBoolean(VOID_RETRIEVER);
+            bufferInventory.selectedSlot = bufferTag.getInt(SELECTED_SLOT_RETRIEVER);
             for (int bufferSlot : bufferInventory.getInvAvailableSlots(null)) {
                 BufferStack bufferStack = bufferInventory.getSlot(bufferSlot);
                 bufferStack.stackQuantity = bufferTag.getInt(STACK_RETRIEVER(bufferSlot));

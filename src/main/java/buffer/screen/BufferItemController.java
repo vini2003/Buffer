@@ -47,12 +47,12 @@ public class BufferItemController extends BufferBaseController {
         togglePickup.setOnToggle(() -> {
             MinecraftClient.getInstance().getNetworkHandler().sendPacket(NetworkRegistry.createBufferPickupPacket(togglePickup.getToggle()));
             bufferInventory.isPickup = togglePickup.getToggle();
-            super.playerInventory.getMainHandStack().getTag().putBoolean(BufferInventory.PICKUP_RETRIEVER(), togglePickup.getToggle());
+            super.playerInventory.getMainHandStack().getTag().putBoolean(BufferInventory.PICKUP_RETRIEVER, togglePickup.getToggle());
         });
         toggleVoid.setOnToggle(() -> {
             MinecraftClient.getInstance().getNetworkHandler().sendPacket(NetworkRegistry.createBufferVoidPacket(toggleVoid.getToggle()));
             bufferInventory.isVoid = toggleVoid.getToggle();
-            super.playerInventory.getMainHandStack().getTag().putBoolean(BufferInventory.VOID_RETRIEVER(), toggleVoid.getToggle());
+            super.playerInventory.getMainHandStack().getTag().putBoolean(BufferInventory.VOID_RETRIEVER, toggleVoid.getToggle());
         });
         
         TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;

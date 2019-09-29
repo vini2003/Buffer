@@ -28,7 +28,7 @@ public class KeybindRegistry {
             if (BUFFER_PICKUP.isPressed() && BufferItem.pickupTick >= 2) {
                 BufferItem.pickupTick = 0;
                 ItemStack heldStack = MinecraftClient.getInstance().player.inventory.getMainHandStack();
-                boolean isPickup = !heldStack.getTag().getBoolean(BufferInventory.PICKUP_RETRIEVER());
+                boolean isPickup = !heldStack.getTag().getBoolean(BufferInventory.PICKUP_RETRIEVER);
                 MinecraftClient.getInstance().getNetworkHandler().getConnection().send(NetworkRegistry.createBufferPickupPacket(isPickup));
             } else if (BUFFER_PICKUP.isPressed()) {
                 ++BufferItem.pickupTick;
@@ -37,7 +37,7 @@ public class KeybindRegistry {
             if (BUFFER_VOID.isPressed() && BufferItem.voidTick >= 2) {
                 BufferItem.voidTick = 0;
                 ItemStack heldStack = MinecraftClient.getInstance().player.inventory.getMainHandStack();
-                boolean isVoid = !heldStack.getTag().getBoolean(BufferInventory.VOID_RETRIEVER());
+                boolean isVoid = !heldStack.getTag().getBoolean(BufferInventory.VOID_RETRIEVER);
                 MinecraftClient.getInstance().getNetworkHandler().getConnection().send(NetworkRegistry.createBufferVoidPacket(isVoid));
             } else if (BUFFER_VOID.isPressed()) {
                 ++BufferItem.voidTick;

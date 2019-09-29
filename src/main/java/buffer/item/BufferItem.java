@@ -128,8 +128,8 @@ public class BufferItem extends BlockItem {
                 text.add(new TranslatableText("buffer.tooltip.tier", Integer.toString(tag.getInt("tier"))));
             }
 
-            text.add(new TranslatableText("buffer.tooltip.pickup." + tag.getBoolean(BufferInventory.PICKUP_RETRIEVER())));
-            text.add(new TranslatableText("buffer.tooltip.void." + tag.getBoolean(BufferInventory.VOID_RETRIEVER())));
+            text.add(new TranslatableText("buffer.tooltip.pickup." + tag.getBoolean(BufferInventory.PICKUP_RETRIEVER)));
+            text.add(new TranslatableText("buffer.tooltip.void." + tag.getBoolean(BufferInventory.VOID_RETRIEVER)));
         }
 
         super.appendTooltip(itemStack, world, text, tooltipContext);
