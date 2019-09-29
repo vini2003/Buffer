@@ -89,9 +89,7 @@ public class NetworkRegistry {
                 else if (playerEntity.getOffHandStack().getItem() == ItemRegistry.BUFFER_ITEM) { hand = Hand.OFF_HAND; }
                 else { return; }
                 if (playerEntity.getStackInHand(hand).getItem() == ItemRegistry.BUFFER_ITEM) {
-                    BufferInventory bufferInventory = BufferInventory.fromTag(playerEntity.getStackInHand(hand).getTag());
-                    bufferInventory.isPickup = isPickup;
-                    playerEntity.getStackInHand(hand).setTag(BufferInventory.toTag(bufferInventory, new CompoundTag()));
+                    playerEntity.getStackInHand(hand).getTag().putBoolean(BufferInventory.PICKUP_RETRIEVER, isPickup);
                 }
             });
         });
@@ -105,9 +103,7 @@ public class NetworkRegistry {
                 else if (playerEntity.getOffHandStack().getItem() == ItemRegistry.BUFFER_ITEM) { hand = Hand.OFF_HAND; }
                 else { return; }
                 if (playerEntity.getStackInHand(hand).getItem() == ItemRegistry.BUFFER_ITEM) {
-                    BufferInventory bufferInventory = BufferInventory.fromTag(playerEntity.getStackInHand(hand).getTag());
-                    bufferInventory.isVoid = isVoid;
-                    playerEntity.getStackInHand(hand).setTag(BufferInventory.toTag(bufferInventory, playerEntity.getStackInHand(hand).getTag()));
+                    playerEntity.getStackInHand(hand).getTag().putBoolean(BufferInventory.VOID_RETRIEVER, isVoid);
                 }
             });   
         });
