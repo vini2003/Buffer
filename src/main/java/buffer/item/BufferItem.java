@@ -21,6 +21,7 @@ import net.minecraft.item.ItemUsageContext;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
@@ -131,13 +132,19 @@ public class BufferItem extends BlockItem {
     }
 
     @Override
-    public void appendTooltip(ItemStack itemStack, World world, List<Text> textList, TooltipContext tooltipContext) {
+    public void appendTooltip(ItemStack itemStack, World world, List<Text> text, TooltipContext tooltipContext) {
         if (itemStack.getTag() != null) {
-            BufferTooltip.toList(itemStack.getTag()).forEach((text)-> {
-                textList.add(text);
-            });
+            CompoundTag tag = itemStack.getTag();
+
+            if(tag.containsKey("tier")) {
+                text.add(new TranslatableText("buffer.tooltip.tier", Integer.toString(tag.getInt("tier"))));
+            }
+
+            text.add(new TranslatableText("buffer.tooltip.pickup." + tag.getBoolean(BufferInventory.PICKUP_RETRIEVER())));
+            text.add(new TranslatableText("buffer.tooltip.void." + tag.getBoolean(BufferInventory.VOID_RETRIEVER())));
         }
-        super.appendTooltip(itemStack, world, textList, tooltipContext);
+
+        super.appendTooltip(itemStack, world, text, tooltipContext);
     }
 
     @Override
