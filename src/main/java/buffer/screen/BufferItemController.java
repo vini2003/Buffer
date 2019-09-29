@@ -73,7 +73,7 @@ public class BufferItemController extends BufferBaseController {
 
     @Override
     public void close(PlayerEntity playerEntity) {
-        ItemStack itemStack = playerEntity.getMainHandStack();
+        ItemStack itemStack = playerEntity.getStackInHand(hand);
         itemStack.setTag(BufferInventory.toTag(bufferInventory, new CompoundTag()));
         BufferItem.stackToDraw = ItemStack.EMPTY;
         BufferItem.amountToDraw = 0;   

@@ -140,6 +140,7 @@ public class BufferItem extends Item {
                             playerEntity.inventory.insertStack((ItemStack)usageResult.getValue());
                             bufferStack.getStack().decrement(1);
                         } else {
+                            bufferStack.getStack().decrement(1);
                             bufferStack.setStack(playerEntity.getStackInHand(hand));
                         }
                         bufferItemStack.setTag(BufferInventory.toTag(bufferInventory, new CompoundTag()));
