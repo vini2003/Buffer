@@ -6,8 +6,7 @@
     "ItemEntityMixin"
   ],
   "client": [
-    "InGameHudMixin",
-    "WToggleButtonMixin"
+    "InGameHudMixin"
   ],
   "injectors": {
     "defaultRequire": 1

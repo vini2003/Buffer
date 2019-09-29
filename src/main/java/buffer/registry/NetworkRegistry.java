@@ -8,10 +8,13 @@ import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
 import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
 import net.minecraft.client.network.packet.CustomPayloadS2CPacket;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.network.packet.CustomPayloadC2SPacket;
+import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.PacketByteBuf;
 
+// For this spaghetti, I blame akoimeex.
 public class NetworkRegistry {
     public static Identifier BUFFER_UPDATE_PACKET = new Identifier("buffer", "buffer_update");
     public static Identifier BUFFER_SWITCH_PACKET = new Identifier("buffer", "buffer_switch");
@@ -25,8 +28,9 @@ public class NetworkRegistry {
         return new CustomPayloadS2CPacket(BUFFER_UPDATE_PACKET, buffer);
     }
 
-    public static CustomPayloadC2SPacket createStackSwitchPacket() {
+    public static CustomPayloadC2SPacket createStackSwitchPacket(int hand) {
         PacketByteBuf buffer = new PacketByteBuf(Unpooled.buffer());
+        buffer.writeInt(hand);
         return new CustomPayloadC2SPacket(BUFFER_SWITCH_PACKET, buffer);
     }
 
@@ -62,35 +66,48 @@ public class NetworkRegistry {
                 }
             });   
         });
-        ServerSidePacketRegistry.INSTANCE.register(BUFFER_SWITCH_PACKET, (packetContext, packetByteBuffer) -> packetContext.getTaskQueue().execute(() -> {
+        ServerSidePacketRegistry.INSTANCE.register(BUFFER_SWITCH_PACKET, (packetContext, packetByteBuffer) -> 
+            packetContext.getTaskQueue().execute(() -> {
             PlayerEntity playerEntity = packetContext.getPlayer();
-            if (playerEntity.inventory.getMainHandStack().getItem() == ItemRegistry.BUFFER_ITEM) {
-                BufferInventory bufferInventory = BufferInventory.fromTag(playerEntity.inventory.getMainHandStack().getTag());
+            Hand hand = Hand.MAIN_HAND;
+            if (playerEntity.getMainHandStack().getItem() == ItemRegistry.BUFFER_ITEM) { hand = Hand.MAIN_HAND; } 
+            else if (playerEntity.getOffHandStack().getItem() == ItemRegistry.BUFFER_ITEM) { hand = Hand.OFF_HAND; }
+            else { return; }
+            if (playerEntity.getStackInHand(hand).getItem() == ItemRegistry.BUFFER_ITEM) {
+                BufferInventory bufferInventory = BufferInventory.fromTag(playerEntity.getStackInHand(hand).getTag());
                 bufferInventory.swapSlot();
-                playerEntity.getMainHandStack().setTag(BufferInventory.toTag(bufferInventory, playerEntity.inventory.getMainHandStack().getTag()));
+                playerEntity.getStackInHand(hand).setTag(BufferInventory.toTag(bufferInventory, new CompoundTag()));
             }
         }));
 
         ServerSidePacketRegistry.INSTANCE.register(BUFFER_PICKUP_PACKET, (packetContext, packetByteBuffer) -> {
-            boolean something = packetByteBuffer.readBoolean();
+            boolean isPickup = packetByteBuffer.readBoolean();
             packetContext.getTaskQueue().execute(() -> {
                 PlayerEntity playerEntity = packetContext.getPlayer();
-                if (playerEntity.inventory.getMainHandStack().getItem() == ItemRegistry.BUFFER_ITEM) {
-                    BufferInventory bufferInventory = BufferInventory.fromTag(playerEntity.inventory.getMainHandStack().getTag());
-                    bufferInventory.isPickup = something;
-                    playerEntity.getMainHandStack().setTag(BufferInventory.toTag(bufferInventory, playerEntity.inventory.getMainHandStack().getTag()));
+                Hand hand = Hand.MAIN_HAND;
+                if (playerEntity.getMainHandStack().getItem() == ItemRegistry.BUFFER_ITEM) { hand = Hand.MAIN_HAND; } 
+                else if (playerEntity.getOffHandStack().getItem() == ItemRegistry.BUFFER_ITEM) { hand = Hand.OFF_HAND; }
+                else { return; }
+                if (playerEntity.getStackInHand(hand).getItem() == ItemRegistry.BUFFER_ITEM) {
+                    BufferInventory bufferInventory = BufferInventory.fromTag(playerEntity.getStackInHand(hand).getTag());
+                    bufferInventory.isPickup = isPickup;
+                    playerEntity.getStackInHand(hand).setTag(BufferInventory.toTag(bufferInventory, new CompoundTag()));
                 }
             });
         });
 
         ServerSidePacketRegistry.INSTANCE.register(BUFFER_VOID_PACKET, (packetContext, packetByteBuffer) -> {
-            boolean something = packetByteBuffer.readBoolean();
+            boolean isVoid = packetByteBuffer.readBoolean();
             packetContext.getTaskQueue().execute(() -> {
                 PlayerEntity playerEntity = packetContext.getPlayer();
-                if (playerEntity.inventory.getMainHandStack().getItem() == ItemRegistry.BUFFER_ITEM) {
-                    BufferInventory bufferInventory = BufferInventory.fromTag(playerEntity.inventory.getMainHandStack().getTag());
-                    bufferInventory.isVoid = something;
-                    playerEntity.getMainHandStack().setTag(BufferInventory.toTag(bufferInventory, playerEntity.inventory.getMainHandStack().getTag()));
+                Hand hand = Hand.MAIN_HAND;
+                if (playerEntity.getMainHandStack().getItem() == ItemRegistry.BUFFER_ITEM) { hand = Hand.MAIN_HAND; } 
+                else if (playerEntity.getOffHandStack().getItem() == ItemRegistry.BUFFER_ITEM) { hand = Hand.OFF_HAND; }
+                else { return; }
+                if (playerEntity.getStackInHand(hand).getItem() == ItemRegistry.BUFFER_ITEM) {
+                    BufferInventory bufferInventory = BufferInventory.fromTag(playerEntity.getStackInHand(hand).getTag());
+                    bufferInventory.isVoid = isVoid;
+                    playerEntity.getStackInHand(hand).setTag(BufferInventory.toTag(bufferInventory, playerEntity.getStackInHand(hand).getTag()));
                 }
             });   
         });

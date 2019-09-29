@@ -2,6 +2,7 @@ package buffer.screen;
 
 import buffer.inventory.BufferInventory;
 import buffer.item.BufferItem;
+import buffer.registry.ItemRegistry;
 import buffer.registry.NetworkRegistry;
 import io.github.cottonmc.cotton.gui.widget.WLabel;
 import io.github.cottonmc.cotton.gui.widget.WToggleButton;
@@ -14,16 +15,17 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
-import net.minecraft.util.Identifier;
+import net.minecraft.util.Hand;
 
 public class BufferItemController extends BufferBaseController {
-    protected final static Identifier offImage = new Identifier("buffer:textures/gui/toggle_off.png");
-	protected final static Identifier onImage  = new Identifier("buffer:textures/gui/toggle_on.png");
+    protected Hand hand = Hand.MAIN_HAND;
 
     public BufferItemController(int syncId, PlayerInventory playerInventory, BlockContext context) {
         super(syncId, playerInventory, context);
+        if (playerInventory.player.getMainHandStack().getItem() == ItemRegistry.BUFFER_ITEM) { hand = Hand.MAIN_HAND; }
+        else if (playerInventory.player.getOffHandStack().getItem() == ItemRegistry.BUFFER_ITEM) { hand = Hand.OFF_HAND; };
         super.playerInventory = playerInventory;
-        super.bufferInventory = BufferInventory.fromTag(playerInventory.getMainHandStack().getTag());
+        super.bufferInventory = BufferInventory.fromTag(playerInventory.player.getStackInHand(hand).getTag());
         super.setBaseWidgets();
         this.setItemWidgets();
         super.rootPanel.validate(this);
@@ -32,8 +34,8 @@ public class BufferItemController extends BufferBaseController {
     public void setItemWidgets() {
         Text voidText;
 
-        WToggleButton togglePickup = new WToggleButton(onImage, offImage);
-        WToggleButton toggleVoid = new WToggleButton(onImage, offImage);
+        WToggleButton togglePickup = new WToggleButton();
+        WToggleButton toggleVoid = new WToggleButton();
 
         WLabel pickupLabel = new WLabel(new TranslatableText("buffer.gui.pickup"), WLabel.DEFAULT_TEXT_COLOR);
         WLabel voidLabel = new WLabel(voidText = new TranslatableText("buffer.gui.void"), WLabel.DEFAULT_TEXT_COLOR);
@@ -44,12 +46,12 @@ public class BufferItemController extends BufferBaseController {
         togglePickup.setOnToggle(() -> {
             MinecraftClient.getInstance().getNetworkHandler().sendPacket(NetworkRegistry.createBufferPickupPacket(togglePickup.getToggle()));
             bufferInventory.isPickup = togglePickup.getToggle();
-            super.playerInventory.getMainHandStack().getTag().putBoolean(BufferInventory.PICKUP_RETRIEVER, togglePickup.getToggle());
+            super.playerInventory.player.getStackInHand(hand).getTag().putBoolean(BufferInventory.PICKUP_RETRIEVER, togglePickup.getToggle());
         });
         toggleVoid.setOnToggle(() -> {
             MinecraftClient.getInstance().getNetworkHandler().sendPacket(NetworkRegistry.createBufferVoidPacket(toggleVoid.getToggle()));
             bufferInventory.isVoid = toggleVoid.getToggle();
-            super.playerInventory.getMainHandStack().getTag().putBoolean(BufferInventory.VOID_RETRIEVER, toggleVoid.getToggle());
+            super.playerInventory.player.getStackInHand(hand).getTag().putBoolean(BufferInventory.VOID_RETRIEVER, toggleVoid.getToggle());
         });
         
         TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;

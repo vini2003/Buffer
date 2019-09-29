@@ -9,6 +9,7 @@ import net.fabricmc.fabric.api.client.keybinding.KeyBindingRegistry;
 import net.fabricmc.fabric.api.event.client.ClientTickCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 
@@ -45,7 +46,13 @@ public class KeybindRegistry {
 
             if (BUFFER_SWITCH.isPressed() && BufferItem.slotTick >= 2) {
                 BufferItem.slotTick = 0;
-                MinecraftClient.getInstance().getNetworkHandler().getConnection().send(NetworkRegistry.createStackSwitchPacket());
+                MinecraftClient client = MinecraftClient.getInstance();
+                PlayerEntity player = client.player;
+                if (player.getMainHandStack().getItem() == ItemRegistry.BUFFER_ITEM) {
+                    MinecraftClient.getInstance().getNetworkHandler().getConnection().send(NetworkRegistry.createStackSwitchPacket(0));
+                } else if (player.getOffHandStack().getItem() == ItemRegistry.BUFFER_ITEM) {
+                    MinecraftClient.getInstance().getNetworkHandler().getConnection().send(NetworkRegistry.createStackSwitchPacket(1));
+                }
             } else if (BUFFER_SWITCH.isPressed()) {
                 ++BufferItem.slotTick;
             }

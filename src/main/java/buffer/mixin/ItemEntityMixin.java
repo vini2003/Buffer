@@ -8,13 +8,18 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.stat.Stats;
+import net.minecraft.util.DefaultedList;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.List;
 import java.util.UUID;
+
+import com.google.common.collect.ImmutableList;
 
 @Mixin(ItemEntity.class)
 public class ItemEntityMixin {
@@ -33,9 +38,17 @@ public class ItemEntityMixin {
 		ItemEntity itemEntity = (ItemEntity) (Object) this;
 		ItemStack buffer = ItemStack.EMPTY;
 
-		for (ItemStack stack : playerEntity.inventory.main) {
-			if (stack.getItem() == ItemRegistry.BUFFER_ITEM) {
-				buffer = stack;
+		List<DefaultedList<ItemStack>> combinedInventory = ImmutableList.of(playerEntity.inventory.main, playerEntity.inventory.offHand);
+
+		for (DefaultedList<ItemStack> list : combinedInventory) {
+			if (buffer.getItem() == ItemRegistry.BUFFER_ITEM) {
+				break;
+			}
+			for (ItemStack stack : list) {
+				if (stack.getItem() == ItemRegistry.BUFFER_ITEM) {
+					buffer = stack;
+					break;
+				}
 			}
 		}
 

@@ -74,7 +74,7 @@ public class BufferItem extends Item {
 
     @Override
     public ActionResult useOnBlock(ItemUsageContext itemContext) {
-            BufferInventory bufferInventory = BufferInventory.fromTag(itemContext.getPlayer().getMainHandStack().getTag());
+            BufferInventory bufferInventory = BufferInventory.fromTag(itemContext.getPlayer().getStackInHand(itemContext.getHand()).getTag());
             if (bufferInventory.selectedSlot == -1) {
                 return super.useOnBlock(itemContext);
             } else {
@@ -91,12 +91,12 @@ public class BufferItem extends Item {
                     Hand hand = itemContext.getHand();
                     World world = itemContext.getWorld();
                     PlayerEntity playerEntity = itemContext.getPlayer();
-                    ItemStack bufferItemStack = playerEntity.getMainHandStack();
+                    ItemStack bufferItemStack = playerEntity.getStackInHand(itemContext.getHand());
                     ActionResult usageResult;
 
                     playerEntity.setStackInHand(hand, bufferStack.getStack());   
 
-                    usageResult = playerEntity.getMainHandStack().getItem().useOnBlock(bufferContext);
+                    usageResult = playerEntity.getStackInHand(itemContext.getHand()).getItem().useOnBlock(bufferContext);
 
                     if (usageResult == ActionResult.SUCCESS) {
                         if (bufferContext.getStack().getItem().isDamageable()) {
@@ -105,7 +105,7 @@ public class BufferItem extends Item {
                         }
                         bufferItemStack.setTag(BufferInventory.toTag(bufferInventory, new CompoundTag()));
                     } else {
-                        TypedActionResult<ItemStack> useResult = playerEntity.getMainHandStack().getItem().use(world, playerEntity, hand);
+                        TypedActionResult<ItemStack> useResult = playerEntity.getStackInHand(itemContext.getHand()).getItem().use(world, playerEntity, hand);
                         if (useResult.getResult() == ActionResult.SUCCESS) {
                             if (useResult.getValue() != bufferStack.getStack()) {
                                 playerEntity.inventory.insertStack((ItemStack)useResult.getValue());
@@ -123,24 +123,24 @@ public class BufferItem extends Item {
     
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity playerEntity, Hand hand) {
-        BufferInventory bufferInventory = BufferInventory.fromTag(playerEntity.getMainHandStack().getTag());
+        BufferInventory bufferInventory = BufferInventory.fromTag(playerEntity.getStackInHand(hand).getTag());
         if (!world.isClient && bufferInventory.selectedSlot == -1 && !playerEntity.isSneaking()) {
-            ContainerProviderRegistry.INSTANCE.openContainer(ScreenRegistryServer.BUFFER_ITEM_CONTAINER, playerEntity, (buffer)-> buffer.writeBlockPos(playerEntity.getBlockPos()));
+            ContainerProviderRegistry.INSTANCE.openContainer(ScreenRegistryServer.BUFFER_ITEM_CONTAINER, playerEntity, (buffer) -> buffer.writeBlockPos(playerEntity.getBlockPos()));
         } else {
-            ItemStack bufferItemStack = playerEntity.getMainHandStack();
+            ItemStack bufferItemStack = playerEntity.getStackInHand(hand);
             if (bufferInventory.selectedSlot != -1) {
                 BufferStack bufferStack = bufferInventory.getSlot(bufferInventory.selectedSlot);
                 if (bufferStack.getStack().isFood()) {
                     return new TypedActionResult<>(ActionResult.PASS, bufferItemStack);
                 } else {
                     playerEntity.setStackInHand(hand, bufferStack.getStack());                
-                    TypedActionResult<ItemStack> usageResult = playerEntity.getMainHandStack().getItem().use(world, playerEntity, hand);
+                    TypedActionResult<ItemStack> usageResult = playerEntity.getStackInHand(hand).getItem().use(world, playerEntity, hand);
                     if (usageResult.getResult() == ActionResult.SUCCESS) {
                         if (usageResult.getValue() != bufferStack.getStack()) {
                             playerEntity.inventory.insertStack((ItemStack)usageResult.getValue());
                             bufferStack.getStack().decrement(1);
                         } else {
-                            bufferStack.setStack(playerEntity.getMainHandStack());
+                            bufferStack.setStack(playerEntity.getStackInHand(hand));
                         }
                         bufferItemStack.setTag(BufferInventory.toTag(bufferInventory, new CompoundTag()));
                     }
@@ -150,7 +150,7 @@ public class BufferItem extends Item {
                
             }
         }
-        return new TypedActionResult<>(ActionResult.PASS, playerEntity.getMainHandStack());
+        return new TypedActionResult<>(ActionResult.PASS, playerEntity.getStackInHand(hand));
     }
 
     @Override
