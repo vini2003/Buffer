@@ -45,7 +45,7 @@ public class BufferItem extends BlockItem {
                 itemTag.putInt("tier", 1);
                 itemStack_1.setTag(itemTag);
             }
-            Integer tier = itemTag.getInt("tier");
+            int tier = itemTag.getInt("tier");
             return tier;
         });
     }
@@ -87,7 +87,7 @@ public class BufferItem extends BlockItem {
                     ItemStack newStack = bufferStack.getStack().copy();
                     useResult = bufferContext.getStack().getItem().useOnBlock(bufferContext);
                     if (useResult == ActionResult.SUCCESS) {
-                        newStack.damage(1, (Random)itemContext.getWorld().random, (ServerPlayerEntity)null);
+                        newStack.damage(1, itemContext.getWorld().random, null);
                         bufferStack.setStack(newStack);
                         bufferStack.setTag(newStack.getTag());
                     }

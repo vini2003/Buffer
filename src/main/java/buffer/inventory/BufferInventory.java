@@ -8,7 +8,7 @@ import java.util.stream.IntStream;
 import com.google.common.collect.Lists;
 
 import blue.endless.jankson.annotation.Nullable;
-import buffer.utility.BufferUtility;
+import buffer.utility.BufferTier;
 import buffer.utility.Tuple;
 import io.github.cottonmc.cotton.gui.widget.WItemSlot;
 import net.minecraft.entity.player.PlayerEntity;
@@ -372,7 +372,7 @@ public class BufferInventory implements SidedInventory {
     }
 
     public int getInvMaxStackAmount() {
-        return BufferUtility.getStackSize(bufferTier);
+        return BufferTier.getStackSize(bufferTier);
     }
 
     @Override
@@ -436,7 +436,7 @@ public class BufferInventory implements SidedInventory {
 
     @Override
     public boolean isInvEmpty() {
-        Boolean isEmpty = true;
+        boolean isEmpty = true;
         for (BufferStack bufferStack : this.bufferStacks) {
             if (bufferStack.getStored() > 0) {
                 isEmpty = false;
@@ -471,7 +471,7 @@ public class BufferInventory implements SidedInventory {
         if (this.listeners != null) {
             Iterator<InventoryListener> iterator = this.listeners.iterator();
             while(iterator.hasNext()) {
-                InventoryListener inventoryListener = (InventoryListener)iterator.next();
+                InventoryListener inventoryListener = iterator.next();
                 inventoryListener.onInvChange(this);
             }
         }
@@ -505,7 +505,7 @@ public class BufferInventory implements SidedInventory {
             for (int bufferSlot : bufferInventory.getInvAvailableSlots(null)) {
                 BufferStack bufferStack = bufferInventory.getSlot(bufferSlot);
                 bufferStack.stackQuantity = bufferTag.getInt(STACK_RETRIEVER(bufferSlot));
-                Integer wrapperQuantity = bufferTag.getInt(SIZE_RETRIEVER(bufferSlot));
+                int wrapperQuantity = bufferTag.getInt(SIZE_RETRIEVER(bufferSlot));
                 bufferStack.wrapperItem = Registry.ITEM.get(new Identifier(bufferTag.getString(ITEM_RETRIEVER(bufferSlot))));
                 ItemStack itemStack = new ItemStack(bufferStack.wrapperItem, wrapperQuantity);
                 if (bufferTag.containsKey(TAG_RETRIEVER(bufferSlot))) {

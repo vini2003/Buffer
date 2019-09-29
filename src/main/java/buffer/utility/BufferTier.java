@@ -1,6 +1,7 @@
 package buffer.utility;
 
-public enum BufferUtility {
+public enum BufferTier {
+
     ONE,
     TWO,
     THREE,
@@ -9,29 +10,12 @@ public enum BufferUtility {
     SIX;
     
     public String toString() {
-        switch(this) {
-            case ONE:
-                return "one";
-            case TWO:
-                return "two";
-            case THREE:
-                return "three";
-            case FOUR:
-                return "four";
-            case FIVE:
-                return "five";
-            case SIX:
-                return "six";
-            default:
-                return "one";
-        }
+        return super.toString().toLowerCase();
     }
 
-    public static BufferUtility fromString(String string) {
+    public static BufferTier fromString(String string) {
         switch(string) {
-            case "one":
-                return ONE;
-            case "two":
+			case "two":
                 return TWO;
             case "three":
                 return THREE;
@@ -41,35 +25,19 @@ public enum BufferUtility {
                 return FIVE;
             case "six":
                 return SIX;
-            default:
+			case "one":
+			default:
                 return ONE;
         }
     }
     
     public int toInt() {
-        switch(this) {
-            case ONE:
-                return 1;
-            case TWO:
-                return 2;
-            case THREE:
-                return 3;
-            case FOUR:
-                return 4;
-            case FIVE:
-                return 5;
-            case SIX:
-                return 6;
-            default:
-                return 1;
-        }
+        return this.ordinal() + 1;
     }
 
-    public static BufferUtility fromInt(int type) {
+    public static BufferTier fromInt(int type) {
         switch(type) {
-            case 1:
-                return ONE;
-            case 2:
+			case 2:
                 return TWO;
             case 3:
                 return THREE;
@@ -79,7 +47,8 @@ public enum BufferUtility {
                 return FIVE;
             case 6:
                 return SIX;
-            default:
+			case 1:
+			default:
                 return ONE;
         }
     }

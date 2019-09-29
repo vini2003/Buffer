@@ -65,7 +65,7 @@ public class BufferBaseController extends CottonScreenController {
                     BufferStack bufferStack = bufferInventory.getSlot(slotNumber);
                     bufferStack.restockStack(false);
                     final ItemStack wrappedStack = bufferStack.getStack().copy();
-                    Boolean success = playerEntity.inventory.insertStack(wrappedStack.copy());
+                    boolean success = playerEntity.inventory.insertStack(wrappedStack.copy());
                     if (success) {
                         bufferStack.setStack(ItemStack.EMPTY);
                         if (!world.isClient){BufferPacket.sendPacket((ServerPlayerEntity)playerEntity, slotNumber, bufferStack.getStored());}
