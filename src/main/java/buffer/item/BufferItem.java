@@ -54,6 +54,11 @@ public class BufferItem extends BlockItem {
         });
     }
 
+    public static void reset() {
+        stackToDraw = ItemStack.EMPTY;
+        amountToDraw = 0;
+    }
+
     @Override
     public ActionResult place(ItemPlacementContext placementContext) {
         if (placementContext.getStack().getItem() == ItemRegistry.BUFFER_ITEM) {

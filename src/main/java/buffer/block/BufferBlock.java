@@ -1,17 +1,14 @@
 package buffer.block;
 
-import java.util.stream.IntStream;
-
 import blue.endless.jankson.annotation.Nullable;
 import buffer.entity.BufferEntity;
 import buffer.inventory.BufferInventory;
 import buffer.registry.BlockRegistry;
 import buffer.registry.ItemRegistry;
-import buffer.registry.NetworkRegistry;
 import buffer.registry.ScreenRegistryServer;
+import buffer.screen.BufferEntityController;
 import buffer.utility.BufferTier;
 import net.fabricmc.fabric.api.container.ContainerProviderRegistry;
-import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockState;
@@ -45,9 +42,7 @@ public class BufferBlock extends Block implements BlockEntityProvider {
         if (!world.isClient) {
             ContainerProviderRegistry.INSTANCE.openContainer(ScreenRegistryServer.BUFFER_BLOCK_CONTAINER, playerEntity, (buffer)-> buffer.writeBlockPos(blockPos));
             BufferEntity bufferEntity = ((BufferEntity)world.getBlockEntity(blockPos));
-            for (int slotNumber : IntStream.rangeClosed(0, bufferEntity.bufferInventory.getTier() - 1).toArray()) {
-                ServerSidePacketRegistry.INSTANCE.sendToPlayer(playerEntity, NetworkRegistry.BUFFER_UPDATE_PACKET, NetworkRegistry.createStackUpdatePacket(slotNumber, bufferEntity.bufferInventory.getStoredInternally(slotNumber)));
-            }
+            bufferEntity.bufferController = (BufferEntityController)playerEntity.container;
         }
         return true;
     }

@@ -2,6 +2,7 @@ package buffer.entity;
 
 import buffer.inventory.BufferInventory;
 import buffer.registry.EntityRegistry;
+import buffer.screen.BufferEntityController;
 import net.fabricmc.fabric.api.block.entity.BlockEntityClientSerializable;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.InventoryProvider;
@@ -16,15 +17,14 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.IWorld;
 
 public class BufferEntity extends BlockEntity implements Tickable, BlockEntityClientSerializable, InventoryProvider, SidedInventory {
-    public BufferInventory bufferInventory = new BufferInventory(1);
+    public BufferEntityController bufferController;
 
-    public CompoundTag bufferTag = new CompoundTag();
+    public BufferInventory bufferInventory = new BufferInventory(1);
     
     protected boolean isUpToDate = false;
 
     public BufferEntity() {
         super(EntityRegistry.ENTITY_BUFFER);
-        this.bufferTag = BufferInventory.toTag(this.bufferInventory, this.bufferTag);
     }
 
     @Override
@@ -110,14 +110,12 @@ public class BufferEntity extends BlockEntity implements Tickable, BlockEntityCl
         this.bufferInventory = BufferInventory.fromTag(bufferTag);
         super.fromTag(bufferTag);
     }
-
-    public CompoundTag getTag() {
-        return BufferInventory.toTag(this.bufferInventory, this.bufferTag);
-    }
     
     @Override
     public void tick() {
-        this.markDirty();
         bufferInventory.restockAll();
+        if (bufferController != null && world.isClient) {
+            bufferController.tick();
+        }
     }
 }
