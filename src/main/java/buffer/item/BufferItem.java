@@ -8,6 +8,7 @@ import buffer.inventory.BufferInventory;
 import buffer.inventory.BufferInventory.BufferStack;
 import buffer.registry.ItemRegistry;
 import buffer.registry.ScreenRegistryServer;
+import buffer.screen.BufferItemController;
 import buffer.utility.BufferUsageContext;
 import net.fabricmc.fabric.api.container.ContainerProviderRegistry;
 import net.minecraft.block.Block;
@@ -32,7 +33,7 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.world.World;
 
-public class BufferItem extends Item {
+public class BufferItem extends BlockItem {
     public static ItemStack stackToDraw = ItemStack.EMPTY;
     public static int amountToDraw = 0;
 
@@ -41,18 +42,19 @@ public class BufferItem extends Item {
     public static int pickupTick = 5;
 
     public BufferItem(Block block, Item.Settings properties) {
-        super(properties);
-        this.addPropertyGetter(new Identifier(BufferInventory.TIER_RETRIEVER), (itemStack_1, world_1, livingEntity_1) -> {
-            CompoundTag itemTag = itemStack_1.getTag();
+        super(block, properties);
+        this.addPropertyGetter(new Identifier(BufferInventory.TIER_RETRIEVER), (itemStack, world, livingEntity) -> {
+            CompoundTag itemTag = itemStack.getTag();
             if (itemTag == null || !itemTag.containsKey(BufferInventory.TIER_RETRIEVER)) {
                 itemTag = new CompoundTag();
                 itemTag.putInt(BufferInventory.TIER_RETRIEVER, 1);
-                itemStack_1.setTag(itemTag);
+                itemStack.setTag(itemTag);
             }
             return itemTag.getInt(BufferInventory.TIER_RETRIEVER);
         });
     }
 
+    @Override
     public ActionResult place(ItemPlacementContext placementContext) {
         if (placementContext.getStack().getItem() == ItemRegistry.BUFFER_ITEM) {
             if (placementContext.canPlace()) {
@@ -174,11 +176,14 @@ public class BufferItem extends Item {
         super.inventoryTick(itemStack, world, entity, integer, bool);
         if (entity instanceof PlayerEntity && world.isClient) {
             PlayerEntity playerEntity = (PlayerEntity)entity;
-            if (playerEntity.getMainHandStack().getItem() == ItemRegistry.BUFFER_ITEM) {
-                BufferInventory bufferInventory = BufferInventory.fromTag(playerEntity.getMainHandStack().getTag());
+            Hand hand = null;
+            if (playerEntity.getMainHandStack().getItem() == ItemRegistry.BUFFER_ITEM) { hand = Hand.MAIN_HAND; } 
+            else if (playerEntity.getOffHandStack().getItem() == ItemRegistry.BUFFER_ITEM) { hand = Hand.OFF_HAND; }
+            if (hand != null) {
+                BufferInventory bufferInventory = BufferInventory.fromTag(playerEntity.getStackInHand(hand).getTag());
                 if (bufferInventory.selectedSlot == -1) {
-                    stackToDraw = playerEntity.getMainHandStack();
-                    amountToDraw = playerEntity.getMainHandStack().getCount();
+                    stackToDraw = playerEntity.getStackInHand(hand);
+                    amountToDraw = playerEntity.getStackInHand(hand).getCount();
                 } else {
                     stackToDraw = bufferInventory.getSlot(bufferInventory.selectedSlot).getStack().copy();
                     amountToDraw = bufferInventory.getStored(bufferInventory.selectedSlot);
@@ -186,6 +191,9 @@ public class BufferItem extends Item {
             } else {
                 stackToDraw = ItemStack.EMPTY;
                 amountToDraw = 0;
+            }
+            if (playerEntity.container instanceof BufferItemController) {
+                ((BufferItemController)playerEntity.container).tick();
             }
         }
     }

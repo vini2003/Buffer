@@ -6,11 +6,12 @@ import java.util.List;
 import buffer.inventory.BufferInventory;
 import buffer.inventory.BufferInventory.BufferStack;
 import buffer.registry.ItemRegistry;
-import buffer.utility.BufferPacket;
+import buffer.registry.NetworkRegistry;
 import io.github.cottonmc.cotton.gui.CottonScreenController;
 import io.github.cottonmc.cotton.gui.widget.WItemSlot;
 import io.github.cottonmc.cotton.gui.widget.WLabel;
 import io.github.cottonmc.cotton.gui.widget.WPlainPanel;
+import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
 import net.minecraft.container.BlockContext;
 import net.minecraft.container.Slot;
 import net.minecraft.container.SlotActionType;
@@ -68,10 +69,10 @@ public class BufferBaseController extends CottonScreenController {
                     boolean success = playerEntity.inventory.insertStack(wrappedStack.copy());
                     if (success) {
                         bufferStack.setStack(ItemStack.EMPTY);
-                        if (!world.isClient){BufferPacket.sendPacket((ServerPlayerEntity)playerEntity, slotNumber, bufferStack.getStored());}
+                        //if (!world.isClient) {ServerSidePacketRegistry.INSTANCE.sendToPlayer(playerEntity, NetworkRegistry.BUFFER_UPDATE_PACKET, NetworkRegistry.createStackUpdatePacket(slotNumber, bufferStack.getStored())); }
                         return ItemStack.EMPTY;
                     } else {
-                        if (!world.isClient){BufferPacket.sendPacket((ServerPlayerEntity)playerEntity, slotNumber, bufferStack.getStored());}
+                        //if (!world.isClient) {ServerSidePacketRegistry.INSTANCE.sendToPlayer(playerEntity, NetworkRegistry.BUFFER_UPDATE_PACKET, NetworkRegistry.createStackUpdatePacket(slotNumber, bufferStack.getStored())); }
                         return wrappedStack.copy();
                     }
                 } else {
@@ -95,6 +96,7 @@ public class BufferBaseController extends CottonScreenController {
                         ItemStack newStack = bufferInventory.insertStack(xavStack.copy());
                         playerEntity.inventory.setCursorStack(newStack);
                     }
+                    //if (!world.isClient) {ServerSidePacketRegistry.INSTANCE.sendToPlayer(playerEntity, NetworkRegistry.BUFFER_UPDATE_PACKET, NetworkRegistry.createStackUpdatePacket(slotNumber, bufferStack.getStored())); }
                     return ItemStack.EMPTY;
                 } else {
                     return super.onSlotClick(slotNumber, button, action, playerEntity);

@@ -21,7 +21,8 @@ public class InGameHudMixin {
 
     @Inject(method = "render(F)V", at = @At("RETURN"))
     private void render(float c, CallbackInfo info) {
-        if (MinecraftClient.getInstance().player.getMainHandStack().getItem() != ItemRegistry.BUFFER_ITEM) {
+        if (MinecraftClient.getInstance().player.getMainHandStack().getItem() != ItemRegistry.BUFFER_ITEM
+        &&  MinecraftClient.getInstance().player.getOffHandStack().getItem() != ItemRegistry.BUFFER_ITEM) {
             BufferItem.amountToDraw = 0;
             BufferItem.stackToDraw = ItemStack.EMPTY;
         }

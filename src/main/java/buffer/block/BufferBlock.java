@@ -7,10 +7,11 @@ import buffer.entity.BufferEntity;
 import buffer.inventory.BufferInventory;
 import buffer.registry.BlockRegistry;
 import buffer.registry.ItemRegistry;
+import buffer.registry.NetworkRegistry;
 import buffer.registry.ScreenRegistryServer;
-import buffer.utility.BufferPacket;
 import buffer.utility.BufferTier;
 import net.fabricmc.fabric.api.container.ContainerProviderRegistry;
+import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockState;
@@ -19,11 +20,9 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.stat.Stats;
 import net.minecraft.state.StateFactory;
 import net.minecraft.util.Hand;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.BlockView;
@@ -47,12 +46,10 @@ public class BufferBlock extends Block implements BlockEntityProvider {
             ContainerProviderRegistry.INSTANCE.openContainer(ScreenRegistryServer.BUFFER_BLOCK_CONTAINER, playerEntity, (buffer)-> buffer.writeBlockPos(blockPos));
             BufferEntity bufferEntity = ((BufferEntity)world.getBlockEntity(blockPos));
             for (int slotNumber : IntStream.rangeClosed(0, bufferEntity.bufferInventory.getTier() - 1).toArray()) {
-                BufferPacket.sendPacket((ServerPlayerEntity)playerEntity, slotNumber, bufferEntity.bufferInventory.getStoredInternally(slotNumber));
+                ServerSidePacketRegistry.INSTANCE.sendToPlayer(playerEntity, NetworkRegistry.BUFFER_UPDATE_PACKET, NetworkRegistry.createStackUpdatePacket(slotNumber, bufferEntity.bufferInventory.getStoredInternally(slotNumber)));
             }
-            return true;
-        } else {
-            return false;
         }
+        return true;
     }
     
     @Override
