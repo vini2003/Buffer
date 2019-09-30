@@ -181,7 +181,13 @@ public class BufferInventory implements SidedInventory {
 
             if (wrapperQuantity >= 0 && stackQuantity > 0) {
                 wrapperQuantity = this.wrapperStack.getCount();
-                int differenceQuantity = this.wrapperStack.getMaxCount() - wrapperQuantity;
+                int differenceQuantity;
+                if (!isInitial) {
+                    differenceQuantity = this.initialStack.getMaxCount() - wrapperQuantity;
+                } else {
+                    differenceQuantity = this.wrapperStack.getMaxCount() - wrapperQuantity;
+                }
+
                 if (this.stackQuantity >= differenceQuantity) {
                     this.setStack(new ItemStack(wrapperItem, wrapperQuantity + differenceQuantity));
                     this.wrapperStack.setTag(wrapperTag);

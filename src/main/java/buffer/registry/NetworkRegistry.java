@@ -112,7 +112,6 @@ public class NetworkRegistry {
                     BufferInventory bufferInventory = BufferInventory.fromTag(playerEntity.getStackInHand(hand).getTag());
                     bufferInventory.isVoid = isVoid;
                     playerEntity.getStackInHand(hand).setTag(BufferInventory.toTag(bufferInventory, playerEntity.getStackInHand(hand).getTag()));
-                    System.out.println("Server: " + bufferInventory.isVoid);
             });
         });
     }
