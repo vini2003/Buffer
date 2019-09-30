@@ -1,5 +1,6 @@
 package buffer.item;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
@@ -8,10 +9,10 @@ import buffer.inventory.BufferInventory;
 import buffer.inventory.BufferInventory.BufferStack;
 import buffer.registry.ItemRegistry;
 import buffer.registry.ScreenRegistryServer;
-import buffer.screen.BufferItemController;
 import buffer.utility.BufferUsageContext;
 import net.fabricmc.fabric.api.container.ContainerProviderRegistry;
 import net.minecraft.block.Block;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -23,6 +24,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
@@ -162,15 +164,41 @@ public class BufferItem extends BlockItem {
 
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> text, TooltipContext tooltipContext) {
+        boolean isSneaking = Screen.hasShiftDown();
         if (itemStack.getTag() != null) {
-            CompoundTag tag = itemStack.getTag();
+            BufferInventory bufferInventory = BufferInventory.fromTag(itemStack.getTag());
+            
+            text.add(new TranslatableText("buffer.tooltip.tier", Integer.toString(bufferInventory.getTier())));
+            text.add(new TranslatableText("buffer.tooltip.pickup." + bufferInventory.isPickup));
+            text.add(new TranslatableText("buffer.tooltip.void." + bufferInventory.isVoid));
 
-            if(tag.containsKey(BufferInventory.TIER_RETRIEVER)) {
-                text.add(new TranslatableText("buffer.tooltip.tier", Integer.toString(tag.getInt(BufferInventory.TIER_RETRIEVER))));
+            if (!isSneaking) {
+                text.add(new TranslatableText("buffer.tooltip.sneaking_false"));
+            } else {
+                text.add(new TranslatableText("buffer.tooltip.sneaking_true"));
+                Iterator<BufferStack> stackIterator = bufferInventory.bufferStacks.iterator();
+                while (stackIterator.hasNext()) {
+                    BufferStack bufferStack = stackIterator.next();
+                    String name;
+                    if (bufferStack.getStack() == ItemStack.EMPTY) {
+                        name = "Empty";
+                    } else {
+                        name = "§f§o" + bufferStack.getStack().getName().getString();
+                    }
+                    String amount;
+                    if (bufferStack.getStack() == ItemStack.EMPTY) {
+                        amount = "";
+                    } else {
+                        amount = "§9" + bufferStack.getStored() + "x §f§o";
+                    }
+
+                    if (stackIterator.hasNext()) {
+                        text.add(new LiteralText("├─ " + amount + name));
+                    } else {
+                        text.add(new LiteralText("└─ " + amount + name));
+                    }
+                }
             }
-
-            text.add(new TranslatableText("buffer.tooltip.pickup." + tag.getBoolean(BufferInventory.PICKUP_RETRIEVER)));
-            text.add(new TranslatableText("buffer.tooltip.void." + tag.getBoolean(BufferInventory.VOID_RETRIEVER)));
         }
         super.appendTooltip(itemStack, world, text, tooltipContext);
     }
@@ -210,7 +238,7 @@ public class BufferItem extends BlockItem {
 
     private ItemStack getTier(int tier) {
         ItemStack stack = new ItemStack(this);
-        CompoundTag tag = new CompoundTag();
+        CompoundTag tag = BufferInventory.toTag(new BufferInventory(tier), new CompoundTag());
         tag.putInt(BufferInventory.TIER_RETRIEVER, tier);
         stack.setTag(tag);
         return stack;

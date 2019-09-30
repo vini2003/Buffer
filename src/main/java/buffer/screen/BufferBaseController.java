@@ -1,7 +1,5 @@
 package buffer.screen;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.List;
 
@@ -43,6 +41,12 @@ public class BufferBaseController extends CottonScreenController {
 		super(RecipeType.CRAFTING, syncId, playerInventory, getBlockInventory(context), getBlockPropertyDelegate(context));
 
 		setRootPanel(rootPanel);
+	}
+
+	public static String withSuffix(long count) {
+		if (count < 1000) return "" + count;
+		int exp = (int) (Math.log(count) / Math.log(1000));
+		return String.format("%.1f %c", count / Math.pow(1000, exp), "KMGTPE".charAt(exp-1));
 	}
 
 	@Override
@@ -110,7 +114,7 @@ public class BufferBaseController extends CottonScreenController {
 
 	public void tickLabels() {
 		for (int bufferSlot : this.bufferInventory.getInvAvailableSlots(null)) {
-			controllerLabels.get(bufferSlot).setText(new LiteralText(Integer.toString(this.bufferInventory.getStored(bufferSlot))));
+			controllerLabels.get(bufferSlot).setText(new LiteralText(withSuffix(this.bufferInventory.getStored(bufferSlot))));
 		}
 	}
 

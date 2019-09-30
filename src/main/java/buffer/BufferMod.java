@@ -3,6 +3,7 @@ package buffer;
 import net.fabricmc.api.ModInitializer;
 import buffer.registry.BlockRegistry;
 import buffer.registry.EntityRegistry;
+import buffer.registry.ItemGroupRegistry;
 import buffer.registry.ItemRegistry;
 import buffer.registry.NetworkRegistry;
 import buffer.registry.ScreenRegistryServer;
@@ -10,6 +11,7 @@ import buffer.registry.ScreenRegistryServer;
 public class BufferMod implements ModInitializer {
 	@Override
 	public void onInitialize() {
+		ItemGroupRegistry.registerGroups();
 		BlockRegistry.registerBlocks();
 		ItemRegistry.registerItems();
 		EntityRegistry.registerBlocks();

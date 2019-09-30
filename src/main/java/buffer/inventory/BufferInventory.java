@@ -1,7 +1,6 @@
 package buffer.inventory;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -25,7 +24,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.registry.Registry;
 
 public class BufferInventory implements SidedInventory {
-    protected List<BufferStack> bufferStacks = new ArrayList<>();
+    public List<BufferStack> bufferStacks = new ArrayList<>();
     protected List<InventoryListener> listeners;
     protected int bufferTier = 1;
 

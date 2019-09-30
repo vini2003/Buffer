@@ -12,6 +12,6 @@ public class ItemRegistry {
     public static BufferItem BUFFER_ITEM;
 
     public static void registerItems() {
-        BUFFER_ITEM = Registry.register(Registry.ITEM, IDENTIFIER_BUFFER, new BufferItem(BlockRegistry.BLOCK_BUFFER, new Item.Settings().group(ItemGroup.MISC)));
+        BUFFER_ITEM = Registry.register(Registry.ITEM, IDENTIFIER_BUFFER, new BufferItem(BlockRegistry.BLOCK_BUFFER, new Item.Settings().group(ItemGroupRegistry.BUFFER_GROUP)));
    }
 }
