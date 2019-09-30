@@ -25,7 +25,16 @@ public class BufferEntityController extends BufferBaseController {
         this.bufferEntity = getBufferEntity(context);
         super.bufferInventory = bufferEntity.bufferInventory;
         super.setBaseWidgets();
+        this.setEntityWidgets();
         super.rootPanel.validate(this);
+    }
+
+    public void setEntityWidgets() {
+        if (super.bufferInventory.getTier() <= 3) {
+            super.rootPanel.add(super.createPlayerInventoryPanel(), 0, sectionY * 3);
+        } else {
+            super.rootPanel.add(super.createPlayerInventoryPanel(), 0, sectionY * 4 + 18);  
+        }
     }
 
     @Override

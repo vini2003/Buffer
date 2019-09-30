@@ -62,13 +62,12 @@ public class BufferItem extends BlockItem {
     @Override
     public ActionResult place(ItemPlacementContext placementContext) {
         if (placementContext.getStack().getItem() == ItemRegistry.BUFFER_ITEM) {
-            if (placementContext.canPlace()) {
+            ActionResult placeResult = super.place(placementContext);
+            if (placeResult == ActionResult.SUCCESS) {
                 BufferEntity bufferEntity = ((BufferEntity)placementContext.getWorld().getBlockEntity(placementContext.getBlockPos()));
                 bufferEntity.bufferInventory = BufferInventory.fromTag(placementContext.getStack().getTag());
-                return ActionResult.SUCCESS;
-            } else {
-                return ActionResult.FAIL;
             }
+            return placeResult;
         } else {
             if (placementContext.getStack().getItem() instanceof BlockItem) {
                 BlockItem blockToPlace = (BlockItem)placementContext.getStack().getItem();
@@ -196,9 +195,6 @@ public class BufferItem extends BlockItem {
             } else {
                 stackToDraw = ItemStack.EMPTY;
                 amountToDraw = 0;
-            }
-            if (playerEntity.container instanceof BufferItemController) {
-                ((BufferItemController)playerEntity.container).tick();
             }
         }
     }
