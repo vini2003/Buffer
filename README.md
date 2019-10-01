@@ -12,4 +12,4 @@ Not `:arr:`!
 Buffer is released under [GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html), because whenever possible, software should be made available to others. Much of Buffer's development was heavily helped by community members.
 
 ### Style? Guidelines?
-Buffer is now moving towards using the [Google Style for Java](https://google.github.io/styleguide/javaguide.html), which sets reasonable standards for code readability, albeit it has opted to use spaces instead of tabs.
+Buffer is now moving towards using the [Google Style for Java](https://google.github.io/styleguide/javaguide.html), which sets reasonable standards for code readability, albeit it has opted to use spaces instead of tabs, and section 4.6.1-1 is not obligatory if method names are similar or the same.
