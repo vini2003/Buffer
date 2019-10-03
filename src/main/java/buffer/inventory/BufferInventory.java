@@ -9,10 +9,7 @@ import com.google.common.collect.Lists;
 import blue.endless.jankson.annotation.Nullable;
 import buffer.utility.BufferTier;
 import buffer.utility.Tuple;
-import io.github.cottonmc.cotton.gui.widget.WItemSlot;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.InventoryListener;
 import net.minecraft.inventory.SidedInventory;
 import net.minecraft.item.Item;
@@ -23,12 +20,16 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.registry.Registry;
 
+/**
+ * BufferInventory implementation of SidedInventory which implements base methods and general
+ * wrapping capabilities to allow large compatibility with most mods.
+ */
 public class BufferInventory implements SidedInventory {
     public List<BufferStack> bufferStacks = new ArrayList<>();
     protected List<InventoryListener> listeners;
     protected int bufferTier = 1;
 
-    public int selectedSlot = 0;
+    public int selectedSlot = -1;
 
     public boolean isVoid = false;
     public boolean isPickup = false;
@@ -38,38 +39,53 @@ public class BufferInventory implements SidedInventory {
     public static final String VOID_RETRIEVER = "void";
     public static final String PICKUP_RETRIEVER = "pickup";
 
+    /**
+     * Constructor which defines a BufferInventory by the given tier.
+     * @param bufferTier Tier to set BufferInventory to.
+     */
+    public BufferInventory(int bufferTier) {
+        this.setTier(bufferTier);
+    }
+
+    /**
+     * Get a retriever for CompoundTag's 'stackQuantity' field.
+     * @param integer Tier to get retriver for.
+     * @return String to retrieve requested NBT data.
+     */
     public static String STACK_RETRIEVER(int integer) {
         return Integer.toString(integer);
     }
 
+    /**
+     * Get a retriever for CompoundTag's 'wrapperQuantity' field.
+     * @param integer Tier to get retriver for.
+     * @return String to retrieve requested NBT data.
+     */
     public static String SIZE_RETRIEVER(int integer) {
         return integer + "_size";
     }
 
+    /**
+     * Get a retriever for CompoundTag's 'wrapperTag' field.
+     * @param integer Tier to get retriver for.
+     * @return String to retrieve requested NBT data.
+     */
     public static String TAG_RETRIEVER(int integer) {
         return integer + "_tag";
     }
 
+    /**
+     * Get a retriever for CompoundTag's 'wrapperItem' field.
+     * @param integer Tier to get retriver for.
+     * @return String to retrieve requested NBT data.
+     */
     public static String ITEM_RETRIEVER(int integer) {
         return integer + "_item";
     }
 
-    public static class WBufferSlot extends WItemSlot {
-        protected int bufferSlot;
-        protected PlayerInventory playerInventory;
-
-        public WBufferSlot(Inventory inventory, int temporaryIndex, int slotsWide, int slotsHigh, PlayerInventory temporaryInventory) {
-            super(inventory, temporaryIndex, slotsWide, slotsHigh, false, false);
-            bufferSlot = temporaryIndex;
-            playerInventory = temporaryInventory;
-        }
-
-        @Override
-        public void onClick(int x, int y, int button) {
-            super.onClick(x, y, button);
-        }
-    }
-
+    /**
+     * Custom wrapper for BufferInventory's stacks, to be as compatible as possible with everything else.
+     */
     public class BufferStack {
         public int stackQuantity = 0;
         public int stackMaximum = getInvMaxStackAmount();
@@ -80,41 +96,86 @@ public class BufferInventory implements SidedInventory {
 
         private ItemStack initialStack = ItemStack.EMPTY;
 
+        /**
+         * Set new 'wrapperStack', which also updates 'wrapperTag'.
+         * @param itemStack ItemStack to set 'wrapperStack' to.
+         */
         public void setStack(ItemStack itemStack) {
-            this.wrapperStack = itemStack.copy();
-            this.wrapperTag = itemStack.getTag();
+            this.wrapperStack = itemStack;
+            setTag(wrapperStack.getTag());
         }
 
+        /**
+         * Returns 'wrappedStack'.
+         * @return ItemStack of 'wrapperStack'.
+         */
         public ItemStack getStack() {
-            return this.wrapperStack;
+            if (this.wrapperStack == null) {
+                return ItemStack.EMPTY;
+            } else {
+                return this.wrapperStack;
+            }
         }
 
+        /**
+         * Returns 'wrapperItem'.
+         * @return Item of 'wrapperItem'.
+         */
         public Item getItem() {
-            return this.wrapperItem;
+            return this.wrapperStack.getItem();
         }
 
+        /**
+         * Set new 'wrapperTag'.
+         * @param itemTag CompoundTag to set 'wrapperTag' to.
+         */
         public void setTag(CompoundTag itemTag) {
             this.wrapperTag = itemTag;
-            this.wrapperStack.setTag(itemTag);
         }
 
+        /**
+         * Checks if 'wrapperTag' exists.
+         * @return true if it exists, false if it doesn't.
+         */
+        public boolean hasTag() {
+            return this.wrapperTag == null ? false : true;
+        }
 
+        /**
+         * Returns 'wrapperTag'.
+         * @return CompoundTag of 'wrapperTag'.
+         */
         public CompoundTag getTag() {
             return this.wrapperTag;
         }
 
+        /**
+         * Checks if provided ItemStack can be inserted.
+         * @param itemStack ItemStack to check insertion status for.
+         * @return true if can insert, false if can't.
+         */
         public boolean canInsert(ItemStack itemStack) {
             return wrapperStack.getCount() + itemStack.getCount() < stackMaximum
                     && wrapperStack.getItem() == itemStack.getItem()
                     && wrapperStack.getTag() == itemStack.getTag();
         }
 
+        /**
+         * Checks if provided ItemStack can be extracted.
+         * @param itemStack ItemStack to check extraction status for.
+         * @return true if can extract, false if can't.
+         */
         public boolean canExtract(ItemStack itemStack) {
             return itemStack.getCount() <= wrapperStack.getCount()
                     && wrapperStack.getItem() == itemStack.getItem()
                     && wrapperStack.getTag() == itemStack.getTag();
         }
         
+        /**
+         * Insert ItemStack into BufferStack.
+         * @param insertStack ItemStack to insert.
+         * @return ItemStack remaining after insertion.
+         */
         public ItemStack insertStack(ItemStack insertStack) {
             if (wrapperStack.getItem() == Items.AIR) {
                 this.setStack(insertStack.copy());
@@ -135,14 +196,12 @@ public class BufferInventory implements SidedInventory {
 
             int insertMaximum = insertStack.getMaxCount();
 
-            this.stackMaximum = getInvMaxStackAmount() + wrapperStack.getMaxCount();
+            this.stackMaximum = getInvMaxStackAmount() + wrapperStack.getMaxCount() + (64 - wrapperStack.getMaxCount());
 
             if (totalQuantity + insertQuantity <= stackMaximum) {
                 this.stackQuantity += insertQuantity;
                 insertStack.decrement(insertQuantity);
-            }
-
-            else if (totalQuantity + insertQuantity > stackMaximum) {
+            } else if (totalQuantity + insertQuantity > stackMaximum) {
                 int differenceQuantity = (totalQuantity + insertQuantity) - stackMaximum;
                 int offsetQuantity = insertMaximum - differenceQuantity;
                 this.stackQuantity += offsetQuantity;
@@ -160,7 +219,11 @@ public class BufferInventory implements SidedInventory {
             }
         }
 
-        public boolean restockStack(Boolean isInitial) {
+        /**
+         * Restock BufferStack's 'wrapperStack'.
+         * @param isInitial Boolean of 'is initial insertion'. If true, update 'initialStack', else, base operations on it.
+         */
+        public void restock(Boolean isInitial) {
             int wrapperQuantity = this.wrapperStack.getCount();
 
             if (this.wrapperStack.getCount() == 0 && this.stackQuantity > 0) {
@@ -177,7 +240,6 @@ public class BufferInventory implements SidedInventory {
 
                 }
             }
-
             if (wrapperQuantity >= 0 && stackQuantity > 0) {
                 wrapperQuantity = this.wrapperStack.getCount();
                 int differenceQuantity;
@@ -196,36 +258,37 @@ public class BufferInventory implements SidedInventory {
                     this.wrapperStack.setTag(wrapperTag);
                     this.stackQuantity -= stackQuantity;
                 }
-                return true;
             } else if (stackQuantity == 0 && wrapperQuantity == 0) {
                 this.wrapperStack = ItemStack.EMPTY;
-                return false;
-            } else {
-                return false;
             }
         }
 
+        /**
+         * Returns BufferStack's total stored amount.
+         * @return Integer with total stored amount.
+         */
         public int getStored() {
             return this.stackQuantity + this.wrapperStack.getCount();
         }
-
-        public void clear() {
-            this.stackQuantity = 0;
-            this.stackMaximum = 0;
-            this.wrapperItem = null;
-            this.wrapperStack = null;
-            this.wrapperTag = null;
-        }
     }
 
+    /**
+     * Invert pickup mode.
+     */
     public void swapPickup() {
         this.isPickup = !this.isPickup;
     }
 
+    /**
+     * Invert void mode.
+     */
     public void swapVoid() {
         this.isVoid = !this.isVoid;
     }
 
+    /**
+     * Switch selected slot.
+     */
     public void swapSlot() {
         if (selectedSlot < this.getTier() - 1) {
             ++selectedSlot;
@@ -235,25 +298,21 @@ public class BufferInventory implements SidedInventory {
         }
     }
 
+    /**
+     * Restock all BufferStacks of BufferInventory.
+     */
     public void restockAll() {
         for (BufferStack bufferStack : this.bufferStacks) {
-            bufferStack.restockStack(false);
+            bufferStack.restock(false);
         }
     }
 
-    public void restockInitial() {
-        for (BufferStack bufferStack : this.bufferStacks) {
-            bufferStack.restockStack(true);
-        }
-    }
-
-    @Nullable
-    public BufferInventory(int tier) {
-        this.setTier(tier);
-    }
-
-    public void setTier(int tier) {
-        this.bufferTier = tier;
+    /**
+     * Sets 'bufferTier' to given tier, adding BufferStacks when needed.
+     * @param bufferTier Tier to set 'bufferTier' to.
+     */
+    public void setTier(int bufferTier) {
+        this.bufferTier = bufferTier;
         for (int bufferSlot = 0; bufferSlot < getInvMaxSlotAmount(); ++bufferSlot) {
             if (bufferStacks.size() - 1 < bufferSlot) {
                 bufferStacks.add(new BufferStack());
@@ -261,10 +320,19 @@ public class BufferInventory implements SidedInventory {
         }
     }
 
+    /**
+     * Returns BufferInventory's 'bufferTier'.
+     * @return Tier of BufferInventory.
+     */
     public int getTier() {
         return this.bufferTier;
     }
 
+    /**
+     * Returns BufferStack of given slot.
+     * @param bufferSlot Slot to get BufferStack of.
+     * @return Retrieved BufferStack.
+     */
     public BufferStack getSlot(int bufferSlot) {
         if (bufferStacks.size() - 1 >= bufferSlot) {
             return bufferStacks.get(bufferSlot);
@@ -273,6 +341,11 @@ public class BufferInventory implements SidedInventory {
         }
     }
     
+    /**
+     * Returns BufferStack of given slot's total stored amount.
+     * @param bufferSlot Slot to get BufferStack of.
+     * @return Retrieved total stored amount.
+     */
     public int getStored(int bufferSlot) {
         BufferStack bufferStack = getSlot(bufferSlot);
         if (bufferStack != null) {
@@ -281,92 +354,42 @@ public class BufferInventory implements SidedInventory {
             return 0;
         }
     }
-    
-    public int getStoredInternally(int bufferSlot) {
-        BufferStack bufferStack = getSlot(bufferSlot);
-        if (bufferStack != null) {
-            return bufferStack.stackQuantity;
-        } else {
-            return 0;
-        }
 
-    }
-
-    @Override
-    public int getInvSize() {
-        return getInvMaxSlotAmount() - 1;
-    }
-
-    @Override
-    public ItemStack getInvStack(int bufferSlot) {
-        BufferStack bufferStack = getSlot(bufferSlot);
-        if (bufferStack != null) {
-            return bufferStack.getStack();
-        } else {
-            return ItemStack.EMPTY;
-        }
-    }
-
-    @Override
-    public void setInvStack(int bufferSlot, ItemStack itemStack) {
-        BufferStack bufferStack = getSlot(bufferSlot);
-        if (bufferStack != null) {
-            bufferStack.setStack(itemStack);
-        }
-    }
-
-    @Override
-    public ItemStack takeInvStack(int bufferSlot, int itemQuantity) {
-        BufferStack bufferStack = getSlot(bufferSlot);
-        if (bufferStack != null) { 
-            if (bufferStack.getStack().getCount() >= itemQuantity) {
-                ItemStack returnStack = new ItemStack(bufferStack.getStack().getItem(), itemQuantity);
-                bufferStack.wrapperStack.decrement(itemQuantity);
-                return returnStack;
-            } else {
-                return ItemStack.EMPTY;
-            }
-        } else {
-            return ItemStack.EMPTY;
-        }
-    }
-
-    @Override
-    public ItemStack removeInvStack(int bufferSlot) {
-        if (bufferStacks.size() <= bufferSlot && bufferSlot >= 0) {
-            ItemStack returnStack = bufferStacks.get(bufferSlot).getStack();
-            bufferStacks.get(bufferSlot).setStack(ItemStack.EMPTY);
-            return returnStack;
-        } else {
-            return ItemStack.EMPTY;
-        }
-    }
-    
-
+    /**
+     * Returns the maximum amount of slots the BufferInventory can hold.
+     * @return Integer of maximum amount of slots.
+     */
     public int getInvMaxSlotAmount() {
         return bufferTier;
     }
 
+    /**
+     * Returns the maximum amount of items the BufferInventory's BufferStacks can hold.
+     * @return Integer of maximum amount of items.
+     */
     public int getInvMaxStackAmount() {
         return BufferTier.getStackSize(bufferTier);
     }
 
-    @Override
-    public int[] getInvAvailableSlots(Direction direction) {
-        return IntStream.rangeClosed(0, bufferTier - 1).toArray();
-    }   
-
-    // -1 = NO SLOT
-    //  0 = EMPTY SLOT
-    // +1 = MATCHING SLOT
+    
+    /**
+     * Check if stack can be inserted into the BufferInventory.
+     * @param insertionStack ItemStack to check with.
+     * @return Where x is slot number:
+     * <ul>
+     *  <li> Tuple<0, x>  if an empty slot can hold it. </li>
+     *  <li> Tuple<-1, x> if no slots can hold it. </li>
+     *  <li> Tuple<+1, x>  if a slot of the same item can hold it. </li>
+     * </ul>
+     */
     public Tuple<Integer, Integer> tryInsert(ItemStack insertionStack) {
         Tuple<Integer, Integer> insertionMode = new Tuple<>(-1, null);
         for (int slot : this.getInvAvailableSlots(null)) {
             BufferStack bufferStack = this.bufferStacks.get(slot);
-            if (insertionStack.getItem() == bufferStack.getStack().getItem()) {
-                if (insertionStack.hasTag() && bufferStack.getStack().hasTag()
-                &&  insertionStack.getTag().equals(bufferStack.getStack().getTag())
-                ||  !insertionStack.hasTag() && !bufferStack.getStack().hasTag()) {
+            if (insertionStack.getItem() == bufferStack.getItem()) {
+                if (insertionStack.hasTag() && bufferStack.hasTag()
+                &&  insertionStack.getTag().equals(bufferStack.getTag())
+                ||  !insertionStack.hasTag() && !bufferStack.hasTag()) {
                     insertionMode.first = +1;
                     insertionMode.second = slot;
                     break;
@@ -380,6 +403,11 @@ public class BufferInventory implements SidedInventory {
         return insertionMode;
     }
 
+    /**
+     * Insert ItemStack into matching BufferStack in BufferInventory.
+     * @param insertStack ItemStack to insert.
+     * @return ItemStack remaining after insertion.
+     */
     public ItemStack insertStack(ItemStack insertionStack) {
         Tuple<Integer, Integer> insertionData = this.tryInsert(insertionStack);
         if (insertionData.first == -1) {
@@ -392,45 +420,16 @@ public class BufferInventory implements SidedInventory {
         if (insertionData.first == 0) {
             BufferStack bufferStack = this.getSlot(insertionData.second);
             bufferStack.insertStack(insertionStack);
-            bufferStack.restockStack(true);
+            bufferStack.restock(true);
             insertionStack = ItemStack.EMPTY;
         }
         return insertionStack;
     }
 
-    @Override
-    public boolean canInsertInvStack(int bufferSlot, ItemStack itemStack, @Nullable Direction direction) {
-        BufferStack bufferStack = getSlot(bufferSlot);
-        return bufferStack.canInsert(itemStack);
-    }
-
-    @Override
-    public boolean canExtractInvStack(int bufferSlot, ItemStack itemStack, Direction direction) {
-        BufferStack bufferStack = getSlot(bufferSlot);
-        return bufferStack.canInsert(itemStack);
-    }
-
-    @Override
-    public boolean isInvEmpty() {
-        boolean isEmpty = true;
-        for (BufferStack bufferStack : this.bufferStacks) {
-            if (bufferStack.getStored() > 0) {
-                isEmpty = false;
-            }
-        }
-        return isEmpty;
-    }
-
-    @Override
-    public void clear() {
-        // TODO: Implement
-    }
-
-    @Override
-    public boolean canPlayerUseInv(PlayerEntity playerEntity) {
-        return true;
-    }
-
+        /**
+     * Implementation for vanilla 'addListener'.
+     * @param inventoryListener InventoryListener to add to 'listeners'.
+     */
     public void addListener(InventoryListener inventoryListener) {
         if (this.listeners == null) {
            this.listeners = Lists.newArrayList();
@@ -438,31 +437,31 @@ public class BufferInventory implements SidedInventory {
         this.listeners.add(inventoryListener);
      }
 
+    /**
+     * Implementation for 'removeListener'.
+     * @param inventoryListener InventoryListener to remove from 'listeners'.
+     */
     public void removeListener(InventoryListener inventoryListener) {
        this.listeners.remove(inventoryListener);
     }
 
-    @Override
-    public void markDirty() {
-        if (this.listeners != null) {
-            for (InventoryListener inventoryListener : this.listeners) {
-                inventoryListener.onInvChange(this);
-            }
-        }
-    }
 
+    /**
+     * Serializes BufferInventory data to a CompoundTag.
+     * @param bufferInventory BufferInventory to serialize.
+     * @param bufferTag CompoundTag to append data to.
+     * @return Resulting CompoundTag.
+     */
     public static CompoundTag toTag(BufferInventory bufferInventory, CompoundTag bufferTag) {
-        bufferInventory.restockAll();
         bufferTag.putInt(TIER_RETRIEVER, bufferInventory.getTier());
         bufferTag.putInt(SELECTED_SLOT_RETRIEVER, bufferInventory.selectedSlot);
         bufferTag.putBoolean(PICKUP_RETRIEVER, bufferInventory.isPickup);
         bufferTag.putBoolean(VOID_RETRIEVER, bufferInventory.isVoid);
         for (int bufferSlot : bufferInventory.getInvAvailableSlots(null)) {
             BufferStack bufferStack = bufferInventory.getSlot(bufferSlot);
-            bufferStack.restockStack(false);
             bufferTag.putInt(STACK_RETRIEVER(bufferSlot), bufferStack.stackQuantity);
             bufferTag.putInt(SIZE_RETRIEVER(bufferSlot), bufferStack.getStack().getCount());
-            bufferTag.putString(ITEM_RETRIEVER(bufferSlot), bufferStack.getStack().getItem().toString());
+            bufferTag.putString(ITEM_RETRIEVER(bufferSlot), bufferStack.getItem().toString());
             if (bufferStack.getStack().hasTag()) {
                 bufferTag.put(TAG_RETRIEVER(bufferSlot), bufferStack.wrapperTag.copy());
             }
@@ -470,6 +469,11 @@ public class BufferInventory implements SidedInventory {
         return bufferTag;
     }
 
+    /**
+     * Deserializes CompoundTag.
+     * @param bufferTag CompoundTag to deserialize.
+     * @return Resulting BufferInventory.
+     */
     public static BufferInventory fromTag(CompoundTag bufferTag) {
         BufferInventory bufferInventory = new BufferInventory(1);
         if (bufferTag != null) {
@@ -488,9 +492,142 @@ public class BufferInventory implements SidedInventory {
                     itemStack.setTag(bufferStack.wrapperTag);
                 }
                 bufferStack.setStack(itemStack.copy());
-                bufferStack.restockStack(true);
+                bufferStack.restock(true);
             }
         }
         return bufferInventory;
+    }
+
+    /**
+     * Wrapper for vanilla's 'getInvSize'.
+     */
+    @Override
+    public int getInvSize() {
+        return getInvMaxSlotAmount() - 1;
+    }
+
+    /**
+     * Wrapper for vanilla's 'getInvStack'.
+     */
+    @Override
+    public ItemStack getInvStack(int bufferSlot) {
+        BufferStack bufferStack = getSlot(bufferSlot);
+        if (bufferStack != null) {
+            return bufferStack.getStack();
+        } else {
+            return ItemStack.EMPTY;
+        }
+    }
+
+    /**
+     * Wrapper for vanilla's 'setInvStack'.
+     */
+    @Override
+    public void setInvStack(int bufferSlot, ItemStack itemStack) {
+        BufferStack bufferStack = getSlot(bufferSlot);
+        if (bufferStack != null) {
+            bufferStack.setStack(itemStack);
+        }
+    }
+
+    /**
+     * Wrapper for vanilla's 'takeInvStack'.
+     */
+    @Override
+    public ItemStack takeInvStack(int bufferSlot, int itemQuantity) {
+        BufferStack bufferStack = getSlot(bufferSlot);
+        if (bufferStack != null) { 
+            if (bufferStack.getStack().getCount() >= itemQuantity) {
+                ItemStack returnStack = new ItemStack(bufferStack.getItem(), itemQuantity);
+                bufferStack.wrapperStack.decrement(itemQuantity);
+                return returnStack;
+            } else {
+                return ItemStack.EMPTY;
+            }
+        } else {
+            return ItemStack.EMPTY;
+        }
+    }
+
+    /**
+     * Wrapper for vanilla's 'removeInvStack'.
+     */
+    @Override
+    public ItemStack removeInvStack(int bufferSlot) {
+        if (bufferStacks.size() <= bufferSlot && bufferSlot >= 0) {
+            ItemStack returnStack = bufferStacks.get(bufferSlot).getStack();
+            bufferStacks.get(bufferSlot).setStack(ItemStack.EMPTY);
+            return returnStack;
+        } else {
+            return ItemStack.EMPTY;
+        }
+    }
+    
+    /**
+     * Wrapper for vanilla's 'getInvAvailableSlots'. 
+     */
+    @Override
+    public int[] getInvAvailableSlots(Direction direction) {
+        return IntStream.rangeClosed(0, bufferTier - 1).toArray();
+    }   
+
+    /**
+     * Wrapper for vanilla 'canInsertInvStack'.
+     */
+    @Override
+    public boolean canInsertInvStack(int bufferSlot, ItemStack itemStack, @Nullable Direction direction) {
+        BufferStack bufferStack = getSlot(bufferSlot);
+        return bufferStack.canInsert(itemStack);
+    }
+
+    /**
+     * Wrapper for vanilla 'canExtractInvStack'.
+     */
+    @Override
+    public boolean canExtractInvStack(int bufferSlot, ItemStack itemStack, Direction direction) {
+        BufferStack bufferStack = getSlot(bufferSlot);
+        return bufferStack.canInsert(itemStack);
+    }
+
+    /**
+     * Wrapper for vanilla 'isInvEmpty'.
+     */
+    @Override
+    public boolean isInvEmpty() {
+        boolean isEmpty = true;
+        for (BufferStack bufferStack : this.bufferStacks) {
+            if (bufferStack.getStored() > 0) {
+                isEmpty = false;
+            }
+        }
+        return isEmpty;
+    }
+
+    /**
+     * Wrapper for vanilla 'clear', except I don't know what it's meant to do.
+     * TODO: Figure out what this is meant to do.
+     */
+    @Override
+    public void clear() {
+    }
+
+    /**
+     * Override for vanilla 'canPlayerUseInv'.
+     */
+    @Override
+    public boolean canPlayerUseInv(PlayerEntity playerEntity) {
+        return true;
+    }
+
+        /**
+     * Override for vanilla 'markDirt'.
+     */
+    @Override
+    public void markDirty() {
+        if (this.listeners != null) {
+            for (InventoryListener inventoryListener : this.listeners) {
+                inventoryListener.onInvChange(this);
+            }
+        }
     }
 }

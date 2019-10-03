@@ -1,17 +1,21 @@
 package buffer.registry;
 
+import buffer.BufferMod;
+import buffer.item.BufferItem;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
-import buffer.item.BufferItem;
 
+/**
+ * Commonside Item registry.
+ */
 public class ItemRegistry {
-    public static final Identifier IDENTIFIER_BUFFER = new Identifier("buffer", "buffer");
-
     public static BufferItem BUFFER_ITEM;
 
+    /**
+     * Register all of Buffer's Items.
+     */
     public static void registerItems() {
-        BUFFER_ITEM = Registry.register(Registry.ITEM, IDENTIFIER_BUFFER, new BufferItem(BlockRegistry.BLOCK_BUFFER, new Item.Settings().group(ItemGroupRegistry.BUFFER_GROUP)));
+        BUFFER_ITEM = Registry.register(Registry.ITEM, new Identifier(BufferMod.MOD_ID, "buffer"), new BufferItem(BlockRegistry.BLOCK_BUFFER, new Item.Settings().group(ItemGroupRegistry.BUFFER_GROUP)));
    }
-}
+}   

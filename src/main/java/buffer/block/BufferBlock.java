@@ -25,18 +25,31 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 
+/**
+ * BufferBlock extension of Block which implements a block entity provider.
+ */
 public class BufferBlock extends Block implements BlockEntityProvider {
+    /**
+     * Default constructor with default state.
+     * @param settings
+     */
     public BufferBlock(Block.Settings settings) {
         super(settings);
         this.setDefaultState(this.stateFactory.getDefaultState()
             .with(BufferTier.bufferTier, 1));
     }
 
+    /**
+     * Override vanilla 'createBlockEntity'.
+     */
     @Override
     public BlockEntity createBlockEntity(BlockView blockView) {
         return new BufferEntity();
     }
 
+    /**
+     * Override vanilla 'activate' implemeting custom container.
+     */
     @Override
     public boolean activate(BlockState blockState, World world, BlockPos blockPos, PlayerEntity playerEntity, Hand hand, BlockHitResult blockHitResult) {
         if (!world.isClient) {
@@ -47,19 +60,25 @@ public class BufferBlock extends Block implements BlockEntityProvider {
         return true;
     }
     
+    /**
+     * Override vanilla 'onPlaced' implementing special code to configure created BufferEntity.
+     */
     @Override
     public void onPlaced(World world, BlockPos blockPosition, BlockState blockState, LivingEntity livingEntity, ItemStack itemStack) {
         if (itemStack.getItem() == ItemRegistry.BUFFER_ITEM) {
             CompoundTag itemTag = itemStack.getTag();
             BufferEntity bufferEntity = (BufferEntity)world.getBlockEntity(blockPosition);
             BufferInventory inventoryMirror = bufferEntity.bufferInventory;
-            int tier = itemTag.getInt(BufferInventory.TIER_RETRIEVER);
-            inventoryMirror.setTier(tier);
+            int bufferTier = itemTag.getInt(BufferInventory.TIER_RETRIEVER);
+            inventoryMirror.setTier(bufferTier);
             world.setBlockState(blockPosition, BlockRegistry.BLOCK_BUFFER.getDefaultState().with(BufferTier.bufferTier, inventoryMirror.getTier()));
         }
         super.onPlaced(world, blockPosition, blockState, livingEntity, itemStack);
     }
 
+    /**
+     * Override vanilla 'afterBreak' implementing special code to configure drop result.
+     */
     @Override
     public void afterBreak(World world, PlayerEntity playerEntity, BlockPos blockPosition, BlockState blockState, @Nullable BlockEntity blockEntity_1, ItemStack itemStack_1) {
         playerEntity.incrementStat(Stats.MINED.getOrCreateStat(this));
@@ -69,6 +88,9 @@ public class BufferBlock extends Block implements BlockEntityProvider {
         dropStack(world, blockPosition, itemStack);
     }
     
+    /**
+     * Override vanilla 'appendProperties' implementing BufferTier.
+     */
     @Override
     protected void appendProperties(StateFactory.Builder<Block, BlockState> builder) {
         super.appendProperties(builder);

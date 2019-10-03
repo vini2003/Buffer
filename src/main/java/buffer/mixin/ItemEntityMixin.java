@@ -1,5 +1,15 @@
 package buffer.mixin;
 
+import java.util.UUID;
+
+import com.google.common.collect.ImmutableList;
+
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
 import buffer.inventory.BufferInventory;
 import buffer.registry.ItemRegistry;
 import buffer.screen.BufferItemController;
@@ -8,17 +18,13 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.stat.Stats;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import net.minecraft.util.DefaultedList;
 
-import java.util.UUID;
-
+/**
+ * Commonside Mixin into ItemEntity to try Buffer insertion before all else.
+ */
 @Mixin(ItemEntity.class)
 public class ItemEntityMixin {
-
 	@Shadow
 	private UUID owner;
 
@@ -28,24 +34,43 @@ public class ItemEntityMixin {
 	@Shadow
 	private int pickupDelay;
 
+	/**
+	 * Intercept 'onPlayerCollision' and attempt insertion into Buffer.
+	 * @param playerEntity PlayerEntity involved in collision.
+	 * @param info Mixin CallbackInfo.
+	 */
 	@Inject(method = "onPlayerCollision", at = @At("HEAD"))
 	private void onPlayerCollision(PlayerEntity playerEntity, CallbackInfo info) {
-		ItemEntity itemEntity = (ItemEntity) (Object) this;
-		ItemStack buffer = ItemStack.EMPTY;
+		ItemEntity itemEntity = (ItemEntity)(Object)this;
+		ItemStack resultStack = ItemStack.EMPTY;
 
-		for (ItemStack stack : playerEntity.inventory.main) {
-			if (stack.getItem() == ItemRegistry.BUFFER_ITEM) {
-				buffer = stack;
+		ImmutableList<DefaultedList<ItemStack>> inventory = ImmutableList.of(playerEntity.inventory.main, playerEntity.inventory.offHand);
+
+		/**
+		 * Attempt to find BufferItem.
+		 */
+		for (DefaultedList<ItemStack> list : inventory) {
+			if (resultStack.getItem() == ItemRegistry.BUFFER_ITEM) {
+				break;
+			}
+			for (ItemStack itemStack : list) {
+				if (itemStack.getItem() == ItemRegistry.BUFFER_ITEM) {
+					resultStack = itemStack;
+					break;
+				}
 			}
 		}
 
-		if (!itemEntity.world.isClient && buffer != ItemStack.EMPTY && !(playerEntity.container instanceof BufferItemController) && buffer.getTag().getBoolean("pickup")) {
+		/**
+		 * If found and meets all criteria, perform insertion.
+		 */
+		if (!itemEntity.world.isClient && resultStack != ItemStack.EMPTY && !(playerEntity.container instanceof BufferItemController) && resultStack.getTag().getBoolean("pickup")) {
 			ItemStack itemStack = itemEntity.getStack();
 			if (itemStack.getItem() != ItemRegistry.BUFFER_ITEM && pickupDelay == 0 && (owner == null || 6000 - age <= 200 || owner.equals(playerEntity.getUuid()))) {
-				BufferInventory bufferInventory = BufferInventory.fromTag(buffer.getTag());
+				BufferInventory bufferInventory = BufferInventory.fromTag(resultStack.getTag());
 				ItemStack tryInsertStack = bufferInventory.insertStack(itemStack);
 				itemEntity.setStack(tryInsertStack);
-				buffer.setTag(BufferInventory.toTag(bufferInventory, new CompoundTag()));
+				resultStack.setTag(BufferInventory.toTag(bufferInventory, new CompoundTag()));
 				playerEntity.sendPickup(itemEntity, itemStack.getCount());
 				playerEntity.increaseStat(Stats.PICKED_UP.getOrCreateStat(itemStack.getItem()), itemStack.getCount());
 			}

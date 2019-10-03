@@ -2,13 +2,38 @@ package buffer.screen;
 
 import buffer.entity.BufferEntity;
 import net.minecraft.container.BlockContext;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 
+/**
+ * Extended Container/Controller for usage with BufferEntity, implements custom methods and
+ * widgets.
+ */
 public class BufferEntityController extends BufferBaseController {
     BufferEntity bufferEntity;
 
-    public BufferEntity getBufferEntity(BlockContext context) {
+    /**
+     * Customized constructor which configures the Container/Controller for a BufferEntity.
+     * Sets custom widgets, obtains BufferEntity, PlayerInventory, and creates a BufferInventory.
+	 * @param syncID ID for Container/Controller synchronization.
+	 * @param playerInventory PlayerInventory from player who opened container.
+	 * @param context BlockContext for opened container.
+     */
+    public BufferEntityController(int syncId, PlayerInventory playerInventory, BlockContext context) {
+        super(syncId, playerInventory, context);
+        super.playerInventory = playerInventory;
+        getBufferEntity(context);
+        super.bufferInventory = bufferEntity.bufferInventory;
+        addBaseWidgets();
+        addEntityWidgets();
+        super.rootPanel.validate(this);
+    }
+
+    /**
+     * Gets BufferEntity based on BlockContext.
+     * @param context Block context of opened interface.
+     * @return BufferEntity of opened interface. 
+     */
+    public void getBufferEntity(BlockContext context) {
         BufferEntity[] lambdaBypass = new BufferEntity[1];
 
         context.run((world, blockPosition) -> {
@@ -16,30 +41,13 @@ public class BufferEntityController extends BufferBaseController {
             lambdaBypass[0] = temporaryEntity;
         });
 
-        return lambdaBypass[0];
+        this.bufferEntity = lambdaBypass[0];
     }
 
-    public BufferEntityController(int syncId, PlayerInventory playerInventory, BlockContext context) {
-        super(syncId, playerInventory, context);
-        super.playerInventory = playerInventory;
-        this.bufferEntity = getBufferEntity(context);
-        super.bufferInventory = bufferEntity.bufferInventory;
-        super.setBaseWidgets();
-        this.setEntityWidgets();
-        super.rootPanel.validate(this);
-    }
-
-    public void setEntityWidgets() {
-        if (super.bufferInventory.getTier() <= 3) {
-            super.rootPanel.add(super.createPlayerInventoryPanel(), 0, sectionY * 3);
-        } else {
-            super.rootPanel.add(super.createPlayerInventoryPanel(), 0, sectionY * 4 + 18);  
-        }
-    }
-
-    @Override
-    public void close(PlayerEntity playerEntity) {
-        bufferEntity.bufferController = null;
-        super.close(playerEntity);
+    /**
+	 * Add base widget(s) used by BufferEntity to Container/Controller.
+	 */
+    public void addEntityWidgets() {
+        super.rootPanel.add(super.createPlayerInventoryPanel(), 0, super.bufferInventory.getTier() <= 3 ? SECTION_Y * 3 : SECTION_Y * 4 + 18);
     }
 }

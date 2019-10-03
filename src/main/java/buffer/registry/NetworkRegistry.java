@@ -1,10 +1,8 @@
 package buffer.registry;
 
 import buffer.inventory.BufferInventory;
-import buffer.screen.BufferEntityController;
 import buffer.screen.BufferItemController;
 import io.netty.buffer.Unpooled;
-import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
 import net.fabricmc.fabric.api.network.ServerSidePacketRegistry;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundTag;
@@ -13,105 +11,92 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.PacketByteBuf;
 
 // For this spaghetti, I blame akoimeex.
+
+/**
+ * Commonside Packet registry.
+ */
 public class NetworkRegistry {
     public static Identifier BUFFER_UPDATE_PACKET = new Identifier("buffer", "buffer_update");
     public static Identifier BUFFER_SWITCH_PACKET = new Identifier("buffer", "buffer_switch");
     public static Identifier BUFFER_PICKUP_PACKET = new Identifier("buffer", "buffer_pickup");
     public static Identifier BUFFER_VOID_PACKET = new Identifier("buffer", "buffer_void");
 
-    public static PacketByteBuf createStackUpdatePacket(int bufferSlot, int stackQuantity) {
+    /**
+     * Creates an empty PacketByteBuf for usage with Buffer selection switching.
+     * @return Empty PacketByteBuf.
+     */
+    public static PacketByteBuf createBufferSwitchPacket() {
         PacketByteBuf buffer = new PacketByteBuf(Unpooled.buffer());
-        buffer.writeInt(bufferSlot);
-        buffer.writeInt(stackQuantity);
         return buffer;
     }
 
-    public static PacketByteBuf createBufferSwitchPacket(int hand) {
-        PacketByteBuf buffer = new PacketByteBuf(Unpooled.buffer());
-        buffer.writeInt(hand);
-        return buffer;
-    }
-
+    /**
+     * Creates a custom PacketByteBuf for usage with Buffer pickup mode switching.
+     * @return Custom PacketByteBuf.
+     */
     public static PacketByteBuf createBufferPickupPacket(boolean isPickup) {
         PacketByteBuf buffer = new PacketByteBuf(Unpooled.buffer());
         buffer.writeBoolean(isPickup);
         return buffer;
     }
 
+    /**
+     * Creates a custom PacketByteBuf for usage with Buffer void mode switching.
+     * @param isVoid Void mode boolean.
+     * @return Custom PacketByteBuf.
+     */
     public static PacketByteBuf createBufferVoidPacket(boolean isVoid) {
         PacketByteBuf buffer = new PacketByteBuf(Unpooled.buffer());
         buffer.writeBoolean(isVoid);
         return buffer;
     }
 
+    /**
+     * Registers all custom packets used by Buffer.
+     */
     public static void registerPackets() {
-        ClientSidePacketRegistry.INSTANCE.register(BUFFER_UPDATE_PACKET, (packetContext, packetByteBuffer) -> {
-            int bufferSlot = packetByteBuffer.readInt();
-            int packetStackQuantity = packetByteBuffer.readInt();
-            packetContext.getTaskQueue().execute(() -> {
-                PlayerEntity playerEntity = packetContext.getPlayer();
-                if (playerEntity.container instanceof BufferItemController) {
-                    BufferItemController bufferController = (BufferItemController)playerEntity.container;
-                    if (bufferController.bufferInventory != null) {
-                        bufferController.bufferInventory.getSlot(bufferSlot).stackQuantity = packetStackQuantity;
-                    }
-                }
-                if (playerEntity.container instanceof BufferEntityController) {
-                    BufferEntityController bufferController = (BufferEntityController)playerEntity.container;
-                    if (bufferController.bufferInventory != null) {
-                        bufferController.bufferInventory.getSlot(bufferSlot).stackQuantity = packetStackQuantity;
-                    }
-                }
-            });   
-        });
-
+        /**
+         * Register the Buffer selection switch packet.
+         */
         ServerSidePacketRegistry.INSTANCE.register(BUFFER_SWITCH_PACKET, (packetContext, packetByteBuffer) -> {
             packetContext.getTaskQueue().execute(() -> {
                 PlayerEntity playerEntity = packetContext.getPlayer();
-                Hand hand = Hand.MAIN_HAND;
-                if (playerEntity.getMainHandStack().getItem() == ItemRegistry.BUFFER_ITEM) { hand = Hand.MAIN_HAND; } 
-                else if (playerEntity.getOffHandStack().getItem() == ItemRegistry.BUFFER_ITEM) { hand = Hand.OFF_HAND; }
-                else { return; }
-                if (playerEntity.getStackInHand(hand).getItem() == ItemRegistry.BUFFER_ITEM) {
-                    BufferInventory bufferInventory = BufferInventory.fromTag(playerEntity.getStackInHand(hand).getTag());
-                    bufferInventory.swapSlot();
-                    playerEntity.getStackInHand(hand).setTag(BufferInventory.toTag(bufferInventory, new CompoundTag()));
-                }
+                Hand hand = playerEntity.getMainHandStack().getItem() == ItemRegistry.BUFFER_ITEM ? Hand.MAIN_HAND : Hand.OFF_HAND;
+                BufferInventory bufferInventory = BufferInventory.fromTag(playerEntity.getStackInHand(hand).getTag());
+                bufferInventory.swapSlot();
+                playerEntity.getStackInHand(hand).setTag(BufferInventory.toTag(bufferInventory, new CompoundTag()));
             });
         });
+        /**
+         * Register the Buffer pickup mode packet.
+         */
         ServerSidePacketRegistry.INSTANCE.register(BUFFER_PICKUP_PACKET, (packetContext, packetByteBuffer) -> {
             boolean isPickup = packetByteBuffer.readBoolean();
             packetContext.getTaskQueue().execute(() -> {
                 PlayerEntity playerEntity = packetContext.getPlayer();
-                Hand hand = Hand.MAIN_HAND;
-                if (playerEntity.getMainHandStack().getItem() == ItemRegistry.BUFFER_ITEM) { hand = Hand.MAIN_HAND; } 
-                else if (playerEntity.getOffHandStack().getItem() == ItemRegistry.BUFFER_ITEM) { hand = Hand.OFF_HAND; }
-                else { return; }
+                Hand hand = playerEntity.getMainHandStack().getItem() == ItemRegistry.BUFFER_ITEM ? Hand.MAIN_HAND : Hand.OFF_HAND;
                 if (playerEntity.container instanceof BufferItemController) {
-                    BufferItemController controller = ((BufferItemController)playerEntity.container);
-                    controller.bufferInventory.isPickup = isPickup;
+                    ((BufferItemController)playerEntity.container).bufferInventory.isPickup = isPickup;
                 }
                 BufferInventory bufferInventory = BufferInventory.fromTag(playerEntity.getStackInHand(hand).getTag());
                 bufferInventory.isPickup = isPickup;
                 playerEntity.getStackInHand(hand).setTag(BufferInventory.toTag(bufferInventory, playerEntity.getStackInHand(hand).getTag()));
             });
         });
-
+        /**
+         * Register the Buffer void mode packet.
+         */
         ServerSidePacketRegistry.INSTANCE.register(BUFFER_VOID_PACKET, (packetContext, packetByteBuffer) -> {
             boolean isVoid = packetByteBuffer.readBoolean();
             packetContext.getTaskQueue().execute(() -> {
-                    PlayerEntity playerEntity = packetContext.getPlayer();
-                    Hand hand = Hand.MAIN_HAND;
-                    if (playerEntity.getMainHandStack().getItem() == ItemRegistry.BUFFER_ITEM) { hand = Hand.MAIN_HAND; } 
-                    else if (playerEntity.getOffHandStack().getItem() == ItemRegistry.BUFFER_ITEM) { hand = Hand.OFF_HAND; }
-                    else { return; }
-                    if (playerEntity.container instanceof BufferItemController) {
-                        BufferItemController controller = ((BufferItemController)playerEntity.container);
-                        controller.bufferInventory.isVoid = isVoid;
-                    }
-                    BufferInventory bufferInventory = BufferInventory.fromTag(playerEntity.getStackInHand(hand).getTag());
-                    bufferInventory.isVoid = isVoid;
-                    playerEntity.getStackInHand(hand).setTag(BufferInventory.toTag(bufferInventory, playerEntity.getStackInHand(hand).getTag()));
+                PlayerEntity playerEntity = packetContext.getPlayer();
+                Hand hand = playerEntity.getMainHandStack().getItem() == ItemRegistry.BUFFER_ITEM ? Hand.MAIN_HAND : Hand.OFF_HAND;
+                if (playerEntity.container instanceof BufferItemController) {
+                    ((BufferItemController)playerEntity.container).bufferInventory.isVoid = isVoid;
+                }
+                BufferInventory bufferInventory = BufferInventory.fromTag(playerEntity.getStackInHand(hand).getTag());
+                bufferInventory.isVoid = isVoid;
+                playerEntity.getStackInHand(hand).setTag(BufferInventory.toTag(bufferInventory, playerEntity.getStackInHand(hand).getTag()));
             });
         });
     }
