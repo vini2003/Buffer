@@ -619,7 +619,7 @@ public class BufferInventory implements SidedInventory {
         return true;
     }
 
-        /**
+    /**
      * Override for vanilla 'markDirt'.
      */
     @Override
