@@ -10,5 +10,5 @@
   "buffer.tooltip.void.false": "§9Void:§7§o No",
   "buffer.tooltip.sneaking_false": "§7§oSHIFT for details...",
   "buffer.tooltip.sneaking_true": "§9Buffered:",
-  "itemGroup.buffer.general": "Buffer"
+  "itemGroup.buffer.buffer": "Buffer"
 }

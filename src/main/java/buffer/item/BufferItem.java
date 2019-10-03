@@ -60,7 +60,7 @@ public class BufferItem extends BlockItem {
          */
         this.addPropertyGetter(new Identifier(BufferInventory.TIER_RETRIEVER), (itemStack, world, livingEntity) -> {
             CompoundTag itemTag = itemStack.getOrCreateTag();
-            if (itemTag.containsKey(BufferInventory.TIER_RETRIEVER)) {
+            if (!itemTag.containsKey(BufferInventory.TIER_RETRIEVER)) {
                 itemTag.putInt(BufferInventory.TIER_RETRIEVER, 1);
                 itemStack.setTag(itemTag);
             }
@@ -106,15 +106,15 @@ public class BufferItem extends BlockItem {
                 bufferEntity.bufferInventory = BufferInventory.fromTag(placementContext.getStack().getTag());
             }
         }
+        else {
+            if (placementContext.getStack().getItem() instanceof BlockItem) {
+                BlockItem blockToPlace = (BlockItem)placementContext.getStack().getItem();
+                return blockToPlace.place(placementContext);
+            } else {
+                return ActionResult.FAIL;
+            }
+        }
         return placementResult;
-        // else {
-        //    if (placementContext.getStack().getItem() instanceof BlockItem) {
-        //        BlockItem blockToPlace = (BlockItem)placementContext.getStack().getItem();
-        //        return blockToPlace.place(placementContext);
-        //    } else {
-        //        return ActionResult.FAIL;
-        //    }
-        //}
     }
 
     /**
@@ -155,6 +155,7 @@ public class BufferItem extends BlockItem {
                             bufferStack.getStack().damage(1, (Random)usageContext.getWorld().random, (ServerPlayerEntity)null);
                             bufferStack.setTag(bufferStack.getStack().getTag());
                         }
+                        bufferStack.getStack().decrement(1);
                         bufferItemStack.setTag(BufferInventory.toTag(bufferInventory, new CompoundTag()));
                     } else {
                         TypedActionResult<ItemStack> useResult = playerEntity.getStackInHand(usageContext.getHand()).getItem().use(world, playerEntity, hand);
@@ -315,7 +316,6 @@ public class BufferItem extends BlockItem {
     private ItemStack getStackWithTier(int bufferTier) {
         ItemStack itemStack = new ItemStack(this);
         CompoundTag itemTag = BufferInventory.toTag(new BufferInventory(bufferTier), new CompoundTag());
-        itemTag.putInt(BufferInventory.TIER_RETRIEVER, bufferTier);
         itemStack.setTag(itemTag);
         return itemStack;
     }
