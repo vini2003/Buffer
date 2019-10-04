@@ -5,6 +5,7 @@ import java.util.List;
 
 import buffer.inventory.BufferInventory;
 import buffer.inventory.BufferInventory.BufferStack;
+import buffer.registry.ItemRegistry;
 import io.github.cottonmc.cotton.gui.CottonScreenController;
 import io.github.cottonmc.cotton.gui.widget.WItemSlot;
 import io.github.cottonmc.cotton.gui.widget.WLabel;
@@ -17,6 +18,7 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.RecipeType;
 import net.minecraft.text.LiteralText;
+import net.minecraft.util.Hand;
 
 /**
  * Base Container/Controller for usage with Buffer, implements default methods for GUI widgets
@@ -33,7 +35,7 @@ public class BufferBaseController extends CottonScreenController {
 	protected static final int SECTION_X = 48;
 	protected static final int SECTION_Y = 20;
 
-	/** 
+	/**
 	 * Base constructor which sets root panel.
 	 * @param syncID ID for Container/Controller synchronization.
 	 * @param playerInventory PlayerInventory from player who opened container.
@@ -98,6 +100,10 @@ public class BufferBaseController extends CottonScreenController {
 				}
 				return quickStack;
 			} else if (action == SlotActionType.PICKUP) {
+				Hand hand = player.getMainHandStack().getItem() == ItemRegistry.BUFFER_ITEM ? Hand.MAIN_HAND : Hand.OFF_HAND;
+				if (player.getStackInHand(hand) == inventorySlot.getStack()) {
+					return player.inventory.getCursorStack();
+				}
 				if (inventorySlot.inventory instanceof BufferInventory) {
 					BufferStack bufferStack = bufferInventory.getSlot(slot);
 					bufferStack.restock(false);
@@ -117,6 +123,8 @@ public class BufferBaseController extends CottonScreenController {
 				} else {
 					return super.onSlotClick(slot, button, action, player);
 				}
+			} else if (action == SlotActionType.THROW) {
+				return ItemStack.EMPTY;
 			} else {
 				return super.onSlotClick(slot, button, action, player);
 			}
@@ -199,26 +207,26 @@ public class BufferBaseController extends CottonScreenController {
 				rootPanel.add(controllerSlots.get(1), SECTION_X * 2 - 27, SECTION_Y - 12);
 				rootPanel.add(controllerSlots.get(2), SECTION_X * 3 - 18, SECTION_Y - 12);
 				rootPanel.add(controllerSlots.get(3), SECTION_X * 1 - 36, SECTION_Y * 2 + 4);
-				rootPanel.add(controllerSlots.get(4), SECTION_X * 2 - 27, SECTION_Y * 2 + 4);        
-				rootPanel.add(controllerSlots.get(5), SECTION_X * 3 - 18, SECTION_Y * 2 + 4);  
+				rootPanel.add(controllerSlots.get(4), SECTION_X * 2 - 27, SECTION_Y * 2 + 4);
+				rootPanel.add(controllerSlots.get(5), SECTION_X * 3 - 18, SECTION_Y * 2 + 4);
 				rootPanel.add(controllerLabels.get(0), SECTION_X * 1 - 36, SECTION_Y + 10);
 				rootPanel.add(controllerLabels.get(1), SECTION_X * 2 - 27, SECTION_Y  + 10);
 				rootPanel.add(controllerLabels.get(2), SECTION_X * 3 - 18, SECTION_Y + 10);
 				rootPanel.add(controllerLabels.get(3), SECTION_X * 1 - 36, SECTION_Y * 2 + 26);
-				rootPanel.add(controllerLabels.get(4), SECTION_X * 2 - 27, SECTION_Y * 2 + 26);        
-				rootPanel.add(controllerLabels.get(5), SECTION_X * 3 - 18, SECTION_Y * 2 + 26);  
-				break;  
+				rootPanel.add(controllerLabels.get(4), SECTION_X * 2 - 27, SECTION_Y * 2 + 26);
+				rootPanel.add(controllerLabels.get(5), SECTION_X * 3 - 18, SECTION_Y * 2 + 26);
+				break;
 		}
 	}
-	
+
 	/**
 	 * Always return -1 because this interface does not implement crafting.
 	 */
-	@Override   
+	@Override
 	public int getCraftingResultSlotIndex() {
 		return -1;
 	}
-	
+
 	/**
 	 * Always return true to allow interface usage.
 	 */

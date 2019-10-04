@@ -1,33 +1,33 @@
 {
-  "schemaVersion": 1,
-  "id": "buffer",
-  "version": "${version}",
-  "name": "Buffer",
-  "description": "Buffers for your storage needs.",
-  "authors": [
-    "vini2003"
-  ],
-  "contact": {
-    "sources": "https://github.com/vini2003/Buffer",
-    "issues": "https://github.com/vini2003/Buffer/issues"
-  },
-  "license": "GPL-3.0+",
-  "icon": "assets/buffer/icon.png",
-  "environment": "*",
-  "entrypoints": {
-    "main": [
-      "buffer.BufferMod"
-    ],
-    "client": [
-      "buffer.BufferModClient"
-    ]
-  },
-  "mixins": [
-    "mixins.buffer.json"
-  ],
-  "depends": {
-    "fabricloader": ">=0.6.2",
-    "fabric": ">=0.4.0",
-    "libgui": ">=1.3.2-beta.1"
-  }
+	"schemaVersion": 1,
+	"id": "buffer",
+	"version": "${version}",
+	"name": "Buffer",
+	"description": "Buffers for your storage needs.",
+	"authors": [
+		"vini2003"
+	],
+	"contact": {
+		"sources": "https://github.com/vini2003/Buffer",
+		"issues": "https://github.com/vini2003/Buffer/issues"
+	},
+	"license": "GPL-3.0+",
+	"icon": "assets/buffer/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"buffer.BufferMod"
+		],
+		"client": [
+			"buffer.BufferModClient"
+		]
+	},
+	"mixins": [
+		"mixins.buffer.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.6.2",
+		"fabric": ">=0.4.0",
+		"libgui": ">=1.3.2-beta.1"
+	}
 }

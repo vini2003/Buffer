@@ -7,6 +7,8 @@ import java.util.stream.IntStream;
 import com.google.common.collect.Lists;
 
 import blue.endless.jankson.annotation.Nullable;
+import buffer.item.BufferItem;
+import buffer.registry.ItemRegistry;
 import buffer.utility.BufferTier;
 import buffer.utility.Tuple;
 import net.minecraft.entity.player.PlayerEntity;
@@ -170,13 +172,16 @@ public class BufferInventory implements SidedInventory {
                     && wrapperStack.getItem() == itemStack.getItem()
                     && wrapperStack.getTag() == itemStack.getTag();
         }
-        
+
         /**
          * Insert ItemStack into BufferStack.
          * @param insertStack ItemStack to insert.
          * @return ItemStack remaining after insertion.
          */
         public ItemStack insertStack(ItemStack insertStack) {
+            if (insertStack.getItem() == ItemRegistry.BUFFER_ITEM) {
+                return insertStack;
+            }
             if (wrapperStack.getItem() == Items.AIR) {
                 this.setStack(insertStack.copy());
                 if (insertStack.hasTag()) {
@@ -230,7 +235,7 @@ public class BufferInventory implements SidedInventory {
                 if (!isInitial) {
                     wrapperItem = initialStack.getItem();
                 }
-            } else if (this.wrapperStack.getCount() > 0 && this.stackQuantity > 0) {    
+            } else if (this.wrapperStack.getCount() > 0 && this.stackQuantity > 0) {
                 if (!isInitial) {
                     this.initialStack = wrapperStack.copy();
                     wrapperItem = wrapperStack.getItem();
@@ -340,7 +345,7 @@ public class BufferInventory implements SidedInventory {
             return null;
         }
     }
-    
+
     /**
      * Returns BufferStack of given slot's total stored amount.
      * @param bufferSlot Slot to get BufferStack of.
@@ -371,7 +376,7 @@ public class BufferInventory implements SidedInventory {
         return BufferTier.getStackSize(bufferTier);
     }
 
-    
+
     /**
      * Check if stack can be inserted into the BufferInventory.
      * @param insertionStack ItemStack to check with.
@@ -419,9 +424,8 @@ public class BufferInventory implements SidedInventory {
         }
         if (insertionData.first == 0) {
             BufferStack bufferStack = this.getSlot(insertionData.second);
-            bufferStack.insertStack(insertionStack);
+            insertionStack = bufferStack.insertStack(insertionStack);
             bufferStack.restock(true);
-            insertionStack = ItemStack.EMPTY;
         }
         return insertionStack;
     }
@@ -536,7 +540,7 @@ public class BufferInventory implements SidedInventory {
     @Override
     public ItemStack takeInvStack(int bufferSlot, int itemQuantity) {
         BufferStack bufferStack = getSlot(bufferSlot);
-        if (bufferStack != null) { 
+        if (bufferStack != null) {
             if (bufferStack.getStack().getCount() >= itemQuantity) {
                 ItemStack returnStack = new ItemStack(bufferStack.getItem(), itemQuantity);
                 bufferStack.wrapperStack.decrement(itemQuantity);
@@ -562,14 +566,14 @@ public class BufferInventory implements SidedInventory {
             return ItemStack.EMPTY;
         }
     }
-    
+
     /**
-     * Wrapper for vanilla's 'getInvAvailableSlots'. 
+     * Wrapper for vanilla's 'getInvAvailableSlots'.
      */
     @Override
     public int[] getInvAvailableSlots(Direction direction) {
         return IntStream.rangeClosed(0, bufferTier - 1).toArray();
-    }   
+    }
 
     /**
      * Wrapper for vanilla 'canInsertInvStack'.

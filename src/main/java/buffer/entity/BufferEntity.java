@@ -24,7 +24,7 @@ public class BufferEntity extends BlockEntity implements BlockEntityClientSerial
     public BufferEntityController bufferController;
 
     public BufferInventory bufferInventory = new BufferInventory(1);
-    
+
     protected boolean isUpToDate = false;
 
     /**
@@ -167,7 +167,7 @@ public class BufferEntity extends BlockEntity implements BlockEntityClientSerial
         this.bufferInventory = BufferInventory.fromTag(bufferTag);
         super.fromTag(bufferTag);
     }
-    
+
     /**
      * Override for vanilla's 'tick'.
      */

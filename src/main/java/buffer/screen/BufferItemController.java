@@ -65,7 +65,7 @@ public class BufferItemController extends BufferBaseController {
             super.bufferInventory.isVoid = toggleVoid.getToggle();
             ClientSidePacketRegistry.INSTANCE.sendToServer(NetworkRegistry.BUFFER_VOID_PACKET, NetworkRegistry.createBufferVoidPacket(super.bufferInventory.isVoid));
         });
-        
+
         if (super.bufferInventory.getTier() <= 3) {
             super.rootPanel.add(togglePickup, 5, SECTION_Y * 2 + 9);
             super.rootPanel.add(toggleVoid, 139, SECTION_Y * 2 + 9);
@@ -75,12 +75,12 @@ public class BufferItemController extends BufferBaseController {
             super.rootPanel.add(togglePickup, 5, SECTION_Y * 3 + 8 + 18);
             super.rootPanel.add(toggleVoid, 139, SECTION_Y * 3 + 8 + 18);
             super.rootPanel.add(pickupLabel, 27, SECTION_Y * 3 + 8 + 18 + 6);
-            super.rootPanel.add(voidLabel, 135 - (MinecraftClient.getInstance().textRenderer.getStringWidth(voidText.asString())), SECTION_Y * 3 + 8 + 18 + 6);       
+            super.rootPanel.add(voidLabel, 135 - (MinecraftClient.getInstance().textRenderer.getStringWidth(voidText.asString())), SECTION_Y * 3 + 8 + 18 + 6);
         }
 
         super.rootPanel.add(super.createPlayerInventoryPanel(), 0, super.bufferInventory.getTier() <= 3 ? SECTION_Y * 4 : SECTION_Y * 5 + 18);
     }
-    
+
     /**
      * Override close method to update hand ItemStack NBT, and reset BufferItem's drawing.
      * @param playerEntity Player who closed Container/Controller.

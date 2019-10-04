@@ -21,7 +21,7 @@ public class KeybindRegistry {
     public static FabricKeyBinding BUFFER_SWITCH = FabricKeyBinding.Builder.create(new Identifier("buffer", "buffer_switch"), InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_PAGE_UP, "Buffer").build();
     public static FabricKeyBinding BUFFER_PICKUP = FabricKeyBinding.Builder.create(new Identifier("buffer", "buffer_pickup"), InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_HOME, "Buffer").build();
     public static FabricKeyBinding BUFFER_VOID = FabricKeyBinding.Builder.create(new Identifier("buffer", "buffer_void"), InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_INSERT, "Buffer").build();
-    
+
     /**
      * Register all of Buffer's Keybinds and Keybind events.
      */

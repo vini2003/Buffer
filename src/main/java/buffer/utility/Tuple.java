@@ -8,7 +8,7 @@ package buffer.utility;
 public class Tuple<X, Y> {
     public X first;
     public Y second;
-    
+
     /**
      * Default constructor, which initializes both variables.
      * @param x

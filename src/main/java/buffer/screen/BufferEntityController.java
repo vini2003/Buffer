@@ -31,7 +31,7 @@ public class BufferEntityController extends BufferBaseController {
     /**
      * Gets BufferEntity based on BlockContext.
      * @param context Block context of opened interface.
-     * @return BufferEntity of opened interface. 
+     * @return BufferEntity of opened interface.
      */
     public void getBufferEntity(BlockContext context) {
         BufferEntity[] lambdaBypass = new BufferEntity[1];

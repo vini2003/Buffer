@@ -54,7 +54,7 @@ public class BufferItem extends BlockItem {
      */
     public BufferItem(Block block, Item.Settings properties) {
         super(block, properties);
-        
+
         /**
          * Add property 'tier' property getter for BufferItem rendering code.
          */
@@ -106,14 +106,6 @@ public class BufferItem extends BlockItem {
                 bufferEntity.bufferInventory = BufferInventory.fromTag(placementContext.getStack().getTag());
             }
         }
-        else {
-            if (placementContext.getStack().getItem() instanceof BlockItem) {
-                BlockItem blockToPlace = (BlockItem)placementContext.getStack().getItem();
-                return blockToPlace.place(placementContext);
-            } else {
-                return ActionResult.FAIL;
-            }
-        }
         return placementResult;
     }
 
@@ -146,7 +138,7 @@ public class BufferItem extends BlockItem {
                     ItemStack bufferItemStack = playerEntity.getStackInHand(usageContext.getHand());
                     ActionResult usageResult;
 
-                    playerEntity.setStackInHand(hand, bufferStack.getStack());   
+                    playerEntity.setStackInHand(hand, bufferStack.getStack());
 
                     usageResult = playerEntity.getStackInHand(usageContext.getHand()).getItem().useOnBlock(bufferContext);
 
@@ -154,8 +146,13 @@ public class BufferItem extends BlockItem {
                         if (bufferContext.getStack().getItem().isDamageable()) {
                             bufferStack.getStack().damage(1, (Random)usageContext.getWorld().random, (ServerPlayerEntity)null);
                             bufferStack.setTag(bufferStack.getStack().getTag());
+                        } else {
+                            if (bufferStack.getStack().getCount() == bufferContext.getStack().getCount()) {
+                                bufferStack.setStack(bufferContext.getStack());
+                            } else {
+                                bufferStack.getStack().decrement(1);
+                            }
                         }
-                        bufferStack.getStack().decrement(1);
                         bufferItemStack.setTag(BufferInventory.toTag(bufferInventory, new CompoundTag()));
                     } else {
                         TypedActionResult<ItemStack> useResult = playerEntity.getStackInHand(usageContext.getHand()).getItem().use(world, playerEntity, hand);
@@ -173,7 +170,7 @@ public class BufferItem extends BlockItem {
                 }
             }
     }
-    
+
     /**
      * Custom BufferItem 'use' behaviour to allow for usage of selected BufferStack.
      * TODO: Perhaps find a better way to do this, given it is currently very hacky.
@@ -185,7 +182,7 @@ public class BufferItem extends BlockItem {
     public TypedActionResult<ItemStack> use(World world, PlayerEntity playerEntity, Hand hand) {
         BufferInventory bufferInventory = BufferInventory.fromTag(playerEntity.getStackInHand(hand).getTag());
         if (!world.isClient && bufferInventory.selectedSlot == -1 && !playerEntity.isSneaking()) {
-            ContainerProviderRegistry.INSTANCE.openContainer(ScreenRegistryServer.BUFFER_ITEM_CONTAINER, playerEntity, (buffer) ->  { 
+            ContainerProviderRegistry.INSTANCE.openContainer(ScreenRegistryServer.BUFFER_ITEM_CONTAINER, playerEntity, (buffer) ->  {
                 buffer.writeBlockPos(playerEntity.getBlockPos());
             });
         } else {
@@ -196,7 +193,7 @@ public class BufferItem extends BlockItem {
                 if (bufferStack.getStack().isFood()) {
                     return new TypedActionResult<>(ActionResult.PASS, bufferItemStack);
                 } else {
-                    playerEntity.setStackInHand(hand, bufferStack.getStack());                
+                    playerEntity.setStackInHand(hand, bufferStack.getStack());
                     TypedActionResult<ItemStack> usageResult = playerEntity.getStackInHand(hand).getItem().use(world, playerEntity, hand);
                     if (usageResult.getResult() == ActionResult.SUCCESS) {
                         if (usageResult.getValue() != bufferStack.getStack()) {
@@ -211,7 +208,7 @@ public class BufferItem extends BlockItem {
                     playerEntity.setStackInHand(hand, bufferItemStack);
                 }
             } else {
-               
+
             }
         }
         return new TypedActionResult<>(ActionResult.PASS, playerEntity.getStackInHand(hand));
@@ -229,7 +226,7 @@ public class BufferItem extends BlockItem {
         boolean isSneaking = Screen.hasShiftDown();
         if (itemStack.getTag() != null) {
             BufferInventory bufferInventory = BufferInventory.fromTag(itemStack.getTag());
-            
+
             text.add(new TranslatableText("buffer.tooltip.tier", Integer.toString(bufferInventory.getTier())));
             text.add(new TranslatableText("buffer.tooltip.pickup." + bufferInventory.isPickup));
             text.add(new TranslatableText("buffer.tooltip.void." + bufferInventory.isVoid));

@@ -59,7 +59,7 @@ public class BufferBlock extends Block implements BlockEntityProvider {
         }
         return true;
     }
-    
+
     /**
      * Override vanilla 'onPlaced' implementing special code to configure created BufferEntity.
      */
@@ -87,7 +87,7 @@ public class BufferBlock extends Block implements BlockEntityProvider {
         itemStack.setTag(BufferInventory.toTag(((BufferEntity)blockEntity_1).bufferInventory, new CompoundTag()));
         dropStack(world, blockPosition, itemStack);
     }
-    
+
     /**
      * Override vanilla 'appendProperties' implementing BufferTier.
      */

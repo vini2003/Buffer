@@ -13,7 +13,7 @@ public enum BufferTier {
     FOUR,
     FIVE,
     SIX;
-    
+
     public static IntProperty bufferTier = IntProperty.of(BufferInventory.TIER_RETRIEVER, 1, 6);
 
     /**
