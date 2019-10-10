@@ -31,18 +31,18 @@ public enum BufferTier {
     public static int getStackSize(int bufferTier) {
         switch(bufferTier) {
             case 2:
-                return 448;
+                return 512;
             case 3:
-                return 960;
+                return 1024;
             case 4:
-                return 4032;
+                return 4096;
             case 5:
-                return 8128;
+                return 8192;
             case 6:
-                return 16320;
+                return 16384;
             case 1:
             default:
-                return 192;
+                return 256;
         }
     }
 }

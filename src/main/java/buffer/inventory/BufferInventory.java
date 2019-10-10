@@ -201,14 +201,13 @@ public class BufferInventory implements SidedInventory {
 
             int insertMaximum = insertStack.getMaxCount();
 
-            this.stackMaximum = getInvMaxStackAmount() + wrapperStack.getMaxCount() + (64 - wrapperStack.getMaxCount());
+            this.stackMaximum = getInvMaxStackAmount();
 
             if (totalQuantity + insertQuantity <= stackMaximum) {
                 this.stackQuantity += insertQuantity;
                 insertStack.decrement(insertQuantity);
             } else if (totalQuantity + insertQuantity > stackMaximum) {
-                int differenceQuantity = (totalQuantity + insertQuantity) - stackMaximum;
-                int offsetQuantity = insertMaximum - differenceQuantity;
+                int offsetQuantity = stackMaximum - totalQuantity;
                 this.stackQuantity += offsetQuantity;
                 if (isVoid) {
                     insertStack = ItemStack.EMPTY;
