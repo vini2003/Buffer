@@ -1,26 +1,26 @@
 {
-    "type": "crafting_shaped",
-    "pattern": [
-        "121",
-        "232",
-        "121"
-    ],
-    "key": {
-        "1": {
-            "item": "minecraft:coal_block"
-        },
-        "2": {
-            "item": "minecraft:iron_bars"
-        },
-        "3": {
-            "item": "minecraft:shulker_box"
-        }
-    },
-    "result": {
-        "item": "buffer:buffer",
-        "data": {
-            "tier": 1
-        },
-        "count": 1
-    }
+	"type": "crafting_shaped",
+	"pattern": [
+		"121",
+		"232",
+		"121"
+	],
+	"key": {
+		"1": {
+			"item": "minecraft:coal_block"
+		},
+		"2": {
+			"item": "minecraft:iron_bars"
+		},
+		"3": {
+			"item": "minecraft:shulker_box"
+		}
+	},
+	"result": {
+		"item": "buffer:buffer",
+		"data": {
+			"tier": 1
+		},
+		"count": 1
+	}
 }

@@ -1,8 +1,8 @@
 package buffer;
 
-import net.fabricmc.api.ClientModInitializer;
 import buffer.registry.KeybindRegistry;
 import buffer.registry.ScreenRegistryClient;
+import net.fabricmc.api.ClientModInitializer;
 
 /**
  * Clientside mod initialization.

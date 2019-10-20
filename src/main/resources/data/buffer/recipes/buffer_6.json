@@ -1,32 +1,32 @@
 {
-    "type": "crafting_shaped",
-    "pattern": [
-        "121",
-        "232",
-        "121"
-    ],
-    "key": {
-        "1": {
-            "item": "minecraft:emerald_block"
-        },
-        "2": {
-            "item": "minecraft:iron_bars"
-        },
-        "3": {
-            "item": "buffer:buffer",
-            "data": {
-                "require": {
-                    "tier": 5
-                }
-            }
-        }
-    },
-    "result": {
-        "item": "buffer:buffer",
-        "data": {
-            "$": "$ i4",
-            "tier": 6
-        },
-        "count": 1
-    }
+	"type": "crafting_shaped",
+	"pattern": [
+		"121",
+		"232",
+		"121"
+	],
+	"key": {
+		"1": {
+			"item": "minecraft:emerald_block"
+		},
+		"2": {
+			"item": "minecraft:iron_bars"
+		},
+		"3": {
+			"item": "buffer:buffer",
+			"data": {
+				"require": {
+					"tier": 5
+				}
+			}
+		}
+	},
+	"result": {
+		"item": "buffer:buffer",
+		"data": {
+			"$": "$ i4",
+			"tier": 6
+		},
+		"count": 1
+	}
 }

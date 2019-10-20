@@ -1,12 +1,12 @@
 package buffer;
 
-import net.fabricmc.api.ModInitializer;
 import buffer.registry.BlockRegistry;
 import buffer.registry.EntityRegistry;
 import buffer.registry.ItemGroupRegistry;
 import buffer.registry.ItemRegistry;
 import buffer.registry.NetworkRegistry;
 import buffer.registry.ScreenRegistryServer;
+import net.fabricmc.api.ModInitializer;
 
 /**
  * Commonside mod initialization.

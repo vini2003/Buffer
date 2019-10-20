@@ -1,8 +1,5 @@
 package buffer.screen;
 
-import java.util.Arrays;
-import java.util.List;
-
 import buffer.inventory.BufferInventory;
 import buffer.inventory.BufferInventory.BufferStack;
 import buffer.registry.ItemRegistry;
@@ -20,26 +17,27 @@ import net.minecraft.recipe.RecipeType;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.Hand;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Base Container/Controller for usage with Buffer, implements default methods for GUI widgets
  * and slot behavior.
  */
 public class BufferBaseController extends CottonScreenController {
-	public BufferInventory bufferInventory = new BufferInventory(1);
-
-	protected WPlainPanel rootPanel = new WPlainPanel();
-
-	protected List<WLabel> controllerLabels = Arrays.asList(new WLabel(""),new WLabel(""), new WLabel(""), new WLabel(""), new WLabel(""), new WLabel(""));
-	protected List<WItemSlot> controllerSlots = Arrays.asList(null, null, null, null, null, null);
-
 	protected static final int SECTION_X = 48;
 	protected static final int SECTION_Y = 20;
+	public BufferInventory bufferInventory = new BufferInventory(1);
+	protected WPlainPanel rootPanel = new WPlainPanel();
+	protected List<WLabel> controllerLabels = Arrays.asList(new WLabel(""), new WLabel(""), new WLabel(""), new WLabel(""), new WLabel(""), new WLabel(""));
+	protected List<WItemSlot> controllerSlots = Arrays.asList(null, null, null, null, null, null);
 
 	/**
 	 * Base constructor which sets root panel.
-	 * @param syncID ID for Container/Controller synchronization.
+	 *
+	 * @param syncID          ID for Container/Controller synchronization.
 	 * @param playerInventory PlayerInventory from player who opened container.
-	 * @param context BlockContext for opened container.
+	 * @param context         BlockContext for opened container.
 	 */
 	public BufferBaseController(int syncId, PlayerInventory playerInventory, BlockContext context) {
 		super(RecipeType.CRAFTING, syncId, playerInventory, getBlockInventory(context), getBlockPropertyDelegate(context));
@@ -48,18 +46,20 @@ public class BufferBaseController extends CottonScreenController {
 
 	/**
 	 * Converts number into metric representation of with rounding.
+	 *
 	 * @param value Number to be converted.
 	 * @return String with converted number.
 	 */
 	public static String withSuffix(long value) {
 		if (value < 1000) return "" + value;
 		int exp = (int) (Math.log(value) / Math.log(1000));
-		return String.format("%.1f %c", value / Math.pow(1000, exp), "KMGTPE".charAt(exp-1));
+		return String.format("%.1f %c", value / Math.pow(1000, exp), "KMGTPE".charAt(exp - 1));
 	}
 
 	/**
 	 * Defines custom behavior for item slot clicks in Container/Controller.
-	 * @param slot Slot clicked.
+	 *
+	 * @param slot   Slot clicked.
 	 * @param button Button clicked.
 	 * @param action Action type.
 	 * @param player Player entity which did action.
@@ -108,9 +108,9 @@ public class BufferBaseController extends CottonScreenController {
 					BufferStack bufferStack = bufferInventory.getSlot(slot);
 					bufferStack.restock(false);
 					if (player.inventory.getCursorStack().isEmpty() && !bufferStack.getStack().isEmpty()) {
-							final ItemStack wrappedStack = bufferStack.getStack().copy();
-							player.inventory.setCursorStack(wrappedStack.copy());
-							bufferStack.setStack(ItemStack.EMPTY);
+						final ItemStack wrappedStack = bufferStack.getStack().copy();
+						player.inventory.setCursorStack(wrappedStack.copy());
+						bufferStack.setStack(ItemStack.EMPTY);
 					} else if (!player.inventory.getCursorStack().isEmpty() && !inventorySlot.hasStack()) {
 						bufferInventory.getSlot(slot).setStack(player.inventory.getCursorStack().copy());
 						player.inventory.setCursorStack(ItemStack.EMPTY);
@@ -197,7 +197,7 @@ public class BufferBaseController extends CottonScreenController {
 				rootPanel.add(controllerSlots.get(3), SECTION_X * 1 - 7, SECTION_Y * 2 + 4);
 				rootPanel.add(controllerSlots.get(4), SECTION_X * 2 + 1, SECTION_Y * 2 + 4);
 				rootPanel.add(controllerLabels.get(0), SECTION_X * 1 - 36, SECTION_Y + 10);
-				rootPanel.add(controllerLabels.get(1), SECTION_X * 2 - 27, SECTION_Y  + 10);
+				rootPanel.add(controllerLabels.get(1), SECTION_X * 2 - 27, SECTION_Y + 10);
 				rootPanel.add(controllerLabels.get(2), SECTION_X * 3 - 18, SECTION_Y + 10);
 				rootPanel.add(controllerLabels.get(3), SECTION_X * 1 - 7, SECTION_Y * 2 + 26);
 				rootPanel.add(controllerLabels.get(4), SECTION_X * 2 + 1, SECTION_Y * 2 + 26);
@@ -210,7 +210,7 @@ public class BufferBaseController extends CottonScreenController {
 				rootPanel.add(controllerSlots.get(4), SECTION_X * 2 - 27, SECTION_Y * 2 + 4);
 				rootPanel.add(controllerSlots.get(5), SECTION_X * 3 - 18, SECTION_Y * 2 + 4);
 				rootPanel.add(controllerLabels.get(0), SECTION_X * 1 - 36, SECTION_Y + 10);
-				rootPanel.add(controllerLabels.get(1), SECTION_X * 2 - 27, SECTION_Y  + 10);
+				rootPanel.add(controllerLabels.get(1), SECTION_X * 2 - 27, SECTION_Y + 10);
 				rootPanel.add(controllerLabels.get(2), SECTION_X * 3 - 18, SECTION_Y + 10);
 				rootPanel.add(controllerLabels.get(3), SECTION_X * 1 - 36, SECTION_Y * 2 + 26);
 				rootPanel.add(controllerLabels.get(4), SECTION_X * 2 - 27, SECTION_Y * 2 + 26);

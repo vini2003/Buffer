@@ -1,37 +1,41 @@
 {
 	"parent": "buffer:block/buffer_1",
-    "overrides": [
-        {
-            "predicate": {
-                "tier": 1
-            },
-            "model": "buffer:block/buffer_1"
-        },
-        {
-            "predicate": {
-                "tier": 2
-            },
-            "model": "buffer:block/buffer_2"
-        },        {
-            "predicate": {
-                "tier": 3
-            },
-            "model": "buffer:block/buffer_3"
-        },        {
-            "predicate": {
-                "tier": 4
-            },
-            "model": "buffer:block/buffer_4"
-        },        {
-            "predicate": {
-                "tier": 5
-            },
-            "model": "buffer:block/buffer_5"
-        },        {
-            "predicate": {
-                "tier": 6
-            },
-            "model": "buffer:block/buffer_6"
-        }
-    ]
+	"overrides": [
+		{
+			"predicate": {
+				"tier": 1
+			},
+			"model": "buffer:block/buffer_1"
+		},
+		{
+			"predicate": {
+				"tier": 2
+			},
+			"model": "buffer:block/buffer_2"
+		},
+		{
+			"predicate": {
+				"tier": 3
+			},
+			"model": "buffer:block/buffer_3"
+		},
+		{
+			"predicate": {
+				"tier": 4
+			},
+			"model": "buffer:block/buffer_4"
+		},
+		{
+			"predicate": {
+				"tier": 5
+			},
+			"model": "buffer:block/buffer_5"
+		},
+		{
+			"predicate": {
+				"tier": 6
+			},
+			"model": "buffer:block/buffer_6"
+		}
+	]
 }

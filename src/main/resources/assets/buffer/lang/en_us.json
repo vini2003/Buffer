@@ -1,14 +1,14 @@
 {
-  "item.buffer.buffer": "Buffer",
-  "block.buffer.buffer": "Buffer",
-  "buffer.gui.pickup": "Collect",
-  "buffer.gui.void": "Void",
-  "buffer.tooltip.tier": "§6§lTier %s",
-  "buffer.tooltip.pickup.true": "§9Collect:§7§o Yes",
-  "buffer.tooltip.pickup.false": "§9Collect:§7§o No",
-  "buffer.tooltip.void.true": "§9Void:§7§o Yes",
-  "buffer.tooltip.void.false": "§9Void:§7§o No",
-  "buffer.tooltip.sneaking_false": "§7§oSHIFT for details...",
-  "buffer.tooltip.sneaking_true": "§9Buffered:",
-  "itemGroup.buffer.buffer": "Buffer"
+	"item.buffer.buffer": "Buffer",
+	"block.buffer.buffer": "Buffer",
+	"buffer.gui.pickup": "Collect",
+	"buffer.gui.void": "Void",
+	"buffer.tooltip.tier": "§6§lTier %s",
+	"buffer.tooltip.pickup.true": "§9Collect:§7§o Yes",
+	"buffer.tooltip.pickup.false": "§9Collect:§7§o No",
+	"buffer.tooltip.void.true": "§9Void:§7§o Yes",
+	"buffer.tooltip.void.false": "§9Void:§7§o No",
+	"buffer.tooltip.sneaking_false": "§7§oSHIFT for details...",
+	"buffer.tooltip.sneaking_true": "§9Buffered:",
+	"itemGroup.buffer.buffer": "Buffer"
 }

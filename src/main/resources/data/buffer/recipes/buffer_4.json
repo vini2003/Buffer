@@ -1,32 +1,32 @@
 {
-    "type": "crafting_shaped",
-    "pattern": [
-        "121",
-        "232",
-        "121"
-    ],
-    "key": {
-        "1": {
-            "item": "minecraft:gold_block"
-        },
-        "2": {
-            "item": "minecraft:iron_bars"
-        },
-        "3": {
-            "item": "buffer:buffer",
-            "data": {
-                "require": {
-                    "tier": 3
-                }
-            }
-        }
-    },
-    "result": {
-        "item": "buffer:buffer",
-        "data": {
-            "$": "$ i4",
-            "tier": 4
-        },
-        "count": 1
-    }
+	"type": "crafting_shaped",
+	"pattern": [
+		"121",
+		"232",
+		"121"
+	],
+	"key": {
+		"1": {
+			"item": "minecraft:gold_block"
+		},
+		"2": {
+			"item": "minecraft:iron_bars"
+		},
+		"3": {
+			"item": "buffer:buffer",
+			"data": {
+				"require": {
+					"tier": 3
+				}
+			}
+		}
+	},
+	"result": {
+		"item": "buffer:buffer",
+		"data": {
+			"$": "$ i4",
+			"tier": 4
+		},
+		"count": 1
+	}
 }

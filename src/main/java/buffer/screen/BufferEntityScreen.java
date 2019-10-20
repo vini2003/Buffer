@@ -10,11 +10,12 @@ public class BufferEntityScreen extends CottonScreen<BufferEntityController> {
 	BufferEntityController controller;
 
 	/**
-     * Customized constructor which configures the Screen for a BufferItem.
-     * Sets cached Container/Controller.
+	 * Customized constructor which configures the Screen for a BufferItem.
+	 * Sets cached Container/Controller.
+	 *
 	 * @param openContainer Container/Controller linked to Screen.
-	 * @param playerEntity Player who opened container.
-     */
+	 * @param playerEntity  Player who opened container.
+	 */
 	public BufferEntityScreen(BufferEntityController newController, PlayerEntity player) {
 		super(newController, player);
 		this.controller = newController;
