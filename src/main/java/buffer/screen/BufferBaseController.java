@@ -3,7 +3,7 @@ package buffer.screen;
 import buffer.inventory.BufferInventory;
 import buffer.inventory.BufferInventory.BufferStack;
 import buffer.registry.ItemRegistry;
-import io.github.cottonmc.cotton.gui.CottonScreenController;
+import io.github.cottonmc.cotton.gui.CottonCraftingController;
 import io.github.cottonmc.cotton.gui.widget.WItemSlot;
 import io.github.cottonmc.cotton.gui.widget.WLabel;
 import io.github.cottonmc.cotton.gui.widget.WPlainPanel;
@@ -24,7 +24,7 @@ import java.util.List;
  * Base Container/Controller for usage with Buffer, implements default methods for GUI widgets
  * and slot behavior.
  */
-public class BufferBaseController extends CottonScreenController {
+public class BufferBaseController extends CottonCraftingController {
 	protected static final int SECTION_X = 48;
 	protected static final int SECTION_Y = 20;
 	public BufferInventory bufferInventory = new BufferInventory(1);
@@ -35,7 +35,7 @@ public class BufferBaseController extends CottonScreenController {
 	/**
 	 * Base constructor which sets root panel.
 	 *
-	 * @param syncID          ID for Container/Controller synchronization.
+	 * @param syncId          ID for Container/Controller synchronization.
 	 * @param playerInventory PlayerInventory from player who opened container.
 	 * @param context         BlockContext for opened container.
 	 */

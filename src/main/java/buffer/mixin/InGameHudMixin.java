@@ -4,7 +4,6 @@ import buffer.item.BufferItem;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.hud.InGameHud;
-import net.minecraft.client.render.GuiLighting;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -34,10 +33,10 @@ public class InGameHudMixin {
 			BufferItem.amountToDraw = 0;
 			BufferItem.stackToDraw = ItemStack.EMPTY;
 		} else if (BufferItem.stackToDraw != ItemStack.EMPTY && BufferItem.amountToDraw > 0) {
-			GuiLighting.enableForItems();
-			itemRenderer.renderGuiItem(BufferItem.stackToDraw, 16, MinecraftClient.getInstance().window.getScaledHeight() - 32);
-			GuiLighting.disable();
-			textRenderer.draw(Integer.toString(BufferItem.amountToDraw), 36, MinecraftClient.getInstance().window.getScaledHeight() - 27, 0xFFFFFF);
+//			GuiLighting.enableForItems();
+			itemRenderer.renderGuiItem(BufferItem.stackToDraw, 16, MinecraftClient.getInstance().getWindow().getScaledHeight() - 32);
+//			GuiLighting.disable();
+			textRenderer.draw(Integer.toString(BufferItem.amountToDraw), 36, MinecraftClient.getInstance().getWindow().getScaledHeight() - 27, 0xFFFFFF);
 		}
 	}
 }

@@ -130,8 +130,8 @@ public class BufferInventory implements SidedInventory {
 				int wrapperQuantity = bufferTag.getInt(SIZE_RETRIEVER(bufferSlot));
 				bufferStack.wrapperItem = Registry.ITEM.get(new Identifier(bufferTag.getString(ITEM_RETRIEVER(bufferSlot))));
 				ItemStack itemStack = new ItemStack(bufferStack.wrapperItem, wrapperQuantity);
-				if (bufferTag.containsKey(TAG_RETRIEVER(bufferSlot))) {
-					bufferStack.wrapperTag = (CompoundTag) bufferTag.getTag(TAG_RETRIEVER(bufferSlot));
+				if (bufferTag.contains(TAG_RETRIEVER(bufferSlot))) {
+					bufferStack.wrapperTag = (CompoundTag) bufferTag.getCompound(TAG_RETRIEVER(bufferSlot));
 					itemStack.setTag(bufferStack.wrapperTag);
 				}
 				bufferStack.setStack(itemStack.copy());
@@ -280,7 +280,7 @@ public class BufferInventory implements SidedInventory {
 	/**
 	 * Insert ItemStack into matching BufferStack in BufferInventory.
 	 *
-	 * @param insertStack ItemStack to insert.
+	 * @param insertionStack ItemStack to insert.
 	 * @return ItemStack remaining after insertion.
 	 */
 	public ItemStack insertStack(ItemStack insertionStack) {

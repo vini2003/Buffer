@@ -16,6 +16,6 @@ public class EntityRegistry {
 	 * Register all of Buffer's Entities.
 	 */
 	public static void registerEntities() {
-		ENTITY_BUFFER = Registry.register(Registry.BLOCK_ENTITY, new Identifier(BufferMod.MOD_ID, "buffer"), BlockEntityType.Builder.create(BufferEntity::new, BlockRegistry.BLOCK_BUFFER).build(null));
+		ENTITY_BUFFER = Registry.register(Registry.BLOCK_ENTITY_TYPE, new Identifier(BufferMod.MOD_ID, "buffer"), BlockEntityType.Builder.create(BufferEntity::new, BlockRegistry.BLOCK_BUFFER).build(null));
 	}
 }

@@ -61,7 +61,7 @@ public class BufferItem extends BlockItem {
 		 */
 		this.addPropertyGetter(new Identifier(BufferInventory.TIER_RETRIEVER), (itemStack, world, livingEntity) -> {
 			CompoundTag itemTag = itemStack.getOrCreateTag();
-			if (!itemTag.containsKey(BufferInventory.TIER_RETRIEVER)) {
+			if (!itemTag.contains(BufferInventory.TIER_RETRIEVER)) {
 				itemTag.putInt(BufferInventory.TIER_RETRIEVER, 1);
 				itemStack.setTag(itemTag);
 			}
