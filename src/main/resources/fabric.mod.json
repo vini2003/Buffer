@@ -11,7 +11,7 @@
 		"sources": "https://github.com/vini2003/Buffer",
 		"issues": "https://github.com/vini2003/Buffer/issues"
 	},
-	"license": "GPL-3.0+",
+	"license": "LGPL v3.0",
 	"icon": "assets/buffer/icon.png",
 	"environment": "*",
 	"entrypoints": {
