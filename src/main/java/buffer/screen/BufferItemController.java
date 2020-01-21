@@ -27,7 +27,7 @@ public class BufferItemController extends BufferBaseController {
 	 * Customized constructor which configures the Container/Controller for a BufferEntity.
 	 * Sets custom widgets, obtains Hand, PlayerInventory, and creates a BufferInventory.
 	 *
-	 * @param syncID          ID for Container/Controller synchronization.
+	 * @param syncId          ID for Container/Controller synchronization.
 	 * @param playerInventory PlayerInventory from player who opened container.
 	 * @param context         BlockContext for opened container.
 	 */

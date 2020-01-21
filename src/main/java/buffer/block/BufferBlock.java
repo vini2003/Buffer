@@ -18,7 +18,8 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.stat.Stats;
-import net.minecraft.state.StateFactory;
+import net.minecraft.state.StateManager;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -36,7 +37,7 @@ public class BufferBlock extends Block implements BlockEntityProvider {
 	 */
 	public BufferBlock(Block.Settings settings) {
 		super(settings);
-		this.setDefaultState(this.stateFactory.getDefaultState()
+		this.setDefaultState(this.getStateManager().getDefaultState()
 				.with(BufferTier.bufferTier, 1));
 	}
 
@@ -52,13 +53,13 @@ public class BufferBlock extends Block implements BlockEntityProvider {
 	 * Override vanilla 'activate' implemeting custom container.
 	 */
 	@Override
-	public boolean activate(BlockState blockState, World world, BlockPos blockPos, PlayerEntity playerEntity, Hand hand, BlockHitResult blockHitResult) {
+	public ActionResult onUse(BlockState blockState, World world, BlockPos blockPos, PlayerEntity playerEntity, Hand hand, BlockHitResult blockHitResult) {
 		if (!world.isClient) {
 			ContainerProviderRegistry.INSTANCE.openContainer(ScreenRegistryServer.BUFFER_BLOCK_CONTAINER, playerEntity, (buffer) -> buffer.writeBlockPos(blockPos));
 			BufferEntity bufferEntity = ((BufferEntity) world.getBlockEntity(blockPos));
 			bufferEntity.bufferController = (BufferEntityController) playerEntity.container;
 		}
-		return true;
+		return ActionResult.SUCCESS;
 	}
 
 	/**
@@ -93,7 +94,7 @@ public class BufferBlock extends Block implements BlockEntityProvider {
 	 * Override vanilla 'appendProperties' implementing BufferTier.
 	 */
 	@Override
-	protected void appendProperties(StateFactory.Builder<Block, BlockState> builder) {
+	protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
 		super.appendProperties(builder);
 		builder.add(BufferTier.bufferTier);
 	}
